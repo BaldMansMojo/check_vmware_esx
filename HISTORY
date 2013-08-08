@@ -1,0 +1,409 @@
+History:
+========
+
+- 22 Mar 2012 M.Fuerstenau
+  - Started with actual version 0.5.0
+  - Impelemented check_esx3new2.diff from Simon (simeg / simmerl)
+  - Reimplemented the changes of Markus Obstmayer for the actual version
+  - Comments within the code inform you about the changes
+  - It may happen that controllers has been found which are not active.
+    Therefor around line 2300        the following was added:
+ 
+    # M.Fuerstenau - additional to avoid using inactive controllers --------------
+     elsif (uc($dev->status) eq "3")
+           {
+           $status = 0;
+           }
+    #----------------------------------------------------------------------------
+          else
+           {
+           $state = 3;
+          }
+           $actual_state = Nagios::Plugin::Functions::max_state($actual_state, $status);
+           }
+           $perfdata = $perfdata . " adapters=" . $count . ";"$perf_thresholds . ";;";
+ 
+          # M.Fuerstenau - changed the output a little bit 
+          $output .= $count . " of " . @{$storage->storageDeviceInfo->hostBusAdapter} . " defined/possible adapters online, ";
+ 
+- 30 Mar 2012 M.Fuerstenau
+  - added --ignore_unknown. This maps 3 to 0. Why? You have for example several host adapters. Some are reported as
+    unknown by the plugin because they are not used or have not the capability to reports something senseful.
+ 
+- 02 Apr 2012 M.Fuerstenau
+  - _info (Adapter/LUN/Path). Removed perfdata. To count such items and display as perfdata doesn't make sense
+  - Changed PATH to MPATH and help from "path - list logical unit paths" to "mpath - list logical unit multipath info" because
+    it is NOT an information about a path - it is an information about multipathing.
+ 
+- 08 Jan 2013 M.Fuerstenau
+  - Removed installation informations for the perl SDK from VMware. This informations are part of the SDK and have nothing to do
+    with this plugin.
+  - Replaced global variables with my variables. Instead of "define every variable on the fly as needed it is a good practice
+    to define variables at the beginning and place a comment within it. It gives you better readability.
+ 
+- 22 Jan 2013 M.Fuerstenau
+  - Merged with the actual version from op5. Therfore all changes done to the op5 version:
+ 
+  - 2012-05-28  Kostyantyn Hushchyn
+    Rename check_esx3 to check_vmware_api(Fixed issue #3745)
+ 
+  - 2012-05-28  Kostyantyn Hushchyn
+    Minor cosmetic changes
+ 
+  - 2012-05-29  Kostyantyn Hushchyn
+    Clear cluster failover perfdata units, as it describes count of possible failures
+    to tolerate, so can't be mesured in MB
+ 
+  - 2012-05-30  Kostyantyn Hushchyn
+    Minor help message changes
+ 
+  - 2012-05-30  Kostyantyn Hushchyn
+    Implemented timeshift for cluster checks, which could fix data retrievel issues. Small refactoring.
+ 
+  - 2012-05-31  Kostyantyn Hushchyn
+    Remove dependency on inteval value for cluster checks, which allows to run commands that doesn't require historical intervals
+ 
+  - 2012-05-31  Kostyantyn Hushchyn
+    Remove unnecessary/unimplemented function which caused cluster effectivecpu subcheck to fail
+ 
+  - 2012-06-01  Kostyantyn Hushchyn
+    Hide NIC status output for net check in case of empty perf data result(Fixed issue #5450)
+ 
+  - 2012-06-07  Kostyantyn Hushchyn
+    Fixed manipulation with undefined values, which caused perl interpreter warnings output
+ 
+  - 2012-06-08  Kostyantyn Hushchyn
+    Moved out global variables from perfdata functions. Added '-M' max sample number argument, which specify maximum data count to retrive.
+ 
+  - 2012-06-08  Kostyantyn Hushchyn
+    Added help text for Cluster checks.
+ 
+  - 2012-06-08  Kostyantyn Hushchyn
+    Increment version number Kostyantyn Hushchyn
+ 
+  - 2012-06-11  Kostyantyn Hushchyn
+    Reimplemented csv parser to process all values in sequence. Now all required functionality for max sample number argument are present in the plugin.
+ 
+  - 2012-06-13  Kostyantyn Hushchyn
+    Fixed cluster failover perf counter output.
+ 
+  - 2012-06-22  Kostyantyn Hushchyn
+    Added help message for literal values in interval argument.
+ 
+  - 2012-06-22  Kostyantyn Hushchyn
+    Added nicknames for intervals(-i argument), which helps to provide correct values in case you can not find them in GUI.
+    Supported values are: r - realtime interval, h<number> - historical interval at position <number>, starting from 0.
+ 
+  - 2012-07-02  Kostyantyn Hushchyn
+    Reimplemented Datastore checking in Datacenter using different approach(Might fix issue #5712)
+ 
+  - 2012-07-06  Kostyantyn Hushchyn
+    Fixed Datacenter runtime check Kostyantyn Hushchyn
+ 
+  - 2012-07-06  Kostyantyn Hushchyn
+    Fixed Datastore checking in Datacenter(Might fix issue #5712)
+ 
+  - 2012-07-09  Kostyantyn Hushchyn
+    Added help info for Host runtime 'sensor' subcheck
+ 
+  - 2012-07-09  Kostyantyn Hushchyn
+    Added Host runtime subcheck to threshold sensor data
+ 
+  - 2012-07-09  Kostyantyn Hushchyn
+    Fixed Host temperature subcheck causing perl interpreter messages output
+ 
+  - 2012-07-10  Kostyantyn Hushchyn
+    Added listall option to output all available sensors. Sensor name now trieted as regexp, so result will be outputed for the first match.
+ 
+  - 2012-07-26  Fixed issue which prevents plugin...   v2.8.8 v2.8.8-beta1 Kostyantyn Hushchyn
+    Fixed issue which prevents plugin from executing under EPN(Fixed issue #5796)
+ 
+  - 2012-09-03  Kostyantyn Hushchyn
+    Implemented plugin timeout(returns 3).
+ 
+  - 2012-09-05  Kostyantyn Hushchyn
+    Added storage refresh functionality in case when it's present(Fixed issue #5787)
+ 
+  - 2012-09-21  Kostyantyn Hushchyn
+    Added check for dead pathes, which generates 2 in case when at least one is present(Fixed issue #5811)
+ 
+  - 2012-09-25  Kostyantyn Hushchyn
+    Changed comparison logic in storage path check
+ 
+  - 2012-09-26  Kostyantyn Hushchyn
+    Fixed 'Global symbol normalizedPathState requires explicit package name'
+ 
+  - 2012-10-02  Kostyantyn Hushchyn
+    Changed timeshift argument type to integer, so that non number values will be treated as invalid.
+ 
+  - 2012-10-02  Kostyantyn Hushchyn
+    Changed to a conditional datastore refresh(Reduce overhead of solution suggested in issue #5787)
+ 
+  - 2012-10-05  Kostyantyn Hushchyn
+    Updated description so now almost all options are documented, though somewhere should be documented arguments like timeshift(-T),
+    max samples(-M) and interval(-i) (Solve ticket #5950)
+ 
+- 31 Jan 2013 M.Fuerstenau
+  - Replaced most die with a normal if statement and an exit.
+ 
+- 1 Feb 2013 M.Fuerstenau
+  - Replaced unless with if. unless was only used eight times in the program. In all other statements we had an if statement
+    with the appropriate negotiation for the statement.
+ 
+- 5 Feb 2013 M.Fuerstenau
+  - Replaced all add_perfdata statements with simple concatenated variable $perfdata
+ 
+- 6 Feb 2013 M.Fuerstenau
+  - Corrected bug. Name of subroutine was sub check_percantage but thist was a typo.
+ 
+- 7 Feb 2013 M.Fuerstenau
+  - Replaced $percc and $percw with $crit_is_percent and $warn_is_percent. This was just cosmetic for better readability.
+  - Removed check_percentage(). It was replaced by two one liners directly in the code. Easier to read.
+  - The only codeblocks using check_percentage() were the blocks checking warning and critical. But unfortunately the
+    plausability check was not sufficient. Now it is tested that no other values than numbers and the % sign can be
+    submitted. It is also checked that in case of percent the values are in a valid level between 0 and 100
+ 
+- 12 Feb 2013 M.Fuerstenau
+  - Replaced literals like CRITICAL with numerical values. Easier to type and anyone developing plugins should be
+    safe with the use
+  - Replaced $state with $actual_state and $res with $state. More for cosmetical issues but the state is returned
+    to Nagios.
+  - check_against_threshold from Nagios::Plugin replaced with a little own subroutine check_against_threshold.
+  - Nagios::Plugin::Functions::max_state replaced with own routine check_state
+ 
+- 14 Feb 2013 M.Fuerstenau
+  - Replaced hash %STATUS_TEXT from Nagios::Plugin::Functions with own hash %status2.
+ 
+- 15 Feb 2013 M.Fuerstenau
+  - Own help (print_help()) and usage (print_usage()) function.
+  - Nagios::plugin kicked finally out.
+  - Mo more global variables.
+ 
+- 25 Feb 2013 M.Fuerstenau
+  - $quickstats instead of $quickStats for better readability.
+ 
+- 5 Mar 2013 M.Fuerstenau
+  - Removed return_cluster_DRS_recommendations() because for daily use this was more of an exotical feature
+  - Removed --quickstats for host_cpu_info and dc_cpu_info because quickstats is not a valid option here.
+ 
+- 6 Mar 2013 M.Fuerstenau
+  - Replaced -o listitems with --listitems
+ 
+- 8 Mar 2013 M.Fuerstenau
+  - --usedspace replaces -o used. $usedflag has been replaced by $usedflag.
+  - --listvms replaces -o listvm. $outputlist has been replaced by $listvms.
+  - --alertonly replaces -o brief. $briefflag has been replaced by $alertonly.
+  - --blacklistregexp replaces -o blacklistregexp. $blackregexpflag has been replaced by $blacklistregexp.
+  - --isregexp replaces -o regexp. $regexpflag has been replaced by $isregexp.
+ 
+- 9 Mar 2013 M.Fuerstenau
+  - Main selection is now transfered to a subrouting main_select because after
+    a successfull if statement the rest can be skipped leaving the subroutine
+    with return
+ 
+- 19 Mar 2013 M.Fuerstenau
+  - Reformatted and cleaned up a lot of code. Variable definitions are now at the beginning of each 
+    subroutine instead of defining them "on the fly" as needed with "my". Especially using "my" for
+    definition in a loop is not goog coding style
+ 
+- 21 Mar 2013 M.Fuerstenau
+  - --listvms removed as extra switch. Ballooning or swapping VMs will always be listed.
+  - Changed subselect list(vm) to listvm for better readability. listvm was accepted  before (equal to list)
+    but not mentioned in the help. To have list or listvm for the same is a little bit exotic. Fixed this inconsistency.
+ 
+- 22 Mar 2013 M.Fuerstenau
+  - Removed timeshift, interval and maxsamples. If needed use original program from op5.
+ 
+- 25 Mar 2013 M.Fuerstenau
+  - Removed $defperfargs because no values will be handled over. Only performance check that needed another which 
+    needed another sampling invel was cluster. This is now fix with 3000.
+    
+- 11 Apr 2013 M.Fuerstenau
+  - Rewritten and cleaned subroutine host_mem_info. Removed $value1 - $value5. Stepwise completion of $output makes
+    this unsophisticated construct obsolete.
+ 
+- 16 Apr 2013 M.Fuerstenau
+  - Stripped down vm_cpu_info. Monitoring CPU usage in Mhz makes no sense under normal circumstances
+    Mhz is no valid unit for performance data according to the plugin developer guide. I have never found
+    a reason to monitor wait time or ready time in a normal alerting evironment. This data has some interest
+    for performance analysis. But this can be done better with the vmware tools.
+  - Rewritten and cleaned subroutine vm_mem_info. Removed $value1 - $value5. Stepwise completion of $output makes
+    this unsophisticated construct obsolete.
+ 
+- 24 Apr 2013 M.Fuerstenau
+  - Because there is a lot of different performance counters for memory in vmware we ave changed something to be 
+    more specific.
+    - Enhenced explanations in help.
+    - Changed swap to swapUSED in host_mem_info().
+    - Changed usageMB to CONSUMED in host_mem_info(). Same for variables.
+    - Removed overall in host_mem_info(). After reading the documentation carefully the addition of consumed.average + overhead.average
+      seems a little bit senseless because consumed.average includes overhead.average.
+    - Changed usageMB to CONSUMED in vm_mem_info(). Same for variables.
+    - Removed swapIN and swapOUT in vm_mem_info(). Not so sensefull for Nagios alerting because it is hard to find 
+      valid thresholds
+    - Removed swap in vm_mem_info(). From the vmware documentation:
+      "Current amount of guest physical memory swapped out to the virtual machine's swap file by the VMkernel. Swapped 
+       memory stays on disk until the virtual machine needs it. This statistic refers to VMkernel swapping and not
+       to guest OS swapping. swapped = swapin + swapout"
+ 
+      This is more an issue of performance tuning rather than alerting. It is not swapping inside the virtual machine.
+      it is not possible to do any alerting here because (especially with vmotion) you have no thresholds.
+    - Removed OVERHEAD in vm_mem_info(). From the vmware documentation:
+      "Amount of machine memory used by the VMkernel to run the virtual machine."
+      So using this we have a useless information about a virtual machine because we have no valid context and we 
+      have no valid thresholds. More important is overhead for the host system. And if we are running in problems here
+      we have to look which machine must be moved to another host. 
+    - As a result of this overall in vm_mem_info() makes no sense.
+ 
+- 25 Apr 2013 M.Fuerstenau
+  - Removed swap in vm_mem_info(). From vmware documentation:
+    "Amount of guest physical memory that is currently reclaimed from the virtual machine through ballooning.
+     This is the amount of guest physical memory that has been allocated and pinned by the balloon driver."
+    So here we have again data which makes no sense used alone. You need the context for interpreting them
+    and there are no thresholds for alerting.
+ 
+- 29 Apr 2013 M.Fuerstenau
+  - Renamed $esx to $esx_server. This is only for cosmetics and better reading of the code.
+  - Reimplmented subselect ready in vm_cpu_info and implemented it new in host_cpu_info.
+    From the vmware documentation:
+    "Percentage of time that the virtual machine was ready, but could not get scheduled
+     to run on the physical CPU. CPU ready time is dependent on the number of virtual
+     machines on the host and their CPU loads."
+    High or growing ready time can be a hint CPU bottlenecks (host and guest system)
+  - Reimplmented subselect wait in vm_cpu_info and implemented it new in host_cpu_info.
+    From the vmware documentation:
+    "CPU time spent in wait state. The wait total includes time spent the CPU Idle, CPU Swap Wait,
+     and CPU I/O Wait states. "
+    High or growing wait time can be a hint I/O bottlenecks (host and guest system)
+ 
+- 30 Apr 2013 M.Fuerstenau
+  - Removed subroutines return_dc_performance_values, dc_cpu_info, dc_mem_info, dc_net_info and dc_disk_io_info.
+    Monitored entity was view type HostSystem. This means, that the CPU of the data center server is monitored.
+    The data center server (vcenter) is either a physical MS Windows server (which can be monitored better
+    directly with SNMP and/or NSClient++) or the new Linux based appliance which is a virtual machine and
+    can be monitored as any virtual machine. The OS (Linux) on that virtual machine can be monitored like
+    any standard Linux.
+ 
+- 5 May 2013 M.Fuerstenau
+  - Revised the code of dc_list_vm_volumes_info()
+ 
+- 9 May 2013 M.Fuerstenau
+  - Revised the code of host_net_info(). The function was devided in two parts (like others):
+    - subselects
+    - else which included all.
+    So most of the code existed twice. One for each subselect and nearly the same for all together.
+    The else block was removed and in case no subselect was defined we defined all as $subselect.
+    With the variable set to all we can decide wether to leave the function after a subselect section
+    has been processed or stay and enhance $output and $perfdata. So the code is more clear and
+    has nearly half the lines of code left.
+  - Removed KBps as unit in performance data. This unit is not specified in the plugin developer 
+    guide. Performance data is now just a number without a unit. Adding the unit has to be done 
+    in the graphing tool (like pnp4nagios).
+  - Removed the number of NICs as performance data. A little bit senseless to have those data here.
+ 
+- 10 May 2013 M.Fuerstenau
+  - Revised the code of vm_net_info(). Same changes as for host_net_info() exept the NIC section.
+    This is not available for VMs.
+ 
+- 14 May 2013 M.Fuerstenau
+  - Replaced $command and $subselect with $select and $subselect. Therfore also the options --command
+    --subselect changed to --select and --subselect. This has been done to become it more clear.
+    In fact these items where no commands (or subselects). It were selections from the amount of
+    performance counters available in vmware.
+ 
+- 15 May 2013 M.Fuerstenau
+  - Kicked out all (I hope so) code for processing historic data from generic_performance_values().
+    generic_performance_values() is called by return_host_performance_values(), return_host_vmware_performance_values()
+    and return_cluster_performance_values() (return_cluster_performance_values() must be rewritten now).
+    The code length of generic_performance_values() was reduced to one third by doing this.
+ 
+- 6 Jun 2013 M.Fuerstenau
+  - Substituted commandline option for select -l with -S. Therefore -S can't be used as option for the sessionfile
+    Only --sessionfile is accepted nor the name of the sessionfile.
+  - Corrected some bugs in check_against_threshold()
+  - Ensured that in case of thresholds critical must be greater than warning.
+ 
+- 11 Jun 2013 M.Fuerstenau
+  - Changed select option for datastore from vmfs to volumes because we will have volumes on nfs AND vmfs. 
+  - Changed output for datastore check to use the option --multiline. This will add a \n (unset -> default) for 
+    every line of output. If set it will use HTML tag <br>.
+ 
+- 13 Jun 2013 M.Fuerstenau
+  - Replaced a previous change because it was wrong done:
+    - --listvms replaced by subselect listvms
+ 
+- 14 Jun 2013 M.Fuerstenau
+  - Some minor corrections like a doubled chop() datastore_volumes_info()
+  - Added volume type to datastore_volumes_info(). So you can see whether the volume is vmfs (local or SAN) or NFS.
+  - variables like $subselect or $blacklist are global there is no need to handle them over to subroutines like
+    ($result, $output) = vm_cpu_info($vmname, local_uc($subselect)) . For $subselect we have now one uppercase
+    (around line 580) instead of having one with each call in the main selection.
+  - Later on I renamed local_uc to local_lc because I recognized that in cases the subselect is a volume name
+    upper cases won't work.
+  - replaced last -o $addopts (only for the name of a sensor) with --sensorname
+ 
+- 18 Jun 2013 M.Fuerstenau
+  - Rewritten and cleaned subroutine host_disk_io_info(). Removed $value1 - $value7. Stepwise completion of $output makes
+    this unsophisticated construct obsolete.
+  - Removed use of performance thresholds in performance data when used disk io without subselect because threshold
+    can only be used for on item not for all. Therefore they weren't checked in that section. Senseless.
+  - Changed the output. Opposite to vm_disk_io_info() most vlues in host_disk_io_info() are not transfer rates
+    but latency in milliseconds. The output is now clearly understandable.
+  - Added subselect read. Average number of kilobytes read from the disk each second. Rate at which data is read
+    from each LUN on the host.read rate = # blocksRead per second x blockSize.
+  - Added subselect write. Average number of kilobytes written to disk each second. Rate at which data is written
+    to each LUN on the host.write rate = # blocksRead per second x blockSize
+  - Added subselect usage. Aggregated disk I/O rate. For hosts, this metric includes the rates for all virtual
+    machines running on the host.
+ 
+- 21 Jun 2013 M.Fuerstenau
+  - Rewritten and cleaned subroutine vm_disk_io_info(). Removed $value1 - $valuen. Stepwise completion of $output makes
+    this unsophisticated construct obsolete.
+  - Removed use of performance thresholds in performance data when used disk io without subselect because threshold
+    can only be used for on item not for all. Therefore they weren't checked in that section. Senseless.
+ 
+- 24 Jun 2013 M.Fuerstenau
+  - Changed all .= (for example $output .= $xxx.....) to = $var... (for example $output = $output . $xxx...). .= is shorter
+    but the longer form of notification is better readable. The probability of overlooking the dot (especially for older eyes
+    like mine) is smaller. 
+ 
+- 07 Aug 2013 M.Fuerstenau
+  - Changed "eval { require VMware::VIRuntime };" to "use VMware::VIRuntime;".  The eval construct 
+    made no sense. If the module isn't available the program will crash with a compile error.
+ 
+  - Removed own subroutine format_uptime() only used by host_uptime_info(). The complete work of this function
+    was done converting seconds to days, hours etc.. Instead of the we use the perl module Time::Duration.
+    So instead of
+       $output = "uptime=" . format_uptime($value);
+    we simply use
+       $output =  "uptime=" . duration_exact($value);
+ 
+  - Removed perfdata from host_uptime_info(). Perfdata for uptime seems senseless. Same for threshold.
+  - Started modularization of the plugin. The reason is that it is much more easier to 
+    patch modules than to patch a large file.
+  - Variables used in that functions which are defined on the top level
+    with "my" must now be defined with "our".
+ 
+    BEWARE! Using "our" with unknown modules can lead to curious results if
+    in this functions are variables with the same name. But in this 
+    case it is no risk because the modules are not generic. We have only
+    broken the plugin in handy pieces.
+ 
+  - Made an seperate moduls:
+  - help.pm -> print_help()
+  - process_perfdata.pm  -> get_key_metrices()
+                         -> generic_performance_values()
+                         -> return_host_performance_values()
+                         -> return_host_vmware_performance_values()
+                         -> return_cluster_performance_values()
+                         -> return_host_temporary_vc_4_1_network_performance_values()
+  - host_cpu_info -> host_cpu_info()
+  - host_mem_info -> host_mem_info()
+  - host_net_info -> host_net_info()
+  - host_disk_io_info -> host_disk_io_info()
+  - datastore_volumes_info -> datastore_volumes_info()
+  - host_list_vm_volumes_info -> host_list_vm_volumes_info()
+  - host_runtime_info -> host_runtime_info()
+  - host_service_info -> host_service_info()
+  - host_storage_info -> host_storage_info()
+  - host_uptime_info -> host_uptime_info()

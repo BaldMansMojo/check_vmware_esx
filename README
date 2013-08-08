@@ -1,0 +1,56 @@
+check_vmware_esx.pl
+===================
+
+chech_vmware_esx.pl - a fork of check_vmware_api.pl
+
+Why a fork? According to my personal unterstanding Nagios, Icingia etc. are tools for
+
+a) Monitoring and alarming. That means checking values against thresholds (internal or handed over)
+b) Collecting performance data. These data, collected with the checks, like network traffic, cpu usage or so should be
+   interpretable without a lot of other data.
+
+Athough check_vmware_api.pl is a great plugin it suffers from various things.
+a) It acts as a monitoring plugin for Nagios etc.
+b) It acts a more comfortable commandline interfacescript.
+c) It collects all a lot of historical data to have all informations in one interface.
+
+While a) is ok b) and c) needs to be discussed. b) was necessary when you had only the Windows GUI and working on Linux
+meant "No interface". this is obsolete now with the new webgui.
+
+c) will be better used by using the webgui because historical data (in most situations) means adjusted data. Most of these
+collected data is not feasible for alerting but for analysing performance gaps.
+
+So as a conclusion collecting historic performance data collected by a monitored system should not be done using Nagios,
+pnp4nagios etc.. It should be interpreted with the approriate admin tools of the relevant system. For vmware it means use
+the (web)client for this and not Nagios. Same for performance counters not self explaining.
+
+Example:
+Monitoring swapped memory of a vmware guest system seems to makes sense. But on the second look it doesn't because on Nagios
+you do not have the surrounding conditions in one view like
+- the number of the running guest systems on the vmware server.
+- the swap every guest system needs
+- the total space allocated for all systems
+- swap/memory usage of the hostcheck_vmware_esx.pl
+- and a lot more
+
+So monitoring memory of a host makes sense but the same for the guest via vmtools makes only a limited sense.
+
+But this were only a few problems. Furthermore we had
+
+- misleading descriptions
+- things monitored for hosts but not for vmware servers
+- a lot of absolutely unnesseary performance data (who needs a performane graph for uptime?)
+- unnessessary output (CPU usage in Mhz for example)
+- and a lot more.
+
+This plugin is old and big and cluttered like the room of my little son.  So it was time for some house cleaning.
+I try to clean up the code of every routine, change things and will try to ease maintenance of the code.
+
+The plugin is not really ready but working. Due to the mass
+of options the help module needs work.
+
+See history for changes
+
+
+Martin Fuerstenau
+
