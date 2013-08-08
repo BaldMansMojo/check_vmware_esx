@@ -3,7 +3,7 @@ check_vmware_esx.pl
 
 chech_vmware_esx.pl - a fork of check_vmware_api.pl
 
-Why a fork? According to my personal unterstanding Nagios, Icingia etc. are tools for
+Why a fork? According to my personal unterstanding Nagios, Icinga etc. are tools for
 
 a) Monitoring and alarming. That means checking values against thresholds (internal or handed over)
 b) Collecting performance data. These data, collected with the checks, like network traffic, cpu usage or so should be
