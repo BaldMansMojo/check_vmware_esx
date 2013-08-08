@@ -51,6 +51,10 @@ of options the help module needs work.
 
 See history for changes
 
+One last notice for technical issues. For better maintenance (and partly improved runtime)
+I have decided to modularize the plugin. It makes patching a lot easier. Modules which must be there every time are
+included with use, the others are include using require at runtime. This ensures that only
+that part of code is loaded which is needed.
 
 Martin Fuerstenau
 
