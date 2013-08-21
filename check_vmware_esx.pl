@@ -437,24 +437,48 @@
 #     case it is no risk because the modules are not generic. We have only
 #     broken the plugin in handy pieces.
 #
-#   - Made an seperate moduls:
-#   - help.pm -> print_help()
-#   - process_perfdata.pm  -> get_key_metrices()
-#                          -> generic_performance_values()
-#                          -> return_host_performance_values()
-#                          -> return_host_vmware_performance_values()
-#                          -> return_cluster_performance_values()
-#                          -> return_host_temporary_vc_4_1_network_performance_values()
-#   - host_cpu_info -> host_cpu_info()
-#   - host_mem_info -> host_mem_info()
-#   - host_net_info -> host_net_info()
-#   - host_disk_io_info -> host_disk_io_info()
-#   - datastore_volumes_info -> datastore_volumes_info()
-#   - host_list_vm_volumes_info -> host_list_vm_volumes_info()
-#   - host_runtime_info -> host_runtime_info()
-#   - host_service_info -> host_service_info()
-#   - host_storage_info -> host_storage_info()
-#   - host_uptime_info -> host_uptime_info()
+#   - Made an seperate modules:
+#     - help.pm -> print_help()
+#     - process_perfdata.pm  -> get_key_metrices()
+#                            -> generic_performance_values()
+#                            -> return_host_performance_values()
+#                            -> return_host_vmware_performance_values()
+#                            -> return_cluster_performance_values()
+#                            -> return_host_temporary_vc_4_1_network_performance_values()
+#     - host_cpu_info.pm -> host_cpu_info()
+#     - host_mem_info.pm -> host_mem_info()
+#     - host_net_info.pm -> host_net_info()
+#     - host_disk_io_info.pm -> host_disk_io_info()
+#     - datastore_volumes_info.pm -> datastore_volumes_info()
+#     - host_list_vm_volumes_info.pm -> host_list_vm_volumes_info()
+#     - host_runtime_info.pm -> host_runtime_info()
+#     - host_service_info.pm -> host_service_info()
+#     - host_storage_info.pm -> host_storage_info()
+#     - host_uptime_info.pm -> host_uptime_info()
+#
+# - 13 Aug 2013 M.Fuerstenau
+#   - Moved host_device_info to host_mounted_media_info. Opposite to it's name
+#     and the description this function wasn't designed to list all devices
+#     on a host. It was designed to show host cds/dvds mounted to one or more
+#     virtual machines. This is important for monitoring because a virtual machine
+#     with a mount cd or dvd drive can not be moved to another host.
+#   - Made an seperate modules:
+#     - host_mounted_media_info.pm -> host_mounted_media_info()
+#
+# - 19 Aug 2013 M.Fuerstenau
+#   - Added SOAP check from Simon Meggle, Consol. Slightly modified to fit.
+#   - Added isblacklisted and isnotwhitelisted from Simon Meggle, Consol. . Same as above.
+#     Following subroutines or modules are affected:
+#     - datastore_volumes_info.pm
+#     - host_runtime_info.pm
+#   - Enhanced host_mounted_media_info.pm
+#     - Added check for host floppy
+#     - Added isblacklisted and isnotwhitelisted
+#     - Added $multiline
+#
+# - 21 Aug 2013 M.Fuerstenau
+#   - Reformatted and cleaned up host_runtime_info().
+#   - A lot of bugs in it.
 
 use strict;
 use warnings;
@@ -470,7 +494,7 @@ use help;
 use process_perfdata;
 use datastore_volumes_info;
 
-# Only for debuggin
+# Only for debugging
 use Data::Dumper;
 #            print "------------------------------------------\n" . Dumper ($store) . "\n" . "------------------------------------------\n";
 
@@ -522,7 +546,7 @@ our $perf_thresholds = ";";                    # This contains the string with $
 my $url2connect;                               # Contains the URL to connect to the host
                                                # or the datacenter depending on the selected type
 my $select;
-my $subselect;
+our $subselect;
 
 my $warning;                                   # Warning threshold.
 my $critical;                                  # Critical threshold.
@@ -542,6 +566,9 @@ my $alertonly;                                 # vmfs - list only alerting volum
 
 our $blacklist;                                # Contains the blacklist
 our $blacklistregexp;                          # treat blacklist as regexp
+our $whitelist;                                # Contains the whitelist
+our $whitelistregexp;                          # treat whitelist as regexp
+
 my $isregexp;                                  # treat vmfs volume names as regexp
 
 my $sec;                                       # Seconds      - used for some date functions
@@ -561,7 +588,7 @@ our $multiline;                                # Multiline output in overview. T
 my $multiline_def="\n";                        # Default for $multiline;
 
 my $ignoreunknown;                             # Maps unknown to ok
-my $listall;                                   # used for host. Lists all available devices(use for listing purpose only)
+our $listall;                                   # used for host. Lists all available devices(use for listing purpose only)
 my $sensorname;                                # Contains the name of a single sensor
 
 
@@ -607,6 +634,8 @@ GetOptions
 	                                 "sessionfile=s"    => \$sessionfile_name,
 	 "x=s" => \$blacklist,           "exclude=s"        => \$blacklist,
                                          "blacklistregexp"  => \$blacklistregexp,
+	 "y=s" => \$whitelist,           "include=s"        => \$whitelist,
+                                         "whitelistregexp"  => \$whitelistregexp,
 	                                 "ignore_unknown"   => \$ignoreunknown,
 	                                 "adaptermodel"     => \$adaptermodel,
 	                                 "trace"            => \$trace,
@@ -977,6 +1006,11 @@ sub main_select
           ($result, $output) = vm_runtime_info($vmname);
           return($result, $output);
           }
+       if ($select eq "soap")
+          {
+          ($result, $output) = soap_check();
+          return($result, $output);
+          }
 
           get_me_out("Unknown HOST-VM command");
         }
@@ -1031,7 +1065,7 @@ sub main_select
           {
           require host_runtime_info;
           import host_runtime_info;
-          ($result, $output) = host_runtime_info($esx_server, $blacklist);
+          ($result, $output) = host_runtime_info($esx_server);
           return($result, $output);
           }
        if ($select eq "service")
@@ -1055,9 +1089,16 @@ sub main_select
           ($result, $output) = host_uptime_info($esx_server);
           return($result, $output);
           }
-       if ($select eq "device")
+       if ($select eq "hostmedia")
           {
-          ($result, $output) = host_device_info($esx_server);
+          require host_mounted_media_info;
+          import host_mounted_media_info;
+          ($result, $output) = host_mounted_media_info($esx_server);
+          return($result, $output);
+          }
+       if ($select eq "soap")
+          {
+          ($result, $output) = soap_check();
           return($result, $output);
           }
 
@@ -1091,6 +1132,11 @@ sub main_select
           ($result, $output) = cluster_runtime_info($cluster, $blacklist);
           return($result, $output);
           }
+       if ($select eq "soap")
+          {
+          ($result, $output) = soap_check();
+          return($result, $output);
+          }
 
           get_me_out("Unknown CLUSTER command");
         }
@@ -1099,12 +1145,17 @@ sub main_select
        {
        if ($select eq "volumes")
           {
-          ($result, $output) = dc_list_vm_volumes_info($blacklist);
+          ($result, $output) = dc_list_vm_volumes_info($blacklist, $whitelist);
           return($result, $output);
           }
        if ($select eq "runtime")
           {
           ($result, $output) = dc_runtime_info($blacklist);
+          return($result, $output);
+          }
+       if ($select eq "soap")
+          {
+          ($result, $output) = soap_check();
           return($result, $output);
           }
 
@@ -1277,88 +1328,75 @@ sub format_issue
 
        $output =~ s/, $/ /;
        $output = $output . ": " . $issue->fullFormattedMessage;
-       $output = $output . "(caused by " . $issue->userName . ")" if ($issue->userName ne "");
+       if ($issue->userName ne "")
+          {
+          $output = $output . "(caused by " . $issue->userName . ")";
+          }
 
        return $output;
 }
 
+# SOAP check, isblacklisted and isnotwhitelisted from Simon Meggle, Consol.
+#  Slightly modified to for this plugin by M.Fuerstenau. Oce Printing Systems
 
-#=====================================================================| HOST |============================================================================#
+sub soap_check
+    {
+    my $output = 'Fatal error: could not connect to the VMWare SOAP API.';
+    my $state = Vim::get_vim_service();
+    
+    if (defined($state))
+       {
+       $state=0;
+       $output = 'Successfully connected to the VMWare SOAP API.';
+       }
+    else
+       {
+       $state=2;
+       }
+    return ($state, $output);
+    }
 
+sub isblacklisted
+    {
+    my ($blacklist_ref,$regexpflag,@candidates) = @_;
+    my $ret;
+    
+    if (!defined $$blacklist_ref)
+       {
+       return 0;
+       }
 
-sub host_device_info
-{
-        my ($host) = @_;
-
-        my $count = 0;
-        my $state = 2;
-        my $output = 'HOST DEVICE Unknown error';
-
-        if (defined($subselect) && ($subselect eq 'cd/dvd')) {
-                my $host_view = Vim::find_entity_view(view_type => 'HostSystem', filter => $host, properties => ['name', 'runtime']);
-
-                if (!defined($host_view))
-                   {
-                   print "Host " . $$host{"name"} . " does not exist\n";
-                   exit 2;
-                   }
-
-                if ($host_view->runtime->inMaintenanceMode)
-                   {
-                   print "Notice: " . $host_view->name . " is in maintenance mode, check skipped\n";
-                   exit 0;
-                   }
-
-                my $vm_views = Vim::find_entity_views(view_type => 'VirtualMachine', begin_entity => $host_view, properties => ['name', 'config.template', 'config.hardware.device', 'runtime.powerState']);
-
-                if (!defined($vm_views))
-                   {
-                   print "Runtime error\n";
-                   exit 2;
-                   }
-
-                $output = '';
-                foreach my $vm (@$vm_views)
-                {
-                        # change get_property to {} to avoid infinite loop
-                        my $istemplate = $vm->{'config.template'};
-                        next if ($istemplate && ($istemplate eq 'true'));
-                        my $match = 0;
-                        my $displayname = $vm->name;
-                        my $devices = $vm->{'config.hardware.device'};
-                        if ($subselect eq 'cd/dvd') {
-                                foreach my $dev (@$devices) {
-                                        $match++ if ((ref($dev) eq "VirtualCdrom") && ($dev->connectable->connected == 1));
-                                }
-                        }
-                        if ($match) {
-                                $count++;
-                                $output = "\"$displayname\"($match), " . $output;
-                        } else {
-                                $output = $output . "\"$displayname\"($match), " if ($listall);
-                        }
-                }
-
-                if ($output ne '') {
-                        chop($output);
-                        chop($output);
-                }
-
-                if ($count) {
-                        $output = "VM's with $subselect devices: " . $output;
-                } else {
-                        $output = $listall ? "VM's without $subselect devices: " . $output : "No VM's with $subselect devices";
-                }
-
-                $perfdata = $perfdata . " match=" . $count . ";" . $perf_thresholds . ";;";
-                $state = check_against_threshold($count);
-        } else {
-                get_me_out("Unknown HOST DEVICE subselect");
-        }
-
-        return ($state, $output);
+    if ($regexpflag)
+       {
+       $ret = grep (/$$blacklist_ref/, @candidates);	
+       }
+    else
+       {
+       $ret = grep {$$blacklist_ref eq $_} @candidates;;
+       }
+    return $ret;
 }
 
+sub isnotwhitelisted
+    {
+    my ($whitelist_ref,$regexpflag,@candidates) = @_;
+    my $ret;
+    
+    if (!defined $$whitelist_ref)
+       {
+       return 0;
+       }
+    
+    if ($regexpflag)
+       {
+       $ret = ! grep (/$$whitelist_ref/, @candidates);
+       }
+       else
+       {
+       $ret = ! grep {$$whitelist_ref eq $_} @candidates;;
+       }
+    return $ret;
+    }
 
 #==========================================================================| VM |============================================================================#
 
@@ -1882,7 +1920,7 @@ sub vm_runtime_info
 
 sub dc_list_vm_volumes_info
     {
-    my ($blacklist) = @_;
+    my ($blacklist, $whitelist) = @_;
     my $dc_views;
     my @datastores;
     my $dc;
@@ -1903,7 +1941,7 @@ sub dc_list_vm_volumes_info
                }
             }
 
-    return datastore_volumes_info(\@datastores, $subselect, $blacklist);
+    return datastore_volumes_info(\@datastores, $subselect, $blacklist, $whitelist);
     }
 
 
@@ -2819,6 +2857,7 @@ sub cluster_list_vm_volumes_info
 sub get_me_out
     {
     my ($msg) = @_;
+    print "$msg\n";
     print "\n";
     print_help();
     exit 2;

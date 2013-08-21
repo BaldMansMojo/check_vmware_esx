@@ -389,21 +389,41 @@ History:
     case it is no risk because the modules are not generic. We have only
     broken the plugin in handy pieces.
  
-  - Made an seperate moduls:
-  - help.pm -> print_help()
-  - process_perfdata.pm  -> get_key_metrices()
-                         -> generic_performance_values()
-                         -> return_host_performance_values()
-                         -> return_host_vmware_performance_values()
-                         -> return_cluster_performance_values()
-                         -> return_host_temporary_vc_4_1_network_performance_values()
-  - host_cpu_info -> host_cpu_info()
-  - host_mem_info -> host_mem_info()
-  - host_net_info -> host_net_info()
-  - host_disk_io_info -> host_disk_io_info()
-  - datastore_volumes_info -> datastore_volumes_info()
-  - host_list_vm_volumes_info -> host_list_vm_volumes_info()
-  - host_runtime_info -> host_runtime_info()
-  - host_service_info -> host_service_info()
-  - host_storage_info -> host_storage_info()
-  - host_uptime_info -> host_uptime_info()
+  - Made an seperate modules:
+    - help.pm -> print_help()
+    - process_perfdata.pm  -> get_key_metrices()
+                           -> generic_performance_values()
+                           -> return_host_performance_values()
+                           -> return_host_vmware_performance_values()
+                           -> return_cluster_performance_values()
+                           -> return_host_temporary_vc_4_1_network_performance_values()
+    - host_cpu_info.pm -> host_cpu_info()
+    - host_mem_info.pm -> host_mem_info()
+    - host_net_info.pm -> host_net_info()
+    - host_disk_io_info.pm -> host_disk_io_info()
+    - datastore_volumes_info.pm -> datastore_volumes_info()
+    - host_list_vm_volumes_info.pm -> host_list_vm_volumes_info()
+    - host_runtime_info.pm -> host_runtime_info()
+    - host_service_info.pm -> host_service_info()
+    - host_storage_info.pm -> host_storage_info()
+    - host_uptime_info.pm -> host_uptime_info()
+
+- 13 Aug 2013 M.Fuerstenau
+  - Moved host_device_info to host_mounted_media_info. Opposite to it's name
+    and the description this function wasn't designed to list all devices
+    on a host. It was designed to show host cds/dvds mounted to one or more
+    virtual machines. This is important for monitoring because a virtual machine
+    with a mount cd or dvd drive can not be moved to another host.
+  - Made an seperate modules:
+    - host_mounted_media_info.pm -> host_mounted_media_info()
+
+- 19 Aug 2013 M.Fuerstenau
+  - Added SOAP check from Simon Meggle, Consol. Slightly modified to fit.
+  - Added isblacklisted and isnotwhitelisted from Simon Meggle, Consol. . Same as above.
+    Following subroutines or modules are affected:
+    - datastore_volumes_info.pm
+    - host_runtime_info.pm
+  - Enhanced host_mounted_media_info.pm
+    - Added check for host floppy
+    - Added isblacklisted and isnotwhitelisted
+    - Added $multiline
