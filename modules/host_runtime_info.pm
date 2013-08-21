@@ -484,11 +484,11 @@ sub host_runtime_info
 
        if ($subselect eq "sensor")
           {
-#          if (!$sensorname)
-#             {
-#             print "Provide sensor name with --sensorname\n";
-#             exit 2;
-#             }
+          if (!$sensorname)
+             {
+             print "Provide sensor name with --sensorname\n";
+             exit 2;
+             }
 
           $output = '';
           if (defined($runtime->healthSystemRuntime))
