@@ -66,17 +66,29 @@ sub print_help
     print "     --isregexp                       whether to treat name as regexp\n";
     print " -x, --exclude=<black_list>           blacklist volumes.\n";
     print "     --blacklistregexp                whether to treat blacklist as regexp\n";
+    print " -y, --include=<white_list>           whitelist volumes.\n";
+    print "     --whitelistregexp                whether to treat whitelist as regexp\n";
     print "\n";
+
     print "        * runtime - shows all runtime info(except cluster and tools and no thresholds)\n";
     print "            + listvms - list of vmware machines and their statuses\n";
     print "            + listhost - list of vmware esx host servers and their statuses\n";
     print "            + listcluster - list of vmware clusters and their statuses\n";
     print "            + tools - vmware Tools status\n";
     print " -x, --exclude=<black_list>           blacklist VM's.\n";
+
     print "            + status - overall object status (gray/green/red/yellow)\n";
     print "            + issues - all issues for the host\n";
-    print " -x, --exclude=<black_list>           blacklist issues.\n";
+    print " -x, --exclude=<black_list>           blacklist volumes.\n";
     print "     --blacklistregexp                whether to treat blacklist as regexp\n";
+    print " -y, --include=<white_list>           whitelist volumes.\n";
+    print "     --whitelistregexp                whether to treat whitelist as regexp\n";
+
+    print "SOAP API:\n";
+    print "---------\n";
+    print "\n";
+    print " -S, --select=soap                    simple check to verify a successfull connection\n";
+    print "                                      to VMWare SOAP API.\n";
     print "\n";
 
 #--- Host ----------------------
@@ -149,6 +161,8 @@ sub print_help
     print "     --isregexp                       whether to treat name as regexp\n";
     print " -x, --exclude=<black_list>           blacklist volumes.\n";
     print "     --blacklistregexp                whether to treat blacklist as regexp\n";
+    print " -y, --include=<white_list>           whitelist volumes.\n";
+    print "     --whitelistregexp                whether to treat whitelist as regexp\n";
     print "\n";
     print "Disk I/O:\n";
     print "---------\n";
@@ -181,6 +195,23 @@ sub print_help
     print " -s, --subselect=queue_latency        Average amount of time (ms) spent in the VMkernel queue,\n";
     print "                                      per SCSI command, during thequeue latency in ms\n";
     print "\n";
+    print "Host mounted media:\n";
+    print "-------------------\n";
+    print "\n";
+    print " -S, --select=hostmedia               list vm's with attached host mounted media like cd,dvd or\n";
+    print "                                      floppy drives. This is important for monitoring because a\n";
+    print "                                      virtual machine with a mount cd or dvd drive can not be\n";
+    print "                                      moved to another host.\n";
+    print " -x, --exclude=<black_list>           blacklist VMs.\n";
+    print "     --blacklistregexp                whether to treat blacklist as regexp\n";
+    print " -y, --include=<white_list>           whitelist VMs.\n";
+    print "     --whitelistregexp                whether to treat whitelist as regexp\n";
+    print "     --multiline                      Multiline output in overview. This mean technically that\n";
+    print "                                      a multiline output uses a HTML <br> for the GUI instead of\n";
+    print "                                      Be aware that your messing connections (email, SMS...) must use\n";
+    print "                                      a filter to file out the <br>. A sed oneliner like the following\n";
+    print "                                      will do the job: sed 's/<[^<>]*>//g'\n";
+    print "\n";
 
     print "        * storage - shows Host storage info\n";
     print "            + adapter - list bus adapters\n";
@@ -190,8 +221,8 @@ sub print_help
     print "            + path - list logical unit paths\n";
     print "                b - blacklist paths\n";
     print "            ^ show all storage info\n";
-    print " --adapter_model\n";
-    print "   Displays the model of the adapter as additional information.\n";
+    print " --adapter_model                       Displays the model of the adapter as additional information.\n";
+
 
     print "        * runtime - shows runtime info\n";
     print "            + con - connection state\n";
@@ -213,16 +244,24 @@ sub print_help
     print "            + issues - all issues for the host\n";
     print "                b - blacklist issues\n";
     print "            ^ all runtime info(health, storagehealth, temperature and sensor are represented as one value and no thresholds)\n";
+
+
     print "        * service - shows Host service info\n";
     print "            + (names) - check the state of one or several services specified by (names), syntax for (names):<service1>,<service2>,...,<serviceN>\n";
     print "            ^ show all services\n";
     print "        * uptime - shows Host uptime\n";
-    print "        * device - shows Host specific device info\n";
-    print "            + cd/dvd - list vm's with attached cd/dvd drives\n";
     print "     --listall - list all available devices(use for listing purpose only)\n";
     print " -x, --exclude=<black_list>\n";
     print "   Specify black list\n";
     print "\n";
+
+    print "SOAP API:\n";
+    print "---------\n";
+    print "\n";
+    print " -S, --select=soap                    simple check to verify a successfull connection\n";
+    print "                                      to VMWare SOAP API.\n";
+    print "\n";
+
 
 #--- Virtual machine ----------------------
 
@@ -287,6 +326,13 @@ sub print_help
     print " -x, --exclude=<black_list>\n";
     print "   Specify black list\n";
 
+    print "SOAP API:\n";
+    print "---------\n";
+    print "\n";
+    print " -S, --select=soap                    simple check to verify a successfull connection\n";
+    print "                                      to VMWare SOAP API.\n";
+    print "\n";
+
 #--- Cluster ----------------------
 
     print "Monitoring a vmware cluster via vmware datacenter or vmware host:\n";
@@ -350,7 +396,17 @@ sub print_help
     print "     --isregexp                       whether to treat name as regexp\n";
     print " -x, --exclude=<black_list>           blacklist volumes.\n";
     print "     --blacklistregexp                whether to treat blacklist as regexp\n";
+    print " -y, --include=<white_list>           whitelist volumes.\n";
+    print "     --whitelistregexp                whether to treat whitelist as regexp\n";
     print "\n";
+
+    print "SOAP API:\n";
+    print "---------\n";
+    print "\n";
+    print " -S, --select=soap                    simple check to verify a successfull connection\n";
+    print "                                      to VMWare SOAP API.\n";
+    print "\n";
+
     }
 
 # A module always must end with a returncode of 1. So placing 1 at the end of a module 

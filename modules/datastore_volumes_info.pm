@@ -1,6 +1,6 @@
 sub datastore_volumes_info
     {
-    my ($datastore, $subselect, $blacklist) = @_;
+    my ($datastore, $subselect) = @_;
     my $state = 0;
     my $actual_state;
     my $output = '';
@@ -14,6 +14,12 @@ sub datastore_volumes_info
     if (defined($subselect) && defined($blacklist) && !defined($isregexp))
        {
        print "Blacklist is supported only in generic check or regexp subcheck\n";
+       exit 2;
+       }
+
+    if (defined($subselect) && defined($whitelist) && !defined($isregexp))
+       {
+       print "Whitelist is supported only in generic check or regexp subcheck\n";
        exit 2;
        }
 
@@ -39,7 +45,15 @@ sub datastore_volumes_info
                {
                if (defined($blacklist))
                   {
-                  if ($blacklistregexp?$name =~ /$blacklist/:$blacklist =~ m/(^|\s|\t|,)\Q$name\E($|\s|\t|,)/)
+                  if (isblacklisted(\$blacklist, $blackregexpflag,$name ))
+                     {
+                     next;
+                     }
+                  }
+
+               if (defined($whitelist))
+                  {
+                  if (isnotwhitelisted(\$whitelist, $whiteregexpflag,$name))
                      {
                      next;
                      }
