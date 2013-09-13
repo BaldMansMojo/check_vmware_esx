@@ -427,3 +427,7 @@ History:
     - Added check for host floppy
     - Added isblacklisted and isnotwhitelisted
     - Added $multiline
+
+- 21 Aug 2013 M.Fuerstenau
+  - Reformatted and cleaned up host_runtime_info().
+  - A lot of bugs in it.
