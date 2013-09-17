@@ -1,6 +1,7 @@
 sub datastore_volumes_info
     {
-    my ($datastore, $subselect) = @_;
+#    my ($datastore, $subselect) = @_;
+    my ($datastore) = @_;
     my $state = 0;
     my $actual_state;
     my $output = '';

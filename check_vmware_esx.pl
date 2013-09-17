@@ -103,7 +103,7 @@
 #
 #   - 2012-06-11  Kostyantyn Hushchyn
 #     Reimplemented csv parser to process all values in sequence. Now all required functionality for max sample number argument are present in the plugin.
-#
+#host_list_vm_volumes_info.pm
 #   - 2012-06-13  Kostyantyn Hushchyn
 #     Fixed cluster failover perf counter output.
 #
@@ -479,6 +479,19 @@
 # - 21 Aug 2013 M.Fuerstenau
 #   - Reformatted and cleaned up host_runtime_info().
 #   - A lot of bugs in it.
+#
+# - 17 Aug 2013 M.Fuerstenau
+#   - Minor bug fix.
+#     - $subselect was always converted to lower case characters.
+#       This is correct exect $subselect contains a name (e.g. volumes). Volume names
+#       can contain upper and lower letters. Fixed.
+#     - datastore_volumes_info.pm had  my ($datastore, $subselect) = @_; as second line
+#       This was incorrect because "global" variables (defined as our in the main program)
+#       are not handled over via function call. (Yes - may be handling over maybe more ok 
+#       in the sense of structured programming. But really - does handling over and giving back 
+#       a variable makes the code so much clearer? More a kind of philosophy :-)) )
+
+
 
 use strict;
 use warnings;
@@ -697,7 +710,10 @@ if (defined($subselect))
       }
       else
       {
-      $subselect = local_lc($subselect)
+      if ( $select ne "volumes")
+         {
+         $subselect = local_lc($subselect)
+         }
       }
    }
 
