@@ -1,52 +1,53 @@
 sub datastore_volumes_info
     {
-#    my ($datastore, $subselect) = @_;
     my ($datastore) = @_;
     my $state = 0;
-    my $actual_state;
+    my $actual_state = 0;
     my $output = '';
-    my $value1;
-    my $value2;
+    my $freespace;
+    my $freespace_percent;
+    my $used_capacity;
+    my $used_capacity_percent;
     my $ref_store;
     my $store;
     my $name;
     my $volume_type;
-    
+    my $uom = "MB";
+        
     if (defined($subselect) && defined($blacklist) && !defined($isregexp))
        {
-       print "Blacklist is supported only in generic check or regexp subcheck\n";
+       print "Blacklist is supported only in overall check (no subselect) or regexp subcheck\n";
        exit 2;
        }
 
     if (defined($subselect) && defined($whitelist) && !defined($isregexp))
        {
-       print "Whitelist is supported only in generic check or regexp subcheck\n";
+       print "Whitelist is supported only in overall check (no subselect) or regexp subcheck\n";
        exit 2;
        }
 
-    if (defined($isregexp) && defined($subselect))
+    if (defined($isregexp))
        {
-       eval {qr{$subselect};};
-
-       if ($@)
-          {
-          $@ =~ s/ at.*line.*\.//;
-          die $@;
-          }
-        }
-
+       $isregexp = 1;
+       }
+    else
+       {
+       $isregexp = 0;
+       }
+               
     foreach $ref_store (@{$datastore})
             {
             $store = Vim::get_view(mo_ref => $ref_store, properties => ['summary', 'info']);
 
             $name = $store->summary->name;
             $volume_type = $store->summary->type;
-            
-            if (!defined($subselect) || ($name eq $subselect) || (defined($isregexp) && $name =~ /$subselect/))
+
+            if (!defined($subselect) || ($name eq $subselect) || (($isregexp == 1) && ($name =~ m/$subselect/)))
                {
+               
                if (defined($blacklist))
                   {
-                  if (isblacklisted(\$blacklist, $blackregexpflag,$name ))
+                  if (isblacklisted(\$blacklist, $isregexp, $name ))
                      {
                      next;
                      }
@@ -54,33 +55,66 @@ sub datastore_volumes_info
 
                if (defined($whitelist))
                   {
-                  if (isnotwhitelisted(\$whitelist, $whiteregexpflag,$name))
+                  if (isnotwhitelisted(\$whitelist, $isregexp, $name))
                      {
                      next;
                      }
                   }
 
+               if ((!defined($blacklist)) && (!defined($blacklist)) && ((defined($subselect) && $name !~ m/$subselect/)))
+                  {
+                  next;
+                  }
+
                if ($store->summary->accessible)
                   {
-                  $value1 = simplify_number(convert_number($store->summary->freeSpace) / 1024 / 1024);
-                  $value2 = convert_number($store->summary->capacity);
-                  if ($value2 > 0)
+                  if ($gigabyte)
                      {
-                     $value2 = simplify_number(convert_number($store->info->freeSpace) / $value2 * 100);
+                     $freespace = simplify_number(convert_number($store->summary->freeSpace) / 1024 / 1024 / 1024);
+                     $uom = "GB";
+                     }
+                  else
+                     {
+                     $freespace = simplify_number(convert_number($store->summary->freeSpace) / 1024 / 1024);
                      }
 
+                  $used_capacity = convert_number($store->summary->capacity);
+                  $used_capacity_percent = simplify_number(convert_number($store->info->freeSpace) / $used_capacity * 100);
                   if ($usedspace)
                      {
-                     $value1 = simplify_number(convert_number($store->summary->capacity) / 1024 / 1024) - $value1;
-                     $value2 = 100 - $value2;
+                     if ($gigabyte)
+                        {
+                        $freespace = simplify_number(convert_number($store->summary->capacity) / 1024 / 1024 / 1024) - $freespace;
+                        $uom = "GB";
+                        }
+                     else
+                        {
+                        $freespace = simplify_number(convert_number($store->summary->capacity) / 1024 / 1024) - $freespace;
+                        }
+                     $used_capacity_percent = 100 - $used_capacity_percent;
+                     }
+  
+                     $used_capacity_percent =  sprintf "%.0f", $used_capacity_percent;
+
+                  if (($warn_is_percent) || ($crit_is_percent))
+                     {
+                     $actual_state = check_against_threshold($used_capacity_percent);
+                     $state = check_state($state, $actual_state);
+                     }
+                  else
+                     {
+                     if (defined($warning) && defined($critical))
+                        {
+                        print "On multiple volumes setting warning or critical threshold is only allowed in percent and not in absolute values!\n";
+                        exit 2;
+                        }
                      }
 
-                  $actual_state = check_against_threshold($value1);
-                  $state = check_state($state, $actual_state);
-                  $perfdata = $perfdata . " " . $name . "=" . $value1 . "%:MB;" . $perf_thresholds . ";;";
+                  $perfdata = $perfdata . " " . $name . "=" . $freespace . "$uom;" . $perf_thresholds . ";;";
+
                   if (!$alertonly || $actual_state != 0)
                      {
-                     $output = $output . "$name" . " (" . $volume_type . ")" . ($usedspace ? " used" : " free") . ": ". $value1 . " MB (" . $value2 . "%)". $multiline;
+                     $output = $output . "$name" . " (" . $volume_type . ")" . ($usedspace ? " used" : " free") . ": ". $freespace . " $uom (" . $used_capacity_percent . "%)". $multiline;
                      }
                   }
                else
@@ -93,17 +127,27 @@ sub datastore_volumes_info
                   {
                   last;
                   }
-               if (defined($blacklist))
-                  {
-                  $blacklist = $blacklist . $blacklistregexp?"|^$name\$":",$name";
-                  }
                }
             }
 
     if ($output)
        {
        chop($output);
-       $output = "For all Storages : " . $multiline . $output;
+       if ( $state == 0 )
+          {
+          $output = "For all volumes: " . $multiline . $output;
+          }
+       else
+          {
+          if ($alertonly)
+             {
+             $output = "Alerts for the following volumes: " . $multiline . $output;
+             }
+             else
+             {
+             $output = "Alerts some for the following volumes (please check): " . $multiline . $output;
+             }
+          }
        }
     else
        {

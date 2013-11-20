@@ -46,16 +46,26 @@ sub host_mounted_media_info
             
             $match = 0;
             $displayname = $vm->name;
+
+            if (defined($isregexp))
+               {
+               $isregexp = 1;
+               }
+            else
+               {
+               $isregexp = 0;
+               }
+               
             if (defined($blacklist))
                {
-               if (isblacklisted(\$blacklist, $blackregexpflag, $displayname))
+               if (isblacklisted(\$blacklist, $isregexp, $displayname))
                   {
                   next;
                   }
                }
             if (defined($whitelist))
                {
-               if (isnotwhitelisted(\$whitelist, $whiteregexpflag, $displayname))
+               if (isnotwhitelisted(\$whitelist, $isregexp, $displayname))
                   {
                   next;
                   }

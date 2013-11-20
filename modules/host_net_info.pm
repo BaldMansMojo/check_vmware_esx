@@ -1,7 +1,11 @@
+# Notice for further development of this module:
+# - more information about the nics
+
 sub host_net_info
     {
     my ($host) = @_;
     my $state = 0;
+    my $actual_state = $state;
     my $value;
     my $output;
     my $output_nic = "";
@@ -14,49 +18,54 @@ sub host_net_info
     my $switch;
     my $nic_key;
     my %NIC = ();
+    my $true_sub_sel=0;     # 0 -> true subselect - 1 -> false subselect
         
     if (!defined($subselect))
        {
        # This means no given subselect. So all checks must be performemed
        # Therefore with all set no threshold check can be performed
        $subselect = "all";
+       $true_sub_sel = 1;
+       
        if ( $perf_thresholds ne ";")
           {
           print "Error! Thresholds are only allowed with subselects!\n";
+          exit 3;
           }
        }
 
     if (($subselect eq "usage") || ($subselect eq "all"))
        {
-       $values = return_host_temporary_vc_4_1_network_performance_values($host, ('received.average:*', 'transmitted.average:*'));
-       if ($values)
+       $true_sub_sel = 1;
+       $values = return_host_performance_values($host, 'net', ('usage.average'));
+
+       if (defined($values))
           {
-          $$values[0][0]{"value"} += $$values[0][1]{"value"};
+          $value = simplify_number(convert_number($$values[0][0]->value));
+          $perfdata = $perfdata . " net_usage=" . $value . $perf_thresholds . ";;";
+          $output = "net usage=" . $value . " KBps";
+          if ($subselect ne "all")
+             {
+             $actual_state = check_against_threshold($value);
+             }
           }
        else
           {
-          $values = return_host_performance_values($host, 'net', ('usage.average'));
+          $output = "net usage=NOT AVAILABLE";
+          $actual_state = 1;
           }
-          if (defined($values))
-            {
-            $value = simplify_number(convert_number($$values[0][0]->value));
-            $perfdata = $perfdata . " net_usage=" . $value . $perf_thresholds . ";;";
-            $output = "net usage=" . $value . " KBps";
-            if ($subselect ne "all")
-               {
-               $state = check_against_threshold($value);
-               }
-            }
-        if ($subselect ne "all")
-           {
-           return ($state, $output);
-           }
+           
+       if ($actual_state != 0)
+          {
+          $state = check_state($state, $actual_state);
+          }
        }
    
     if (($subselect eq "receive") || ($subselect eq "all"))
        {
-       $values = return_host_temporary_vc_4_1_network_performance_values($host, ('received.average:*'));
-       $values = return_host_performance_values($host, 'net', ('received.average')) if (!$values);
+       $true_sub_sel = 1;
+       $values = return_host_performance_values($host, 'net', ('received.average'));
+
        if (defined($values))
           {
           $value = simplify_number(convert_number($$values[0][0]->value));
@@ -64,26 +73,30 @@ sub host_net_info
           if ($subselect ne "all")
              {
              $output = "net receive=" . $value . " KBps";
-             $state = check_against_threshold($value);
+             $actual_state = check_against_threshold($value);
              }
-             else
+          else
              {
              $output = $output . ", net receive=" . $value . " KBps";
              }
           }
-       if ($subselect ne "all")
+       else
           {
-          return ($state, $output);
+          $output = "net receive=NOT AVAILABLE";
+          $actual_state = 1;
+          }
+
+       if ($actual_state != 0)
+          {
+          $state = check_state($state, $actual_state);
           }
        }
   
     if (($subselect eq "send") || ($subselect eq "all"))
        {
-       $values = return_host_temporary_vc_4_1_network_performance_values($host, ('transmitted.average:*'));
-       if (!$values)
-          {
-          $values = return_host_performance_values($host, 'net', ('transmitted.average'));
-          }
+       $true_sub_sel = 1;
+       $values = return_host_performance_values($host, 'net', ('transmitted.average'));
+
        if (defined($values))
           {
           $value = simplify_number(convert_number($$values[0][0]->value));
@@ -91,21 +104,28 @@ sub host_net_info
           if ($subselect ne "all")
              {
              $output = "net send=" . $value . " KBps";
-             $state = check_against_threshold($value);
+             $actual_state = check_against_threshold($value);
              }
              else
              {
              $output = $output . ", net send=" . $value . " KBps";
              }
           }
-       if ($subselect ne "all")
+       else
           {
-          return ($state, $output);
+          $output = "net send=NOT AVAILABLE";
+          $actual_state = 1;
+          }
+
+       if ($actual_state != 0)
+          {
+          $state = check_state($state, $actual_state);
           }
        }
 
     if (($subselect eq "nic") || ($subselect eq "all"))
        {
+       $true_sub_sel = 1;
        $host_view = Vim::find_entity_view(view_type => 'HostSystem', filter => $host, properties => ['name', 'configManager.networkSystem', 'runtime.inMaintenanceMode']);
 
        if (!defined($host_view))
@@ -196,14 +216,17 @@ sub host_net_info
              $output = $output . ", " . $BadCount ."/" . ($BadCount + $OKCount) . " NICs are disconnected: " . $output_nic;
              }
           }
-       return ($state, $output);
        }
 
-    if ($subselect ne "all")
+    if ($true_sub_sel == 0)
        {
        get_me_out("Unknown HOST NET subselect");
        }
-    }
+    else
+       {
+       return ($state, $output);
+       }
+   }
 
 # A module always must end with a returncode of 1. So placing 1 at the end of a module 
 # is a commen method to ensure this.

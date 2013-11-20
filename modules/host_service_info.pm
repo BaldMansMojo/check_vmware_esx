@@ -1,10 +1,15 @@
 sub host_service_info
     {
     my ($host) = @_;
-    my $state = 2;
-    my $output = 'HOST service info unknown error';
+    my $state = 0;
+    my $output;
     my $services;
-    my $srvname;
+    my $service_name;
+    my $service_state;
+    my %service_state = (0 => "down", 1 => "up");
+    my $service_count = 0;
+    my $alert_count = 0;;
+
     my $host_view = Vim::find_entity_view(view_type => 'HostSystem', filter => $host, properties => ['name', 'configManager', 'runtime.inMaintenanceMode']);
 
     if (!defined($host_view))
@@ -13,7 +18,7 @@ sub host_service_info
        exit 2;
        }
 
-    if (uc($host_view->get_property('runtime.inMaintenanceMode')) eq "TRUE")
+    if (lc($host_view->get_property('runtime.inMaintenanceMode')) eq "true")
        {
        print "Notice: " . $host_view->name . " is in maintenance mode, check skipped\n";
        exit 0;
@@ -21,51 +26,64 @@ sub host_service_info
 
     $services = Vim::get_view(mo_ref => $host_view->configManager->serviceSystem, properties => ['serviceInfo'])->serviceInfo->service;
 
-    if (defined($subselect))
-       {
-       $subselect = ',' . $subselect . ',';
-       $output = '';
-       foreach (@$services)
+    foreach (@$services)
+            {
+            $service_name = $_->key;
+            $service_state = $_->running;
+
+            if (defined($isregexp))
                {
-               $srvname = $_->key;
-               if ($subselect =~ s/,$srvname,/,/g)
+               $isregexp = 1;
+               }
+            else
+               {
+               $isregexp = 0;
+               }
+               
+            if (defined($blacklist))
+               {
+               if (isblacklisted(\$blacklist, $isregexp, $service_name))
                   {
-                  while ($subselect =~ s/,$srvname,/,/g){};
-                                $output = $output . $srvname . ", " if (!$_->running);
-                        }
-                }
-                $subselect =~ s/^,//;
-                chop($subselect);
+                  next;
+                  }
+               }
+            if (defined($whitelist))
+               {
+               if (isnotwhitelisted(\$whitelist, $isregexp, $service_name))
+                  {
+                  next;
+                  }
+               }
+            $service_count++;
+            if ($service_state == 0)
+               {
+               $state = 2;
+               $state = check_state($state, $service_state);
+               $alert_count++;
+               }
+            if (!$output)
+               {
+               $output = $multiline . $service_name . " (" . $service_state{$service_state} . ")";
+               }
+            else
+               {
+               $output = $output . $multiline . $service_name . " (" . $service_state{$service_state} . ")";
+               }
+            }
 
-                if ($subselect ne '')
-                {
-                        $state = 3;
-                        $output = "unknown services : $subselect";
-                }
-                elsif ($output eq '')
-                {
-                        $state = 0;
-                        $output = "All services are in their apropriate state.";
-                }
-                else
-                {
-                        chop($output);
-                        chop($output);
-                        $output = $output . " are down";
-                }
-        }
-        else
-        {
-                my %service_state = (0 => "down", 1 => "up");
-                $state = 0;
-                $output = "services : ";
-                $output = $output . $_->key . " (" . $service_state{$_->running} . "), " foreach (@$services);
-                chop($output);
-                chop($output);
-        }
+    # An alert should only be caused if the selection is more specific.. Otherwise you will have an alert for every
+    # b...shit.
 
-        return ($state, $output);
-}
+    if (!((defined($blacklist)) || (defined($whitelist))))
+       {
+       $state = 0;
+       }
+       
+    $output = "Checked services:(" . $service_count . ") Services up:(" . ($service_count - $alert_count) . ") Services down:(" . $alert_count . ")" . $output;
+
+
+    return ($state, $output);
+    }
 
 # A module always must end with a returncode of 1. So placing 1 at the end of a module 
 # is a commen method to ensure this.

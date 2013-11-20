@@ -3,7 +3,7 @@
 # Nagios plugin to monitor vmware ESX and vSphere servers
 #
 # License: GPL
-# This plugin is a forked from the original one from op5 by Martin Fuerstenau
+# This plugin is a forked by Martin Fuerstenau from the original one from op5
 # Copyright (c) 2008 op5 AB
 # Author: Kostyantyn Hushchyn <dev@op5.com>
 # Contributor(s): Patrick Müller, Jeremy Martin, Eric Jonsson, stumpr, John Cavanaugh, Libor Klepac, maikmayers, Steffen Poulsen, Mark Elliott, simeg, sebastien.prudhomme, Raphael Schitz
@@ -103,7 +103,7 @@
 #
 #   - 2012-06-11  Kostyantyn Hushchyn
 #     Reimplemented csv parser to process all values in sequence. Now all required functionality for max sample number argument are present in the plugin.
-#host_list_vm_volumes_info.pm
+#
 #   - 2012-06-13  Kostyantyn Hushchyn
 #     Fixed cluster failover perf counter output.
 #
@@ -191,27 +191,27 @@
 #
 ######################################################################################################################################
 #
-# - 31 Jan 2013 M.Fuerstenau
+# - 31 Jan 2013 M.Fuerstenau version 0.7.1
 #   - Replaced most die with a normal if statement and an exit.
 #
-# - 1 Feb 2013 M.Fuerstenau
+# - 1 Feb 2013 M.Fuerstenau version 0.7.2
 #   - Replaced unless with if. unless was only used eight times in the program. In all other statements we had an if statement
 #     with the appropriate negotiation for the statement.
 #
-# - 5 Feb 2013 M.Fuerstenau
+# - 5 Feb 2013 M.Fuerstenau version 0.7.3
 #   - Replaced all add_perfdata statements with simple concatenated variable $perfdata
 #
-# - 6 Feb 2013 M.Fuerstenau
-#   - Corrected bug. Name of subroutine was sub check_percantage but thist was a typo.
+# - 6 Feb 2013 M.Fuerstenau version 0.7.4
+#   - Corrected bug. Name of subroutine was sub check_percantage but this was a typo.
 #
-# - 7 Feb 2013 M.Fuerstenau
+# - 7 Feb 2013 M.Fuerstenau version 0.7.5
 #   - Replaced $percc and $percw with $crit_is_percent and $warn_is_percent. This was just cosmetic for better readability.
 #   - Removed check_percentage(). It was replaced by two one liners directly in the code. Easier to read.
 #   - The only codeblocks using check_percentage() were the blocks checking warning and critical. But unfortunately the
 #     plausability check was not sufficient. Now it is tested that no other values than numbers and the % sign can be
 #     submitted. It is also checked that in case of percent the values are in a valid level between 0 and 100
 #
-# - 12 Feb 2013 M.Fuerstenau
+# - 12 Feb 2013 M.Fuerstenau version 0.7.8
 #   - Replaced literals like CRITICAL with numerical values. Easier to type and anyone developing plugins should be
 #     safe with the use
 #   - Replaced $state with $actual_state and $res with $state. More for cosmetical issues but the state is returned
@@ -219,58 +219,58 @@
 #   - check_against_threshold from Nagios::Plugin replaced with a little own subroutine check_against_threshold.
 #   - Nagios::Plugin::Functions::max_state replaced with own routine check_state
 #
-# - 14 Feb 2013 M.Fuerstenau
-#   - Replaced hash %STATUS_TEXT from Nagios::Plugin::Functions with own hash %status2.
+# - 14 Feb 2013 M.Fuerstenau version 0.7.9
+#   - Replaced hash %STATUS_TEXT from Nagios::Plugin::Functions with own hash %status2text.
 #
-# - 15 Feb 2013 M.Fuerstenau
+# - 15 Feb 2013 M.Fuerstenau version 0.7.10
 #   - Own help (print_help()) and usage (print_usage()) function.
 #   - Nagios::plugin kicked finally out.
 #   - Mo more global variables.
 #
-# - 25 Feb 2013 M.Fuerstenau
+# - 25 Feb 2013 M.Fuerstenau version 0.7.11
 #   - $quickstats instead of $quickStats for better readability.
 #
-# - 5 Mar 2013 M.Fuerstenau
+# - 5 Mar 2013 M.Fuerstenau version 0.7.12
 #   - Removed return_cluster_DRS_recommendations() because for daily use this was more of an exotical feature
 #   - Removed --quickstats for host_cpu_info and dc_cpu_info because quickstats is not a valid option here.
 #
-# - 6 Mar 2013 M.Fuerstenau
+# - 6 Mar 2013 M.Fuerstenau version 0.7.13
 #   - Replaced -o listitems with --listitems
 #
-# - 8 Mar 2013 M.Fuerstenau
+# - 8 Mar 2013 M.Fuerstenau version 0.7.14
 #   - --usedspace replaces -o used. $usedflag has been replaced by $usedflag.
 #   - --listvms replaces -o listvm. $outputlist has been replaced by $listvms.
 #   - --alertonly replaces -o brief. $briefflag has been replaced by $alertonly.
 #   - --blacklistregexp replaces -o blacklistregexp. $blackregexpflag has been replaced by $blacklistregexp.
 #   - --isregexp replaces -o regexp. $regexpflag has been replaced by $isregexp.
 #
-# - 9 Mar 2013 M.Fuerstenau
-#   - Main selection is now transfered to a subrouting main_select because after
+# - 9 Mar 2013 M.Fuerstenau version 0.7.15
+#   - Main selection is now transfered to a subroutine main_select because after
 #     a successfull if statement the rest can be skipped leaving the subroutine
 #     with return
 #
-# - 19 Mar 2013 M.Fuerstenau
+# - 19 Mar 2013 M.Fuerstenau version 0.7.16
 #   - Reformatted and cleaned up a lot of code. Variable definitions are now at the beginning of each 
 #     subroutine instead of defining them "on the fly" as needed with "my". Especially using "my" for
 #     definition in a loop is not goog coding style
 #
-# - 21 Mar 2013 M.Fuerstenau
+# - 21 Mar 2013 M.Fuerstenau version 0.7.17
 #   - --listvms removed as extra switch. Ballooning or swapping VMs will always be listed.
 #   - Changed subselect list(vm) to listvm for better readability. listvm was accepted  before (equal to list)
 #     but not mentioned in the help. To have list or listvm for the same is a little bit exotic. Fixed this inconsistency.
 #
-# - 22 Mar 2013 M.Fuerstenau
+# - 22 Mar 2013 M.Fuerstenau version 0.7.18
 #   - Removed timeshift, interval and maxsamples. If needed use original program from op5.
 #
-# - 25 Mar 2013 M.Fuerstenau
-#   - Removed $defperfargs because no values will be handled over. Only performance check that needed another which 
-#     needed another sampling invel was cluster. This is now fix with 3000.
+# - 25 Mar 2013 M.Fuerstenau version 0.7.19
+#   - Removed $defperfargs because no values will be handled over. Only performance check that needed another 
+#     another sampling invel was cluster. This is now fix with 3000.
 #     
-# - 11 Apr 2013 M.Fuerstenau
+# - 11 Apr 2013 M.Fuerstenau version 0.7.20
 #   - Rewritten and cleaned subroutine host_mem_info. Removed $value1 - $value5. Stepwise completion of $output makes
 #     this unsophisticated construct obsolete.
 #
-# - 16 Apr 2013 M.Fuerstenau
+# - 16 Apr 2013 M.Fuerstenau version 0.7.21
 #   - Stripped down vm_cpu_info. Monitoring CPU usage in Mhz makes no sense under normal circumstances
 #     Mhz is no valid unit for performance data according to the plugin developer guide. I have never found
 #     a reason to monitor wait time or ready time in a normal alerting evironment. This data has some interest
@@ -278,7 +278,7 @@
 #   - Rewritten and cleaned subroutine vm_mem_info. Removed $value1 - $value5. Stepwise completion of $output makes
 #     this unsophisticated construct obsolete.
 #
-# - 24 Apr 2013 M.Fuerstenau
+# - 24 Apr 2013 M.Fuerstenau version 0.7.22
 #   - Because there is a lot of different performance counters for memory in vmware we ave changed something to be 
 #     more specific.
 #     - Enhenced explanations in help.
@@ -303,14 +303,14 @@
 #       we have to look which machine must be moved to another host. 
 #     - As a result of this overall in vm_mem_info() makes no sense.
 #
-# - 25 Apr 2013 M.Fuerstenau
+# - 25 Apr 2013 M.Fuerstenau version 0.7.23
 #   - Removed swap in vm_mem_info(). From vmware documentation:
 #     "Amount of guest physical memory that is currently reclaimed from the virtual machine through ballooning.
 #      This is the amount of guest physical memory that has been allocated and pinned by the balloon driver."
 #     So here we have again data which makes no sense used alone. You need the context for interpreting them
 #     and there are no thresholds for alerting.
 #
-# - 29 Apr 2013 M.Fuerstenau
+# - 29 Apr 2013 M.Fuerstenau version 0.7.24
 #   - Renamed $esx to $esx_server. This is only for cosmetics and better reading of the code.
 #   - Reimplmented subselect ready in vm_cpu_info and implemented it new in host_cpu_info.
 #     From the vmware documentation:
@@ -324,7 +324,7 @@
 #      and CPU I/O Wait states. "
 #     High or growing wait time can be a hint I/O bottlenecks (host and guest system)
 #
-# - 30 Apr 2013 M.Fuerstenau
+# - 30 Apr 2013 M.Fuerstenau version 0.7.25
 #   - Removed subroutines return_dc_performance_values, dc_cpu_info, dc_mem_info, dc_net_info and dc_disk_io_info.
 #     Monitored entity was view type HostSystem. This means, that the CPU of the data center server is monitored.
 #     The data center server (vcenter) is either a physical MS Windows server (which can be monitored better
@@ -332,10 +332,10 @@
 #     can be monitored as any virtual machine. The OS (Linux) on that virtual machine can be monitored like
 #     any standard Linux.
 #
-# - 5 May 2013 M.Fuerstenau
+# - 5 May 2013 M.Fuerstenau version 0.7.26
 #   - Revised the code of dc_list_vm_volumes_info()
 #
-# - 9 May 2013 M.Fuerstenau
+# - 9 May 2013 M.Fuerstenau version 0.7.27
 #   - Revised the code of host_net_info(). The function was devided in two parts (like others):
 #     - subselects
 #     - else which included all.
@@ -349,39 +349,53 @@
 #     in the graphing tool (like pnp4nagios).
 #   - Removed the number of NICs as performance data. A little bit senseless to have those data here.
 #
-# - 10 May 2013 M.Fuerstenau
+# - 10 May 2013 M.Fuerstenau version 0.7.27
 #   - Revised the code of vm_net_info(). Same changes as for host_net_info() exept the NIC section.
 #     This is not available for VMs.
 #
-# - 14 May 2013 M.Fuerstenau
+# - 14 May 2013 M.Fuerstenau version 0.7.28
 #   - Replaced $command and $subselect with $select and $subselect. Therfore also the options --command
 #     --subselect changed to --select and --subselect. This has been done to become it more clear.
 #     In fact these items where no commands (or subselects). It were selections from the amount of
 #     performance counters available in vmware.
 #
-# - 15 May 2013 M.Fuerstenau
+# - 15 May 2013 M.Fuerstenau version 0.7.29
 #   - Kicked out all (I hope so) code for processing historic data from generic_performance_values().
 #     generic_performance_values() is called by return_host_performance_values(), return_host_vmware_performance_values()
 #     and return_cluster_performance_values() (return_cluster_performance_values() must be rewritten now).
 #     The code length of generic_performance_values() was reduced to one third by doing this.
 #
-# - 6 Jun 2013 M.Fuerstenau
+# - 6 Jun 2013 M.Fuerstenau version 0.7.30
 #   - Substituted commandline option for select -l with -S. Therefore -S can't be used as option for the sessionfile
 #     Only --sessionfile is accepted nor the name of the sessionfile.
 #   - Corrected some bugs in check_against_threshold()
 #   - Ensured that in case of thresholds critical must be greater than warning.
 #
-# - 11 Jun 2013 M.Fuerstenau
-#   - Changed select option for datastore from vmfs to volumes because we will have volumes on nfs AND vmfs. 
+# - 11 Jun 2013 M.Fuerstenau version 0.7.31
+#   - Changed select option for datastore from vmfs to volumes because we will have volumes on nfs AND vmfs on local or
+#     SAN disks. 
 #   - Changed output for datastore check to use the option --multiline. This will add a \n (unset -> default) for 
 #     every line of output. If set it will use HTML tag <br>.
 #
-# - 13 Jun 2013 M.Fuerstenau
+#     The option --multiline sets a <br> tag instead of \n. This must be filtered out
+#     before using the output in notifications like an email. sed will do the job:
+#
+#     sed 's/<[Bb][Rr]>/&\n/g' | sed 's/<[^<>]*>//g'
+#
+#     Example:
+#
+#    # 'notify-by-email' command definition
+#    define command{
+#    	command_name	notify-by-email
+#    	command_line	/usr/bin/printf "%b" "Message from Nagios:\n\nNotification Type: $NOTIFICATIONTYPE$\n\nService: $SERVICEDESC$\nHost: $HOSTNAME$\nHostalias: $HOSTALIAS$\nAddress: $HOSTADDRESS$\nState: $SERVICESTATE$\n\nDate/Time: $SHORTDATETIME$\n\nAdditional Info:\n\n$SERVICEOUTPUT$\n$LONGSERVICEOUTPUT$" | sed 's/<[Bb][Rr]>/&\n/g' | sed 's/<[^<>]*>//g' | /bin/mail -s "** $NOTIFICATIONTYPE$ alert - $HOSTNAME$/$SERVICEDESC$ is $SERVICESTATE$ **" $CONTACTEMAIL$
+#    	}
+#
+# - 13 Jun 2013 M.Fuerstenau version 0.7.32
 #   - Replaced a previous change because it was wrong done:
 #     - --listvms replaced by subselect listvms
 #
-# - 14 Jun 2013 M.Fuerstenau
-#   - Some minor corrections like a doubled chop() datastore_volumes_info()
+# - 14 Jun 2013 M.Fuerstenau version 0.7.33
+#   - Some minor corrections like a doubled chop() in datastore_volumes_info()
 #   - Added volume type to datastore_volumes_info(). So you can see whether the volume is vmfs (local or SAN) or NFS.
 #   - variables like $subselect or $blacklist are global there is no need to handle them over to subroutines like
 #     ($result, $output) = vm_cpu_info($vmname, local_uc($subselect)) . For $subselect we have now one uppercase
@@ -390,12 +404,12 @@
 #     upper cases won't work.
 #   - replaced last -o $addopts (only for the name of a sensor) with --sensorname
 #
-# - 18 Jun 2013 M.Fuerstenau
+# - 18 Jun 2013 M.Fuerstenau version 0.7.34
 #   - Rewritten and cleaned subroutine host_disk_io_info(). Removed $value1 - $value7. Stepwise completion of $output makes
 #     this unsophisticated construct obsolete.
 #   - Removed use of performance thresholds in performance data when used disk io without subselect because threshold
-#     can only be used for on item not for all. Therefore they weren't checked in that section. Senseless.
-#   - Changed the output. Opposite to vm_disk_io_info() most vlues in host_disk_io_info() are not transfer rates
+#     can only be used for one item not for all. Therefore they weren't checked in that section. Senseless.
+#   - Changed the output. Opposite to vm_disk_io_info() most values in host_disk_io_info() are not transfer rates
 #     but latency in milliseconds. The output is now clearly understandable.
 #   - Added subselect read. Average number of kilobytes read from the disk each second. Rate at which data is read
 #     from each LUN on the host.read rate = # blocksRead per second x blockSize.
@@ -404,18 +418,18 @@
 #   - Added subselect usage. Aggregated disk I/O rate. For hosts, this metric includes the rates for all virtual
 #     machines running on the host.
 #
-# - 21 Jun 2013 M.Fuerstenau
+# - 21 Jun 2013 M.Fuerstenau version 0.7.35
 #   - Rewritten and cleaned subroutine vm_disk_io_info(). Removed $value1 - $valuen. Stepwise completion of $output makes
 #     this unsophisticated construct obsolete.
 #   - Removed use of performance thresholds in performance data when used disk io without subselect because threshold
 #     can only be used for on item not for all. Therefore they weren't checked in that section. Senseless.
 #
-# - 24 Jun 2013 M.Fuerstenau
+# - 24 Jun 2013 M.Fuerstenau version 0.7.36
 #   - Changed all .= (for example $output .= $xxx.....) to = $var... (for example $output = $output . $xxx...). .= is shorter
 #     but the longer form of notification is better readable. The probability of overlooking the dot (especially for older eyes
 #     like mine) is smaller. 
 #
-# - 07 Aug 2013 M.Fuerstenau
+# - 07 Aug 2013 M.Fuerstenau version 0.8.0
 #   - Changed "eval { require VMware::VIRuntime };" to "use VMware::VIRuntime;".  The eval construct 
 #     made no sense. If the module isn't available the program will crash with a compile error.
 #
@@ -456,7 +470,7 @@
 #     - host_storage_info.pm -> host_storage_info()
 #     - host_uptime_info.pm -> host_uptime_info()
 #
-# - 13 Aug 2013 M.Fuerstenau
+# - 13 Aug 2013 M.Fuerstenau version 0.8.1
 #   - Moved host_device_info to host_mounted_media_info. Opposite to it's name
 #     and the description this function wasn't designed to list all devices
 #     on a host. It was designed to show host cds/dvds mounted to one or more
@@ -465,7 +479,7 @@
 #   - Made an seperate modules:
 #     - host_mounted_media_info.pm -> host_mounted_media_info()
 #
-# - 19 Aug 2013 M.Fuerstenau
+# - 19 Aug 2013 M.Fuerstenau version 0.8.2
 #   - Added SOAP check from Simon Meggle, Consol. Slightly modified to fit.
 #   - Added isblacklisted and isnotwhitelisted from Simon Meggle, Consol. . Same as above.
 #     Following subroutines or modules are affected:
@@ -476,11 +490,11 @@
 #     - Added isblacklisted and isnotwhitelisted
 #     - Added $multiline
 #
-# - 21 Aug 2013 M.Fuerstenau
+# - 21 Aug 2013 M.Fuerstenau version 0.8.3
 #   - Reformatted and cleaned up host_runtime_info().
 #   - A lot of bugs in it.
 #
-# - 17 Aug 2013 M.Fuerstenau
+# - 17 Aug 2013 M.Fuerstenau version 0.8.4
 #   - Minor bug fix.
 #     - $subselect was always converted to lower case characters.
 #       This is correct exect $subselect contains a name (e.g. volumes). Volume names
@@ -490,8 +504,121 @@
 #       are not handled over via function call. (Yes - may be handling over maybe more ok 
 #       in the sense of structured programming. But really - does handling over and giving back 
 #       a variable makes the code so much clearer? More a kind of philosophy :-)) )
-
-
+#
+# - 27 Oct 2013 M.Fuerstenau version 0.8.5
+#   - Made an seperate modules:
+#     - vm_cpu_info.pm -> vm_cpu_info()
+#     - vm_mem_info.pm -> vm_mem_info()
+#     - dc_list_vm_volumes_info.pm -> dc_list_vm_volumes_info()
+#     - vm_net_info.pm -> vm_net_info()
+#     - vm_disk_io_info.pm -> vm_disk_io_info()
+#
+# - 31 Oct 2013 M.Fuerstenau version 0.8.9
+#   - Readded -V|--version to display the version number.
+#
+# - 01 Nov 2013 M.Fuerstenau version 0.8.10
+#   - removed return_host_temporary_vc_4_1_network_performance_values() from
+#     process_perfdata.pm. Not needed in ESX version 5 and above.
+#     Affected subroutine:
+#     host_net_info().
+#   - Bug fixed in generic_performance_values(). Unfortunaltely I had moved
+#     my @values = () to main function. Therefore instead of containing a 
+#     new array reference with each run the new references were added to the array
+#     but only the first one was processed. Thanks to Timo Weber for discovering this bug.
+#
+# - 20 Nov 2013 M.Fuerstenau version 0.8.11
+#   - check_state(). Bugfix. Logical error. Complete rewrite.
+#   - host_net_info()
+#     - Minor bugfix. Added exit 2 in case of unallowed thresholds
+#     - Simplified the output. Instead of doing it for every subselect (or not
+#       if subselect=all for selecting all info) we have a new helper variable
+#       called $true_sub_sel.
+#       0 means not a true subselect.
+#       1 means a true subselect (including all)
+#   - host_runtime_info().
+#     - Filtered out the sensor type "software components". Makes no sense for alerting.
+#     - The complete else tree (no subselect) was scrap due to the fact that the return code
+#       was always ok. There would never be any alarm. Kicked out.
+#     - The else tree was replaced by a $subselect=all as in host_net_info().
+#     - Same for output.
+#     - subselect listvms.
+#       - The (OK) in the output was a hardcoded. Replaced by the deliverd value (UP). (in my oipinion senseless)
+#       - Removed perfdata. The number of virtual machines as perfdata doesn't
+#         make so much sense.
+#     - Rearranged the order of subselects. Must be the same as the statements
+#       in the kicked out else sequence to get the same order in output
+#     - connection state.
+#
+#       From the docs:
+#       connected      Connected to the server. For ESX Server, this is always
+#                      the setting.
+#       disconnected   The user has explicitly taken the host down. VirtualCenter
+#                      does not expect to receive heartbeats from the host. The
+#                      next time a heartbeat is received, the host is moved to
+#                      the connected state again and an event is logged.
+#       notResponding  VirtualCenter is not receiving heartbeats from the server
+#                    . The state automatically changes to connected once
+#                      heartbeats are received again. This state is typically
+#                      used to trigger an alarm on the host. 
+#
+#       In the past the presset of returncode was 2. It was set to 0 in case of a
+#       connected. But disconnected doesn' mean a critical error. It means main-
+#       tenance or somesting like that. Therefore we now return a 1 for warning.
+#       notResonding will cause a 2 for critical.
+#     - Kicked out maintenance info in runtime summary and as subselect. In the beginning of
+#       the function is a check for maintenance. In the original program in this case
+#       the program will be left with a die which caused a red alert in Nagios. Now an info 
+#       is displayed and a return code of 1 (warning) is deliverd because a maintenance is
+#       regular work. Although monitoring should take notice of it. Therefore a warning.
+#       Therefor the maintenence check in the else tree was scrap. It was never reached.
+#     - listvms
+#       In case of no VMs the plugin returned a critical. But this is not correct. No VMs
+#       on a host is not an error. It is simply what it says: No VMs.
+#     - Replaced --listitems and --listall with --listsensors because there were two options
+#       for the same use.
+#     - Later on I decided to kick out the complete sensorname construction. To monitor a seperate sensor
+#       by name (a string which ist different for each sensor) seems not to make so much sense. To monitor
+#       sensors by type gave no usefull information (exept temperature which is still monitored. All usefull
+#       informations are in the health section. Better to implement some out here if needed.
+#       renamed -s temperature to -s temp (because I am lazy).
+#     - Changed output of --listsensors. | is the seperation symbol for performance data. So it should not be
+#       used in output strings.
+#     - Same for the error output of sensors in case of a problem.
+#     - subselect=health. Filter out sensors which have not valid data. Often a sensor is
+#       reckognizedby vmware but has not the ability to report something senseful. In this
+#       case an unknown is reported and the message "Cannot report on the current health state of
+#       the element". This it can be skipped.
+#   - Bugfix for vm_net_info(). It worked perfectly for -H but produced bullshit with the -D option.
+#     With -D in PerfQuerySpec->new(...) intervalId and maxSample must be set. Default was 20 for intervalId
+#     and 1 for maxSample
+#   - datastore_volumes_info()
+#     - New option --gigabyte
+#     - Fixed bug for treating name as regexp (--isregexp).
+#     - Fixed bug in perfdata (%:MB). Is now MB or GB.
+#     - If no single volume is selected warning/critical threshold can be given
+#       only in percent.
+#   - Fixed bug in regexp for blacklists and whitelists and replace --blacklistregexp and --whitelistregexp with
+#     --isregexp. Used in
+#       - host_mounted_media_info()
+#       - datastore_volumes_info()
+#       - host_runtime_info()
+#     All subroutines revised later will include it automatically
+#   - Fixed bug in regexp for blacklists and whitelists and replace --blacklistregexp and --whitelistregexp with
+#   - Opposite to the op5 original blacklists and whitelists can now contain true reular expressions.
+#   - help.pm rewritten. It was too much output. Now the user has several choices:
+#     -h|--help=<all>                    The complete help for all.
+#     -h|--help=<dc|datacenter|vcenter>  Help for datacenter/vcenter checks.
+#     -h|--help=<host>                   Help for vmware host checks.
+#     -h|--help=<vm>                     Help for virtual machines checks.
+#     -h|--help=<cluster>                Help for cluster checks.
+#   - host_service_info() rewritten.
+#     - No longer a list of services via subselect.
+#     - Instead full blacklist/whitelist support
+#     - With --isregexp blacklist/whitelist items are interpreted as regular expressions
+#   - Changed switch of blacklist from -x to -B
+#   - Changed switch of whitelist from -y to -W
+#   - main_select(). Something for the scatterbrained of us. Replaced string compare (eq,ne etc.) with
+#     a regexp pattern matching. So it is possible to type in services or Services instead of service.
 
 use strict;
 use warnings;
@@ -509,8 +636,8 @@ use datastore_volumes_info;
 
 # Only for debugging
 use Data::Dumper;
-#            print "------------------------------------------\n" . Dumper ($store) . "\n" . "------------------------------------------\n";
-
+$Data::Dumper::Indent = 1;
+#print "------------------------------------------\n" . Dumper ($store) . "\n" . "------------------------------------------\n";
 
 if ( $@ )
    {
@@ -524,8 +651,10 @@ if ( $@ )
 # 1. Define variables
 
 # General stuff
-our $version = '0.7.1';                        # Contains the program version number
+our $version;                                  # Only for showing the version
+our $prog_version = '0.8.9';                   # Contains the program version number
 our $ProgName = basename($0);
+#my $help = '';                                 # If some help is wanted....
 my $help;                                      # If some help is wanted....
 my $NoA="";                                    # Number of arguments handled over
                                                # the program
@@ -537,10 +666,10 @@ my $sessionfile_name;                          # Contains the name of the sessio
                                                # a sessionfile is used for faster authentication
 
 
-my $host;                                      # Name of the vmware server
+our $host;                                      # Name of the vmware server
 my $cluster;                                   # Name of the monitored cluster
-my $datacenter;                                # Name of the vCenter server
-my $vmname;                                    # Name of the virtual machine
+our $datacenter;                                # Name of the vCenter server
+our $vmname;                                    # Name of the virtual machine
 
 my $output;                                    # Contains the output string
 my $values;
@@ -561,28 +690,28 @@ my $url2connect;                               # Contains the URL to connect to 
 my $select;
 our $subselect;
 
-my $warning;                                   # Warning threshold.
-my $critical;                                  # Critical threshold.
+our $warning;                                  # Warning threshold.
+our $critical;                                 # Critical threshold.
 
-my $crit_is_percent;                           # Flag. If it is set to one critical threshold is percent.
-my $warn_is_percent;                           # Flag. If it is set to one warning threshold is percent.
+our $crit_is_percent;                          # Flag. If it is set to one critical threshold is percent.
+our $warn_is_percent;                          # Flag. If it is set to one warning threshold is percent.
 my $thresholds_given = 0;                      # During checking the threshold it will be set to one. Only if
                                                # it is set we will check the threshold against warning or critical
                                         
 my $plugin_cache="/var/nagios_plugin_cache/";  # Directory for caching plaugin data. Good idea to use a tmpfs
                                                # because it speeds up operation    
-my $listitems;                                 # This flag set in conjunction with -l runtime -s health will list all sensors
+our $listsensors;                              # This flag set in conjunction with -l runtime -s health or -s sensors
+                                               # will list all sensors
 my $usedspace;                                 # Show used spaced instead of free
+our $gigabyte;                                 # Output in gigabyte instead of megabyte
 my $adaptermodel;                              # Additional information about storage adapters
                                                
-my $alertonly;                                 # vmfs - list only alerting volumes
+our $alertonly;                                # vmfs - list only alerting volumes
 
 our $blacklist;                                # Contains the blacklist
-our $blacklistregexp;                          # treat blacklist as regexp
 our $whitelist;                                # Contains the whitelist
-our $whitelistregexp;                          # treat whitelist as regexp
 
-my $isregexp;                                  # treat vmfs volume names as regexp
+our $isregexp;                                 # treat names, blacklist and whitelists as regexp
 
 my $sec;                                       # Seconds      - used for some date functions
 my $min;                                       # Minutes      - used for some date functions
@@ -601,11 +730,9 @@ our $multiline;                                # Multiline output in overview. T
 my $multiline_def="\n";                        # Default for $multiline;
 
 my $ignoreunknown;                             # Maps unknown to ok
-our $listall;                                   # used for host. Lists all available devices(use for listing purpose only)
-my $sensorname;                                # Contains the name of a single sensor
+our $listall;                                  # used for host. Lists all available devices(use for listing purpose only)
 
 
-my @values;
 
 my $trace;
 my $timeout = 30;
@@ -616,12 +743,12 @@ my $timeout = 30;
 # The same as in Nagios::plugin::functions but it is ridiculous to buy a truck for a
 # "one time one box" transportations job.
 
-my %status2text = (
-    0 => 'OK',
-    1 => 'WARNING',
-    2 => 'CRITICAL',
-    3 => 'UNKNOWN',
-    4 => 'DEPENDENT',
+our %status2text = (
+    0 => 'Ok',
+    1 => 'Warning',
+    2 => 'Critical',
+    3 => 'Unknown',
+    4 => 'Dependent',
 );
 
 #--- End presets --------------------------------------------------------
@@ -632,7 +759,7 @@ $NoA=$#ARGV;
 
 Getopt::Long::Configure('bundling');
 GetOptions
-	("h"   => \$help,                "help"             => \$help,
+	("h:s" => \$help,                "help:s"           => \$help,
 	 "H=s" => \$host,                "host=s"           => \$host,
 	 "C=s" => \$cluster,             "cluster=s"        => \$cluster,
 	 "D=s" => \$datacenter,          "datacenter=s"     => \$datacenter,
@@ -645,26 +772,34 @@ GetOptions
 	 "S=s" => \$select,              "select=s"         => \$select,
 	 "s=s" => \$subselect,           "subselect=s"      => \$subselect,
 	                                 "sessionfile=s"    => \$sessionfile_name,
-	 "x=s" => \$blacklist,           "exclude=s"        => \$blacklist,
-                                         "blacklistregexp"  => \$blacklistregexp,
-	 "y=s" => \$whitelist,           "include=s"        => \$whitelist,
-                                         "whitelistregexp"  => \$whitelistregexp,
+	 "B=s" => \$blacklist,           "exclude=s"        => \$blacklist,
+	 "W=s" => \$whitelist,           "include=s"        => \$whitelist,
 	                                 "ignore_unknown"   => \$ignoreunknown,
 	                                 "adaptermodel"     => \$adaptermodel,
 	                                 "trace"            => \$trace,
-                                         "listitems"        => \$listitems,
+                                         "listsensors"      => \$listsensors,
                                          "usedspace"        => \$usedspace,
                                          "alertonly"        => \$alertonly,
                                          "multiline"        => \$multiline,
                                          "isregexp"         => \$isregexp,
                                          "listall"          => \$listall,
-                                         "sensorname"       => \$sensorname);
+                                         "gigabyte"         => \$gigabyte,
+	 "V"   => \$version,             "version"          => \$version);
+
+# Show version
+if ($version)
+   {
+   print "Version $prog_version\n";
+   print "This program is free software; you can redistribute it and/or modify\n";
+   print "it under the terms of the GNU General Public License version 2 as\n";
+   print "published by the Free Software Foundation.\n";
+   exit 0;
+   }
 
 # Several checks to check parameters
-if ($help)
+if (defined($help))
    {
-   print_help();
-
+   print_help($help);
    exit 0;
    }
 
@@ -682,7 +817,7 @@ else
 
 if ( $NoA == -1 )
    {
-   print_help();
+   print_usage();
    exit 1;
    }
 
@@ -939,7 +1074,7 @@ $perfdata =~ s/^[ \t]*//;
 
 if ( $result == 0 )
    {
-   print "Ok. $output";
+   print "$output";
    if ($perfdata)
       {
       print "|$perfdata\n";
@@ -978,7 +1113,7 @@ if ( $result == 2 )
 
 if ( $result == 3 )
    {
-   print "Unknown! $output";
+   print "$output";
    if ($perfdata)
       {
       print "|$perfdata\n";
@@ -999,21 +1134,29 @@ sub main_select
        {
        if ($select eq "cpu")
           {
+          require vm_cpu_info;
+          import vm_cpu_info;
           ($result, $output) = vm_cpu_info($vmname);
           return($result, $output);
           }
        if ($select eq "mem")
           {
+          require vm_mem_info;
+          import vm_mem_info;
           ($result, $output) = vm_mem_info($vmname);
           return($result, $output);
           }
        if ($select eq "net")
           {
+          require vm_net_info;
+          import vm_net_info;
           ($result, $output) = vm_net_info($vmname);
           return($result, $output);
           }
        if ($select eq "io")
           {
+          require vm_disk_io_info;
+          import vm_disk_io_info;
           ($result, $output) = vm_disk_io_info($vmname);
           return($result, $output);
           }
@@ -1028,7 +1171,7 @@ sub main_select
           return($result, $output);
           }
 
-          get_me_out("Unknown HOST-VM command");
+          get_me_out("Unknown HOST-VM select");
         }
 
     if (defined($host))
@@ -1084,7 +1227,8 @@ sub main_select
           ($result, $output) = host_runtime_info($esx_server);
           return($result, $output);
           }
-       if ($select eq "service")
+       # service OR services because I always type the wrong one :-)) - M.Fuerstenau
+       if ($select =~ m/^service.?$/)
           {
           require host_service_info;
           import host_service_info;
@@ -1118,7 +1262,7 @@ sub main_select
           return($result, $output);
           }
 
-          get_me_out("Unknown HOST command");
+          get_me_out("Unknown HOST select");
         }
 
     if (defined($cluster))
@@ -1154,13 +1298,15 @@ sub main_select
           return($result, $output);
           }
 
-          get_me_out("Unknown CLUSTER command");
+          get_me_out("Unknown CLUSTER select");
         }
 
     if (defined($datacenter))
        {
        if ($select eq "volumes")
           {
+          require dc_list_vm_volumes_info;
+          import dc_list_vm_volumes_info;
           ($result, $output) = dc_list_vm_volumes_info($blacklist, $whitelist);
           return($result, $output);
           }
@@ -1175,7 +1321,7 @@ sub main_select
           return($result, $output);
           }
 
-       get_me_out("Unknown DATACENTER command");
+       get_me_out("Unknown DATACENTER select");
        }
     get_me_out("You should never end here. Totally unknown anything.");
     }
@@ -1213,19 +1359,24 @@ sub check_against_threshold
     
 sub check_state
     {
-    my ($tmp_state1, $tmp_state2) = @_;
-    
-    if ($tmp_state1 < $tmp_state2)
+    if (grep { $_ == 2 } @_)
        {
-       return $tmp_state2;
+       return 2;
        }
-
-    if ($tmp_state1 >= $tmp_state2)
+    if (grep { $_ == 1 } @_)
        {
-       return $tmp_state1;
+       return 1;
        }
+    if (grep { $_ == 3 } @_)
+       {
+       return 3;
+       }
+    if (grep { $_ == 0 } @_)
+       {
+       return 0;
+       }
+    return 3;
     }
-    
 
 sub local_lc
     {
@@ -1374,369 +1525,83 @@ sub soap_check
 
 sub isblacklisted
     {
-    my ($blacklist_ref,$regexpflag,@candidates) = @_;
-    my $ret;
+    my ($blacklist_ref,$regexpflag,$candidate) = @_;
+    my $ret = 0;
+    my @blacklist;
+    my $blacklist;
+    my $hitcount = 0;
     
     if (!defined $$blacklist_ref)
        {
        return 0;
        }
 
-    if ($regexpflag)
+    if ($regexpflag == 0)
        {
-       $ret = grep (/$$blacklist_ref/, @candidates);	
+       $ret = grep(/$candidate/, $$blacklist_ref);
        }
     else
        {
-       $ret = grep {$$blacklist_ref eq $_} @candidates;;
+       @blacklist = split(/,/, $$blacklist_ref);
+
+       foreach $blacklist (@blacklist)
+               {
+               if ($candidate =~ m/$blacklist/)
+                  {
+                  $hitcount++;
+                  }
+               }
+
+       if ($hitcount >= 1)
+          {
+          $ret = 1;
+          }
        }
     return $ret;
 }
 
 sub isnotwhitelisted
     {
-    my ($whitelist_ref,$regexpflag,@candidates) = @_;
-    my $ret;
-    
+    my ($whitelist_ref,$regexpflag,$candidate) = @_;
+    my $ret = 0;
+    my @whitelist;
+    my $whitelist;
+    my $hitcount = 0;
+
     if (!defined $$whitelist_ref)
        {
-       return 0;
+       return $ret;
        }
-    
-    if ($regexpflag)
+
+    if ($regexpflag == 0)
        {
-       $ret = ! grep (/$$whitelist_ref/, @candidates);
+       $ret = ! grep(/$candidate/, $$whitelist_ref);
        }
-       else
+    else
        {
-       $ret = ! grep {$$whitelist_ref eq $_} @candidates;;
+       @whitelist = split(/,/, $$whitelist_ref);
+
+       foreach $whitelist (@whitelist)
+               {
+               if ($candidate =~ m/$whitelist/)
+                  {
+                  $hitcount++;
+                  }
+               }
+
+       if ($hitcount == 0)
+          {
+          $ret = 1;
+          }
        }
     return $ret;
     }
 
 #==========================================================================| VM |============================================================================#
 
-sub vm_cpu_info
-    {
-    my ($vmname) = @_;
-    my $state = 2;
-    my $output = 'HOST-VM CPU Unknown error';
-    my $value;
-    
-    if (defined($subselect))
-       {
-       if ($subselect eq "wait")
-          {
-          $values = return_host_vmware_performance_values($vmname,'cpu', ('wait.summation:*'));
-          
-          if (defined($values))
-             {
-             $value = simplify_number(convert_number($$values[0][0]->value));
-             }
 
-          if (defined($value))
-             {
-             $perfdata = $perfdata . " cpu_wait=" . $value . "ms;" . $perf_thresholds . ";;";
-             $output = "cpu wait=" . $value . " ms";
-             $state = check_against_threshold($value);
-             }
-          return ($state, $output);
-          }
 
-       if ($subselect eq "ready")
-          {
-          $values = return_host_vmware_performance_values($vmname,'cpu', ('ready.summation:*'));
-          
-          if (defined($values))
-             {
-             $value = simplify_number(convert_number($$values[0][0]->value));
-             }
 
-          if (defined($value))
-             {
-             $perfdata = $perfdata . " cpu_ready=" . $value . "ms;" . $perf_thresholds . ";;";
-             $output = "cpu ready=" . $value . " ms";
-             $state = check_against_threshold($value);
-             }
-          return ($state, $output);
-          }
-       get_me_out("Unknown HOST CPU subselect");
-       }
-    else
-       {
-       $values = return_host_vmware_performance_values($vmname, 'cpu', ('usage.average'));
-
-       if (defined($values))
-          {
-          $value = simplify_number(convert_number($$values[0][0]->value) * 0.01);
-          $perfdata = $perfdata . " cpu_usage=" . $value . "%;" . $perf_thresholds . ";;";
-          $output = "$vmname: cpu usage=" . $value . "%"; 
-          $state = check_against_threshold($value);
-          }
-       return ($state, $output);
-       }
-    }
-
-sub vm_mem_info
-    {
-    my ($vmname) = @_;
-
-    my $state = 2;
-    my $output = 'HOST-VM MEM Unknown error';
-    my $value;
-        
-    if (defined($subselect))
-       {
-       if ($subselect eq "usage")
-          {
-          $values = return_host_vmware_performance_values($vmname, 'mem', ('usage.average'));
-          
-          if (defined($values))
-             {
-             $value = simplify_number(convert_number($$values[0][0]->value) * 0.01);
-             $perfdata = $perfdata . " mem_usage=" . $value . "%;" . $perf_thresholds . ";;";
-             $output = "$vmname: mem usage=" . $value . "%"; 
-             $state = check_against_threshold($value);
-             }
-          return ($state, $output);
-          }
-       
-       if ($subselect eq "consumed")
-          {
-          $values = return_host_vmware_performance_values($vmname, 'mem', ('consumed.average'));
-       
-          if (defined($values))
-             {
-             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
-             $perfdata = $perfdata . " consumed_memory=" . $value . "MB;" . $perf_thresholds . ";;";
-             $output = "$vmname: consumed memory=" . $value . " MB";
-             $state = check_against_threshold($value);
-             }
-          return ($state, $output);
-          }
-       
-       if ($subselect eq "overhead")
-          {
-          $values = return_host_vmware_performance_values($vmname, 'mem', ('overhead.average'));
-       
-          if (defined($values))
-             {
-             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
-             $perfdata = $perfdata . " mem_overhead=" . $value . "MB;" . $perf_thresholds . ";;";
-             $output = "$vmname: mem overhead=" . $value . " MB";
-             $state = check_against_threshold($value);
-             }
-          return ($state, $output);
-          }
-       
-       if ($subselect eq "active")
-          {
-          $values = return_host_vmware_performance_values($vmname, 'mem', ('active.average'));
-       
-          if (defined($values))
-             {
-             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
-             $perfdata = $perfdata . " mem_active=" . $value . "MB;" . $perf_thresholds . ";;";
-             $output = "$vmname: mem active=" . $value . " MB";
-             $state = check_against_threshold($value);
-             }
-          return ($state, $output);
-          }
-       get_me_out("Unknown HOST-VM MEM Unknown error");
-       }
-    else
-       {
-        if ($perf_thresholds ne ';')
-           {
-           print_help();
-           print "\nERROR! Thresholds only allowed with subselects!\n\n";
-           exit 2;
-           }
-
-       $values = return_host_vmware_performance_values($vmname, 'mem', ('consumed.average', 'usage.average'));
-       if (defined($values))
-          {
-          $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
-          $perfdata = $perfdata . " consumed_memory=" . $value . "MB;;;";
-          $output = "$vmname: consumed memory=" . $value . " MB(";
-
-          $value = simplify_number(convert_number($$values[0][1]->value) * 0.01);
-          $perfdata = $perfdata . " mem_usage=" . $value . "%;;;";
-          $output = $output . $value . "%)";
-
-          $state = 0;
-          }
-       return ($state, $output);
-       }
-    }
-
-sub vm_net_info
-    {
-    my ($vmname) = @_;
-    my $state = 2;
-    my $output;
-    my $value;
-
-    if (!defined($subselect))
-       {
-       # This means no given subselect. So all checks must be performemed
-       # Therefore with all set no threshold check can be performed
-       $subselect = "all";
-       if ( $perf_thresholds ne ";")
-          {
-          print "Error! Thresholds are only allowed with subselects!\n";
-          }
-       }
-
-    if (($subselect eq "usage") || ($subselect eq "all"))
-       {
-       $values = return_host_vmware_performance_values($vmname, 'net', ('usage.average:*'));
-       if (defined($values))
-          {
-          $value = simplify_number(convert_number($$values[0][0]->value));
-          $perfdata = $perfdata . " net_usage=" . $value . $perf_thresholds . ";;";
-          $output = "$vmname: net usage=" . $value . " KBps"; 
-          if ($subselect ne "all")
-             {
-             $state = check_against_threshold($value);
-             }
-          }
-       if ($subselect ne "all")
-          {
-          return ($state, $output);
-          }
-       }
-
-    if (($subselect eq "RECEIVE") || ($subselect eq "all"))
-       {
-       $values = return_host_vmware_performance_values($vmname, 'net', ('received.average:*'));
-       if (defined($values))
-          {
-          $value = simplify_number(convert_number($$values[0][0]->value));
-          $perfdata = $perfdata . " net_receive=" . $value . $perf_thresholds . ";;";
-          if ($subselect ne "all")
-             {
-             $output = "$vmname: net receive=" . $value . " KBps"; 
-             $state = check_against_threshold($value);
-             }
-          else
-             {
-             $output = $output . ", net receive=" . $value . " KBps"; 
-             }
-           }
-       if ($subselect ne "all")
-          {
-          return ($state, $output);
-          }
-       }
-
-    if (($subselect eq "send") || ($subselect eq "all"))
-       {
-       $values = return_host_vmware_performance_values($vmname, 'net', ('transmitted.average:*'));
-       if (defined($values))
-          {
-          $value = simplify_number(convert_number($$values[0][0]->value));
-          $perfdata = $perfdata . " net_send=" . $value . $perf_thresholds . ";;";
-          if ($subselect ne "all")
-             {
-             $output = "$vmname: net send=" . $value . " KBps"; 
-             $state = check_against_threshold($value);
-             }
-          else
-             {
-             $output =$output . ", net send=" . $value . " KBps"; 
-             }
-          }
-       return ($state, $output);
-       }
-
-    if ($subselect ne "all")
-       {
-       get_me_out("Unknown HOST-VM NET subselect");
-       }
-    }
-
-sub vm_disk_io_info
-    {
-    my ($vmname) = @_;
-    my $state = 2;
-    my $output = 'VM IO Unknown error';
-    my $value;
-    
-    if (defined($subselect))
-       {
-       if ($subselect eq "usage")
-          {
-          $values = return_host_vmware_performance_values($vmname, 'disk', ('usage.average:*'));
-          if (defined($values))
-             {
-             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
-             $perfdata = $perfdata . " io_usage=" . $value . "MB;" . $perf_thresholds . ";;";
-             $output = "$vmname io usage=" . $value . " MB";
-             $state = check_against_threshold($value);
-             }
-          return ($state, $output);
-          }
-       
-       if ($subselect eq "read")
-          {
-          $values = return_host_vmware_performance_values($vmname, 'disk', ('read.average:*'));
-          if (defined($values))
-             {
-             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
-             $perfdata = $perfdata . " io_read=" . $value . "MB/s;" . $perf_thresholds . ";;";
-             $output = "$vmname io read=" . $value . " MB/s";
-             $state = check_against_threshold($value);
-             }
-          return ($state, $output);
-          }
-
-       if ($subselect eq "write")
-          {
-          $values = return_host_vmware_performance_values($vmname, 'disk', ('write.average:*'));
-          if (defined($values))
-             {
-             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
-             $perfdata = $perfdata . " io_write=" . $value . "MB/s;" . $perf_thresholds . ";;";
-             $output = "$vmname io write=" . $value . " MB/s";
-             $state = check_against_threshold($value);
-             }
-          return ($state, $output);
-          }
-       
-       get_me_out("Unknown VM IO subselect");
-       }
-    else
-       {
-
-       if ($perf_thresholds ne ';')
-          {
-          print_help();
-          print "\nERROR! Thresholds only allowed with subselects!\n\n";
-          exit 2;
-          }
-
-       $values = return_host_vmware_performance_values($vmname, 'disk', ('usage.average:*', 'read.average:*', 'write.average:*'));
-       if (defined($values))
-          {
-          $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
-          $perfdata = $perfdata . " io_usage=" . $value . "MB;;;";
-          $output = "$vmname io usage=" . $value . " MB, ";
-
-          $value = simplify_number(convert_number($$values[0][1]->value) / 1024);
-          $perfdata = $perfdata . " io_read=" . $value . "MB;;;";
-          $output = $output . "read=" . $value . " MB/s, ";
-
-          $value = simplify_number(convert_number($$values[0][2]->value) / 1024);
-          $perfdata = $perfdata . " io_write=" . $value . "MB;;;";
-          $output = $output . "write=" . $value . " MB/s";
-
-          $state = 0;
-          }
-        }
-
-        return ($state, $output);
-}
 
 sub vm_runtime_info
     {
@@ -1934,31 +1799,6 @@ sub vm_runtime_info
 #==========================================================================| DC |============================================================================#
 
 
-sub dc_list_vm_volumes_info
-    {
-    my ($blacklist, $whitelist) = @_;
-    my $dc_views;
-    my @datastores;
-    my $dc;
-
-    $dc_views = Vim::find_entity_views(view_type => 'Datacenter', properties => ['datastore']);
-    
-    if (!defined($dc_views))
-       {
-       print "There are no Datacenter\n";
-       exit 2;
-       }
-
-    foreach $dc (@$dc_views)
-            {
-            if (defined($dc->datastore))
-               {
-               push(@datastores, @{$dc->datastore});
-               }
-            }
-
-    return datastore_volumes_info(\@datastores, $subselect, $blacklist, $whitelist);
-    }
 
 
 sub dc_runtime_info

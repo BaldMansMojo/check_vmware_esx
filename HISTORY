@@ -327,7 +327,20 @@ History:
   - Changed select option for datastore from vmfs to volumes because we will have volumes on nfs AND vmfs. 
   - Changed output for datastore check to use the option --multiline. This will add a \n (unset -> default) for 
     every line of output. If set it will use HTML tag <br>.
- 
+
+    The option --multiline sets a <br> tag instead of \n. This must be filtered out
+    before using the output in notifications like an email. sed will do the job:
+
+    sed 's/<[Bb][Rr]>/&\n/g' | sed 's/<[^<>]*>//g'
+
+    Example:
+
+    # 'notify-by-email' command definition
+    define command{
+    	command_name	notify-by-email
+    	command_line	/usr/bin/printf "%b" "Message from Nagios:\n\nNotification Type: $NOTIFICATIONTYPE$\n\nService: $SERVICEDESC$\nHost: $HOSTNAME$\nHostalias: $HOSTALIAS$\nAddress: $HOSTADDRESS$\nState: $SERVICESTATE$\n\nDate/Time: $SHORTDATETIME$\n\nAdditional Info:\n\n$SERVICEOUTPUT$\n$LONGSERVICEOUTPUT$" | sed 's/<[Bb][Rr]>/&\n/g' | sed 's/<[^<>]*>//g' | /bin/mail -s "** $NOTIFICATIONTYPE$ alert - $HOSTNAME$/$SERVICEDESC$ is $SERVICESTATE$ **" $CONTACTEMAIL$
+    	}
+
 - 13 Jun 2013 M.Fuerstenau
   - Replaced a previous change because it was wrong done:
     - --listvms replaced by subselect listvms
@@ -442,3 +455,111 @@ History:
       are not handled over via function call. (Yes - may be handling over maybe more ok 
       in the sense of structured programming. But really - does handling over and giving back 
       a variable makes the code so much clearer? More a kind of philosophy :-)) )
+
+- 3 Oct 2013 M.Fuerstenau
+  - host_runtime_info().
+    - Filtered out the sensor type "software components". Makes no sense for alerting.
+
+- 01 Nov 2013 M.Fuerstenau version 0.8.10
+  - removed return_host_temporary_vc_4_1_network_performance_values() from
+    process_perfdata.pm. Not needed in ESX version 5 and above.
+    Affected subroutine:
+    host_net_info().
+  - Bug fixed in generic_performance_values(). Unfortunaltely I had moved
+    my @values = () to main function. Therefore instead of containing a 
+    new array reference with each run the new references were added to the array
+    but only the first one was processed. Thanks to Timo Weber for discovering this bug.
+
+- 20 Nov 2013 M.Fuerstenau version 0.8.11
+  - check_state(). Bugfix. Logical error. Complete rewrite.
+  - host_net_info()
+    - Minor bugfix. Added exit 2 in case of unallowed thresholds
+    - Simplified the output. Instead of doing it for every subselect (or not
+      if subselect=all for selecting all info) we have a new helper variable
+      called $true_sub_sel.
+      0 means not a true subselect.
+      1 means a true subselect (including all)
+  - host_runtime_info().
+    - Filtered out the sensor type "software components". Makes no sense for alerting.
+    - The complete else tree (no subselect) was scrap due to the fact that the return code
+      was always ok. There would never be any alarm. Kicked out.
+    - The else tree was replaced by a $subselect=all as in host_net_info().
+    - Same for output.
+    - subselect listvms.
+      - The (OK) in the output was a hardcoded. Replaced by the deliverd value (UP). (in my oipinion senseless)
+      - Removed perfdata. The number of virtual machines as perfdata doesn't
+        make so much sense.
+    - Rearranged the order of subselects. Must be the same as the statements
+      in the kicked out else sequence to get the same order in output
+    - connection state.
+
+      From the docs:
+      connected      Connected to the server. For ESX Server, this is always
+                     the setting.
+      disconnected   The user has explicitly taken the host down. VirtualCenter
+                     does not expect to receive heartbeats from the host. The
+                     next time a heartbeat is received, the host is moved to
+                     the connected state again and an event is logged.
+      notResponding  VirtualCenter is not receiving heartbeats from the server
+                   . The state automatically changes to connected once
+                     heartbeats are received again. This state is typically
+                     used to trigger an alarm on the host. 
+
+      In the past the presset of returncode was 2. It was set to 0 in case of a
+      connected. But disconnected doesn' mean a critical error. It means main-
+      tenance or somesting like that. Therefore we now return a 1 for warning.
+      notResonding will cause a 2 for critical.
+    - Kicked out maintenance info in runtime summary and as subselect. In the beginning of
+      the function is a check for maintenance. In the original program in this case
+      the program will be left with a die which caused a red alert in Nagios. Now an info 
+      is displayed and a return code of 1 (warning) is deliverd because a maintenance is
+      regular work. Although monitoring should take notice of it. Therefore a warning.
+      Therefor the maintenence check in the else tree was scrap. It was never reached.
+    - listvms
+      In case of no VMs the plugin returned a critical. But this is not correct. No VMs
+      on a host is not an error. It is simply what it says: No VMs.
+    - Replaced --listitems and --listall with --listsensors because there were two options
+      for the same use.
+    - Later on I decided to kick out the complete sensorname construction. To monitor a seperate sensor
+      by name (a string which ist different for each sensor) seems not to make so much sense. To monitor
+      sensors by type gave no usefull information (exept temperature which is still monitored. All usefull
+      informations are in the health section. Better to implement some out here if needed.
+      renamed -s temperature to -s temp (because I am lazy).
+    - Changed output of --listsensors. | is the seperation symbol for performance data. So it should not be
+      used in output strings.
+    - Same for the error output of sensors in case of a problem.
+    - subselect=health. Filter out sensors which have not valid data. Often a sensor is
+      reckognizedby vmware but has not the ability to report something senseful. In this
+      case an unknown is reported and the message "Cannot report on the current health state of
+      the element". This it can be skipped.
+  - Bugfix for vm_net_info(). It worked perfectly for -H but produced bullshit with the -D option.
+    With -D in PerfQuerySpec->new(...) intervalId and maxSample must be set. Default was 20 for intervalId
+    and 1 for maxSample
+  - datastore_volumes_info()
+    - New option --gigabyte
+    - Fixed bug for treating name as regexp (--isregexp).
+    - Fixed bug in perfdata (%:MB). Is now MB or GB.
+    - If no single volume is selected warning/critical threshold can be given
+      only in percent.
+  - Fixed bug in regexp for blacklists and whitelists and replace --blacklistregexp and --whitelistregexp with
+    --isregexp. Used in
+      - host_mounted_media_info()
+      - datastore_volumes_info()
+      - host_runtime_info()
+    All subroutines revised later will include it automatically
+  - Fixed bug in regexp for blacklists and whitelists and replace --blacklistregexp and --whitelistregexp with
+  - Opposite to the op5 original blacklists and whitelists can now contain true reular expressions.
+  - help.pm rewritten. It was too much output. Now the user has several choices:
+    -h|--help=<all>                    The complete help for all.
+    -h|--help=<dc|datacenter|vcenter>  Help for datacenter/vcenter checks.
+    -h|--help=<host>                   Help for vmware host checks.
+    -h|--help=<vm>                     Help for virtual machines checks.
+    -h|--help=<cluster>                Help for cluster checks.
+  - host_service_info() rewritten.
+    - No longer a list of services via subselect.
+    - Instead full blacklist/whitelist support
+    - With --isregexp blacklist/whitelist items are interpreted as regular expressions
+  - Changed switch of blacklist from -x to -B
+  - Changed switch of whitelist from -y to -W
+  - main_select(). Something for the scatterbrained of us. Replaced string compare (eq,ne etc.) with
+    a regexp pattern matching. So it is possible to type in services or Services instead of service.

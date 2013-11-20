@@ -3,7 +3,10 @@ check_vmware_esx.pl
 
 chech_vmware_esx.pl - a fork of check_vmware_api.pl
 
-Why a fork? According to my personal unterstanding Nagios, Icinga etc. are tools for
+General
+-------
+
+Why a fork? According to my personal unterstanding Nagios, Icingia etc. are tools for
 
 a) Monitoring and alarming. That means checking values against thresholds (internal or handed over)
 b) Collecting performance data. These data, collected with the checks, like network traffic, cpu usage or so should be
@@ -55,6 +58,24 @@ One last notice for technical issues. For better maintenance (and partly improve
 I have decided to modularize the plugin. It makes patching a lot easier. Modules which must be there every time are
 included with use, the others are include using require at runtime. This ensures that only
 that part of code is loaded which is needed.
+
+HTML in output caused by --multiline
+------------------------------------
+
+The option --multiline sets a <br> tag instead of \n. This must be filtered out
+before using the output in notifications like an email. sed will do the job:
+
+sed 's/<[Bb][Rr]>/&\n/g' | sed 's/<[^<>]*>//g'
+
+Example:
+- - - - -
+
+# 'notify-by-email' command definition
+define command{
+	command_name	notify-by-email
+	command_line	/usr/bin/printf "%b" "Message from Nagios:\n\nNotification Type: $NOTIFICATIONTYPE$\n\nService: $SERVICEDESC$\nHost: $HOSTNAME$\nHostalias: $HOSTALIAS$\nAddress: $HOSTADDRESS$\nState: $SERVICESTATE$\n\nDate/Time: $SHORTDATETIME$\n\nAdditional Info:\n\n$SERVICEOUTPUT$\n$LONGSERVICEOUTPUT$" | sed 's/<[Bb][Rr]>/&\n/g' | sed 's/<[^<>]*>//g' | /bin/mail -s "** $NOTIFICATIONTYPE$ alert - $HOSTNAME$/$SERVICEDESC$ is $SERVICESTATE$ **" $CONTACTEMAIL$
+	}
+
 
 Martin Fuerstenau
 
