@@ -3,8 +3,9 @@ check_vmware_esx.pl
 
 chech_vmware_esx.pl - a fork of check_vmware_api.pl
 
+
 General
--------
+=======
 
 Why a fork? According to my personal unterstanding Nagios, Icingia etc. are tools for
 
@@ -59,8 +60,22 @@ I have decided to modularize the plugin. It makes patching a lot easier. Modules
 included with use, the others are include using require at runtime. This ensures that only
 that part of code is loaded which is needed.
 
+
+Installation
+============
+
+Downlod the archive (.zip from github or .tar.gz/.tgz from other locations) and unpack it in a location suitable for you.
+
+It is recommended not to merge third party plugins with plugins deliverd by Nagios/Icingia/Shinken etc.. So it is a good practice
+to have seperate directories for your own and/or third party plugins.
+
+Ensure the the path to the perl interpreter in the program is set to the right perl executable on your system.
+
+Adjust the path for the modules directory (use lib "modules") to fit your system (for example: use lib "/usr/local/libexec/myplugins/modules")
+
+
 HTML in output caused by --multiline
-------------------------------------
+====================================
 
 The option --multiline sets a <br> tag instead of \n. This must be filtered out
 before using the output in notifications like an email. sed will do the job:
@@ -68,7 +83,7 @@ before using the output in notifications like an email. sed will do the job:
 sed 's/<[Bb][Rr]>/&\n/g' | sed 's/<[^<>]*>//g'
 
 Example:
-- - - - -
+--------
 
 # 'notify-by-email' command definition
 define command{
@@ -76,6 +91,4 @@ define command{
 	command_line	/usr/bin/printf "%b" "Message from Nagios:\n\nNotification Type: $NOTIFICATIONTYPE$\n\nService: $SERVICEDESC$\nHost: $HOSTNAME$\nHostalias: $HOSTALIAS$\nAddress: $HOSTADDRESS$\nState: $SERVICESTATE$\n\nDate/Time: $SHORTDATETIME$\n\nAdditional Info:\n\n$SERVICEOUTPUT$\n$LONGSERVICEOUTPUT$" | sed 's/<[Bb][Rr]>/&\n/g' | sed 's/<[^<>]*>//g' | /bin/mail -s "** $NOTIFICATIONTYPE$ alert - $HOSTNAME$/$SERVICEDESC$ is $SERVICESTATE$ **" $CONTACTEMAIL$
 	}
 
-
-Martin Fuerstenau
 
