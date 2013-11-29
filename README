@@ -92,3 +92,22 @@ define command{
 	}
 
 
+Using a sessionfile
+===================
+
+With version 0.8.13 the authentication system was rewritten. From that version on using a seesionfile for authorization works as expected.
+
+The sessionfilename is given over to the program using the commandline switch  --sessionfile=<filename>. To have a uniq
+identifier the IP address of the adresses host/vcenter server is placed in front of the given name.
+
+Example:
+--------
+192.168.10.12_duck
+
+But a string like "duck" may not be a unique identifier. You can use any senseful Nagios macro for this in the command definition but beware
+to use things like the service description in case the description contains blanks. In this case you will create a filename
+with blanks in it. Quite stupid.
+
+
+
+

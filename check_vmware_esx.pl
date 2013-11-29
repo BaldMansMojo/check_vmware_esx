@@ -631,6 +631,7 @@
 #   - Bypass SSL certificate validation - thanks Robert Karliczek for the hint
 #   - Added --sslport if any port other port than 443 is wanted. 443 is used as default.
 #   - Rewritten authorization part. Sessionfiles are working now.
+#   - Updated README.
 
      
 use strict;
