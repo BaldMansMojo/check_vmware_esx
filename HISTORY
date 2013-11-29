@@ -301,7 +301,7 @@ History:
     in the graphing tool (like pnp4nagios).
   - Removed the number of NICs as performance data. A little bit senseless to have those data here.
  
-- 10 May 2013 M.Fuerstenau10.51.21.12_duck
+- 10 May 2013 M.Fuerstenau
   - Revised the code of vm_net_info(). Same changes as for host_net_info() exept the NIC section.
     This is not available for VMs.
  
