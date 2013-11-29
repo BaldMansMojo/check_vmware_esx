@@ -619,7 +619,20 @@
 #   - Changed switch of whitelist from -y to -W
 #   - main_select(). Something for the scatterbrained of us. Replaced string compare (eq,ne etc.) with
 #     a regexp pattern matching. So it is possible to type in services or Services instead of service.
+#
+# - 29 Nov 2013 M.Fuerstenau version 0.8.13
+#   - In all functions checking host for maintenance we had the following contruction:
+#
+#     if (uc($host_view->get_property('runtime.inMaintenanceMode')) eq "TRUE")
+#
+#     This is quite stupid. runtime.inMaintenanceMode is xsd:boolean wich means true or false (in 
+#     lower cas letters. So a uc() make no sense. Removed
+#
+#   - Bypass SSL certificate validation - thanks Robert Karliczek for the hint
+#   - Added --sslport if any port other port than 443 is wanted. 443 is used as default.
+#   - Rewritten authorization part. Sessionfiles are working now.
 
+     
 use strict;
 use warnings;
 use File::Basename;
@@ -633,6 +646,10 @@ use lib "modules";
 use help;
 use process_perfdata;
 use datastore_volumes_info;
+
+# Prevent SSL certificate validation
+
+$ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0; 
 
 # Only for debugging
 use Data::Dumper;
@@ -654,28 +671,29 @@ if ( $@ )
 our $version;                                  # Only for showing the version
 our $prog_version = '0.8.9';                   # Contains the program version number
 our $ProgName = basename($0);
-#my $help = '';                                 # If some help is wanted....
-my $help;                                      # If some help is wanted....
-my $NoA="";                                    # Number of arguments handled over
+
+#my  $help = '';                                # If some help is wanted....
+my  $help;                                     # If some help is wanted....
+my  $NoA="";                                   # Number of arguments handled over
                                                # the program
 # Login options
-my $username;                                  # Username for vmware host or vsphere server (datacenter)
-my $password;                                  # Password for vmware host or vsphere server (datacenter)
-my $authfile;                                  # If username/password should read from a file ....
-my $sessionfile_name;                          # Contains the name of the sessionfile if a
+my  $username;                                 # Username for vmware host or vsphere server (datacenter)
+my  $password;                                 # Password for vmware host or vsphere server (datacenter)
+my  $authfile;                                 # If username/password should read from a file ....
+my  $sessionfile_name;                         # Contains the name of the sessionfile if a
                                                # a sessionfile is used for faster authentication
+my $vim;                                       # Needed to stroe results ov Vim.
 
+our $host;                                     # Name of the vmware server
+my  $cluster;                                  # Name of the monitored cluster
+our $datacenter;                               # Name of the vCenter server
+our $vmname;                                   # Name of the virtual machine
 
-our $host;                                      # Name of the vmware server
-my $cluster;                                   # Name of the monitored cluster
-our $datacenter;                                # Name of the vCenter server
-our $vmname;                                    # Name of the virtual machine
-
-my $output;                                    # Contains the output string
-my $values;
-my $result;                                    # Contains the output string
+my  $output;                                   # Contains the output string
+my  $values;
+my  $result;                                   # Contains the output string
 our $perfdata;                                 # Contains the perfdata string.
-my $perfdata_init = "perfdata:";               # Contains the perfdata init string. We init $perfdata with
+my  $perfdata_init = "perfdata:";              # Contains the perfdata init string. We init $perfdata with
                                                # a stupid string because in case of concatenate perfdata
                                                # it is much more simple to remove a leading string with
                                                # a regular expression than to decide in every case wether
@@ -685,9 +703,11 @@ $perfdata = $perfdata_init;                    # Init of perfdata. Using variabl
 our $perf_thresholds = ";";                    # This contains the string with $warning, $critical or nothing
                                                # for $perfdata. If no thresold is set it is just ;
 
-my $url2connect;                               # Contains the URL to connect to the host
+my  $url2connect;                              # Contains the URL to connect to the host
                                                # or the datacenter depending on the selected type
-my $select;
+my  $sslport;                                  # If a port other than 443 is used.
+my  $sslport_def = 443;                        # Default port
+my  $select;
 our $subselect;
 
 our $warning;                                  # Warning threshold.
@@ -695,16 +715,16 @@ our $critical;                                 # Critical threshold.
 
 our $crit_is_percent;                          # Flag. If it is set to one critical threshold is percent.
 our $warn_is_percent;                          # Flag. If it is set to one warning threshold is percent.
-my $thresholds_given = 0;                      # During checking the threshold it will be set to one. Only if
+my  $thresholds_given = 0;                     # During checking the threshold it will be set to one. Only if
                                                # it is set we will check the threshold against warning or critical
                                         
-my $plugin_cache="/var/nagios_plugin_cache/";  # Directory for caching plaugin data. Good idea to use a tmpfs
+my  $plugin_cache="/var/nagios_plugin_cache/"; # Directory for caching plaugin data. Good idea to use a tmpfs
                                                # because it speeds up operation    
 our $listsensors;                              # This flag set in conjunction with -l runtime -s health or -s sensors
                                                # will list all sensors
-my $usedspace;                                 # Show used spaced instead of free
+my  $usedspace;                                # Show used spaced instead of free
 our $gigabyte;                                 # Output in gigabyte instead of megabyte
-my $adaptermodel;                              # Additional information about storage adapters
+my  $adaptermodel;                             # Additional information about storage adapters
                                                
 our $alertonly;                                # vmfs - list only alerting volumes
 
@@ -713,12 +733,12 @@ our $whitelist;                                # Contains the whitelist
 
 our $isregexp;                                 # treat names, blacklist and whitelists as regexp
 
-my $sec;                                       # Seconds      - used for some date functions
-my $min;                                       # Minutes      - used for some date functions
-my $hour;                                      # Hour         - used for some date functions
-my $mday;                                      # Day of month - used for some date functions
-my $mon;                                       # Month        - used for some date functions
-my $year;                                      # Year         - used for some date functions
+my  $sec;                                      # Seconds      - used for some date functions
+my  $min;                                      # Minutes      - used for some date functions
+my  $hour;                                     # Hour         - used for some date functions
+my  $mday;                                     # Day of month - used for some date functions
+my  $mon;                                      # Month        - used for some date functions
+my  $year;                                     # Year         - used for some date functions
 
 # Output options
 our $multiline;                                # Multiline output in overview. This mean technically that
@@ -727,15 +747,15 @@ our $multiline;                                # Multiline output in overview. T
                                                # a filter to file out the <br>. A sed oneliner like the following
                                                # will do the job:
                                                # sed 's/<[^<>]*>//g'
-my $multiline_def="\n";                        # Default for $multiline;
+my  $multiline_def="\n";                       # Default for $multiline;
 
-my $ignoreunknown;                             # Maps unknown to ok
+my  $ignoreunknown;                            # Maps unknown to ok
 our $listall;                                  # used for host. Lists all available devices(use for listing purpose only)
 
 
 
-my $trace;
-my $timeout = 30;
+my  $trace;
+my  $timeout = 30;
 
 
 # 2. Define arrays and hashes  
@@ -783,6 +803,7 @@ GetOptions
                                          "multiline"        => \$multiline,
                                          "isregexp"         => \$isregexp,
                                          "listall"          => \$listall,
+                                         "sslport=s"        => \$sslport,
                                          "gigabyte"         => \$gigabyte,
 	 "V"   => \$version,             "version"          => \$version);
 
@@ -994,33 +1015,38 @@ else
       }
    }
 
-if (index($url2connect, ":") == -1)
+if (defined($sslport))
    {
-   $url2connect = $url2connect . ":443";
+   $url2connect = $url2connect . ":" . $sslport;
    }
 
 $url2connect = "https://" . $url2connect . "/sdk/webService";
 
-if (defined($sessionfile_name) and -e $sessionfile_name)
+if (defined($sessionfile_name))
    {
-   Opts::set_option("sessionfile", $sessionfile_name);
-   Util::connect($url2connect, $username, $password);
-   
-   if (Opts::get_option("url") ne $url2connect)
+   if ( -e $sessionfile_name )
       {
-      print "Connected host doesn't match reqested URL.\n";
-      Opts::set_option("sessionfile", undef);
+      eval {$vim = Vim::load_session(session_file => $sessionfile_name)};
+      if (($@ =~ /The session is not authenticated/gi) || (Opts::get_option("url") ne $url2connect))
+         {
+         unlink $sessionfile_name;
+         Util::connect($url2connect, $username, $password);
+         $vim = Vim::save_session(session_file => $sessionfile_name);
+         }
+      else
+         {
+         $vim = Vim::load_session(session_file => $sessionfile_name);
+         }
+      }
+      else
+      {
       Util::connect($url2connect, $username, $password);
+      $vim = Vim::save_session(session_file => $sessionfile_name);
       }
    }
 else
    {
    Util::connect($url2connect, $username, $password);
-   }
-
-if (defined($sessionfile_name))
-   {
-   Vim::save_session(session_file => $sessionfile_name);
    }
 
 # Tracemode?
@@ -1055,8 +1081,15 @@ if ($@)
       $result = 2;
       }
    }
-
-Util::disconnect();
+# Hier noch kleiner Bock!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+if (defined($sessionfile_name) and -e $sessionfile_name)
+   {
+   $vim->unset_logout_on_disconnect();
+   }
+else
+   {
+   Util::disconnect();
+   }
 
 # Added for mapping unknown to ok - M.Fuerstenau - 30 Mar 2011
 

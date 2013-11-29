@@ -563,3 +563,16 @@ History:
   - Changed switch of whitelist from -y to -W
   - main_select(). Something for the scatterbrained of us. Replaced string compare (eq,ne etc.) with
     a regexp pattern matching. So it is possible to type in services or Services instead of service.
+
+- 29 Nov 2013 M.Fuerstenau version 0.8.13
+  - In all functions checking host for maintenance we had the following contruction:
+
+    if (uc($host_view->get_property('runtime.inMaintenanceMode')) eq "TRUE")
+
+    This is quite stupid. runtime.inMaintenanceMode is xsd:boolean wich means true or false (in 
+    lower cas letters. So a uc() make no sense. Removed
+
+  - Bypass SSL certificate validation - thanks Robert Karliczek for the hint
+  - Added --sslport if any port other port than 443 is wanted. 443 is used as default.
+  - Rewritten authorization part. Sessionfiles are working now.
+
