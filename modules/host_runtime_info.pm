@@ -392,7 +392,7 @@ sub host_runtime_info
                      
                      if ($actual_state != 0)
                         {
-                        if ($actual_state == 3)
+                        if (($actual_state == 3) && (!defined($ignoreunknown)))
                            {
                            # Trouble with the unknown status with sensors should better be a warning than unknown
                            $actual_state = 1;

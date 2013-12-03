@@ -577,3 +577,11 @@ History:
   - Rewritten authorization part. Sessionfiles are working now.
   - Updated README.
 
+- 03 Dec 2013 M.Fuerstenau version 0.8.14
+  - host_runtime_info()
+    - Fixed minor bug. In case of an unknown with sensors the unknown was always mapped to
+      a warning. This wasn't sensefull under all circumstances. Now it is only mapped to warning
+      if --ignoreunknow is not set.
+  - README
+    - Updated installation notes
+  - Optional pathname for sessionfile

@@ -69,11 +69,11 @@ sub print_help
        {
        print "\nBecause the output of the complete help is very large you have to select what you want:\n\n";
        help_options();
-       print "--more--";
+       print "<--Hit enter for next page-->";
        $page = <STDIN>;
        undef $page;
        hint();
-       print "--more--";
+       print "<--Hit enter for next page-->";
        $page = <STDIN>;
        undef $page;
        version_lic();
@@ -100,9 +100,11 @@ sub print_help
        print "Options for authentication:\n";
        print "===========================\n";
        print "\n";
-       print "     --sessionfile=SESSIONFILE       If this option is set a session file will be used for login. The name will \n";
+       print "     --sessionfile=<sessionfile>     If this option is set a session file will be used for login. The name will \n";
        print "                                     be generated automatically. A good idea is to use the servicedescription. It is \n";
        print "                                     combined with the hostname and so it is dynamic for every service.\n";
+       print "     --sessionfiledir=<directory>    If this option is set a path different from the path stored in \$nagios_plugin_cache\n";
+       print "                                     will be used.\n";
        print "-u, --username=<username>            Username to connect with.\n";
        print "-p, --password=<password>            Password to use with the username.\n";
        print "-f, --authfile=<path>                Authentication file with login and password.\n";
@@ -120,6 +122,7 @@ sub print_help
        print "=================================\n";
        print "\n";
        print "-D, --datacenter=<DCname>           Datacenter/Vcenter hostname.\n";
+       print "    --sslport=<port>                If a SSL port different from 443 is used.\n";
        print "\n";
        print "Volumes:\n";
        print "--------\n";
@@ -163,6 +166,7 @@ sub print_help
        print "===========================\n";
        print "\n";
        print "-H, --host=<hostname>               ESX or ESXi hostname.\n";
+       print "    --sslport=<port>                If a SSL port different from 443 is used.\n";
        print "\n";
        print "CPU:\n";
        print "----\n";
@@ -369,13 +373,14 @@ sub print_help
    
        print "        * storage - shows Host storage info\n";
        print "            + adapter - list bus adapters\n";
-       print "                b - blacklist adapters\n";
+       print "-B, --exclude=<black_list>          blacklist adapters. Blacklisted adapters will not be displayed.\n";
+       print "-W, --include=<white_list>          whitelist adapters. Only whitelisted adapters will be displayed.\n";
+       print "    --isregexp                      whether to treat blacklist and whitelist as regexp\n";
        print "            + lun - list SCSI logical units\n";
        print "                b - blacklist LUN's\n";
        print "            + path - list logical unit paths\n";
        print "                b - blacklist paths\n";
        print "            ^ show all storage info\n";
-       print "--adapter_model                       Displays the model of the adapter as additional information.\n";
    
    
        print "        * uptime - shows Host uptime\n";
@@ -403,8 +408,9 @@ sub print_help
        print "-D, --datacenter=<DCname>           Datacenter hostname.\n";
        print "  or \n";
        print "-H, --host=<hostname>               ESX or ESXi hostname.\n";
-   
+       print "\n";
        print "-N, --name=<vmname>                 Virtual machine name.\n";
+       print "    --sslport=<port>                If a SSL port different from 443 is used.\n";
        print "\n";
        print "CPU:\n";
        print "----\n";
@@ -481,8 +487,9 @@ sub print_help
        print "-D, --datacenter=<DCname>           Datacenter hostname.\n";
        print "  or \n";
        print "-H, --host=<hostname>               ESX or ESXi hostname.\n";
-   
+       print "\n";
        print "-C, --cluster=<clustername>         ESX or ESXi clustername.\n";
+       print "    --sslport=<port>                If a SSL port different from 443 is used.\n";
    
        print "-S, --select=COMMAND\n";
        print "   Specify command type (cpu,mem,net,io,volumes,runtime, ...)\n";

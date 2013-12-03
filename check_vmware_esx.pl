@@ -632,8 +632,16 @@
 #   - Added --sslport if any port other port than 443 is wanted. 443 is used as default.
 #   - Rewritten authorization part. Sessionfiles are working now.
 #   - Updated README.
+#
+# - 03 Dec 2013 M.Fuerstenau version 0.8.14
+#   - host_runtime_info()
+#     - Fixed minor bug. In case of an unknown with sensors the unknown was always mapped to
+#       a warning. This wasn't sensefull under all circumstances. Now it is only mapped to warning
+#       if --ignoreunknow is not set.
+#   - README
+#     - Updated installation notes
+#   - Optional pathname for sessionfile
 
-     
 use strict;
 use warnings;
 use File::Basename;
@@ -683,6 +691,8 @@ my  $password;                                 # Password for vmware host or vsp
 my  $authfile;                                 # If username/password should read from a file ....
 my  $sessionfile_name;                         # Contains the name of the sessionfile if a
                                                # a sessionfile is used for faster authentication
+my  $sessionfile_dir;                          # Optinal. Contains the path to the sessionfile. Used in conjunction
+                                               # with sessionfile
 my $vim;                                       # Needed to stroe results ov Vim.
 
 our $host;                                     # Name of the vmware server
@@ -725,7 +735,6 @@ our $listsensors;                              # This flag set in conjunction wi
                                                # will list all sensors
 my  $usedspace;                                # Show used spaced instead of free
 our $gigabyte;                                 # Output in gigabyte instead of megabyte
-my  $adaptermodel;                             # Additional information about storage adapters
                                                
 our $alertonly;                                # vmfs - list only alerting volumes
 
@@ -750,7 +759,7 @@ our $multiline;                                # Multiline output in overview. T
                                                # sed 's/<[^<>]*>//g'
 my  $multiline_def="\n";                       # Default for $multiline;
 
-my  $ignoreunknown;                            # Maps unknown to ok
+our $ignoreunknown;                            # Maps unknown to ok
 our $listall;                                  # used for host. Lists all available devices(use for listing purpose only)
 
 
@@ -793,10 +802,10 @@ GetOptions
 	 "S=s" => \$select,              "select=s"         => \$select,
 	 "s=s" => \$subselect,           "subselect=s"      => \$subselect,
 	                                 "sessionfile=s"    => \$sessionfile_name,
+	                                 "sessionfiledir=s" => \$sessionfile_dir,
 	 "B=s" => \$blacklist,           "exclude=s"        => \$blacklist,
 	 "W=s" => \$whitelist,           "include=s"        => \$whitelist,
 	                                 "ignore_unknown"   => \$ignoreunknown,
-	                                 "adaptermodel"     => \$adaptermodel,
 	                                 "trace"            => \$trace,
                                          "listsensors"      => \$listsensors,
                                          "usedspace"        => \$usedspace,
@@ -855,7 +864,16 @@ $result = 2;
 if (defined($sessionfile_name))
    {
    $sessionfile_name =~ s/ +//g;
-   $sessionfile_name = $plugin_cache . $host . "_" . $sessionfile_name;
+   if (defined($sessionfile_dir))
+      {
+      # If path contains trailing slash remove it
+      $sessionfile_dir =~ s/\/$//;
+      $sessionfile_name = $sessionfile_dir . "/" . $host . "_" . $sessionfile_name;
+      }
+   else
+      {
+      $sessionfile_name = $plugin_cache . $host . "_" . $sessionfile_name;
+      }
    }
 
 # Check $subselect and if defined set it to upper case letters
@@ -1082,7 +1100,6 @@ if ($@)
       $result = 2;
       }
    }
-# Hier noch kleiner Bock!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (defined($sessionfile_name) and -e $sessionfile_name)
    {
    $vim->unset_logout_on_disconnect();

@@ -64,14 +64,28 @@ that part of code is loaded which is needed.
 Installation
 ============
 
-Downlod the archive (.zip from github or .tar.gz/.tgz from other locations) and unpack it in a location suitable for you.
+First install the VMware Perl SDK.
+----------------------------------
+
+- Download the SDK from vmware.
+  - Go to www.vmware.com->Downloads->All downloads,drivers & tools
+  - Search for "Perl SDK"
+  - Download the appropriate Perl SDK for your release (the SDK is free but you have to register yourself for this).
+  - Install it. (Installation guide can be found here: http://www.vmware.com/support/developer/viperltoolkit/)
+  
+
+Second install the plugin
+-------------------------
+  
+- Download the archive (.zip from github or .tar.gz/.tgz from other locations) and unpack it in a location suitable for you.
 
 It is recommended not to merge third party plugins with plugins deliverd by Nagios/Icingia/Shinken etc.. So it is a good practice
 to have seperate directories for your own and/or third party plugins.
 
 Ensure the the path to the perl interpreter in the program is set to the right perl executable on your system.
 
-Adjust the path for the modules directory (use lib "modules") to fit your system (for example: use lib "/usr/local/libexec/myplugins/modules")
+-> Adjust the path for the modules directory (use lib "modules") to fit your system (for example: use lib "/usr/local/libexec/myplugins/modules")
+-> If using a session file adjust the path for the sessionfile ($plugin_cache in variable definition)
 
 
 HTML in output caused by --multiline
@@ -107,6 +121,8 @@ Example:
 But a string like "duck" may not be a unique identifier. You can use any senseful Nagios macro for this in the command definition but beware
 to use things like the service description in case the description contains blanks. In this case you will create a filename
 with blanks in it. Quite stupid.
+
+Optional a path different from the default one can be set with --sessionfilename=<directory>.
 
 
 
