@@ -6,6 +6,7 @@ sub datastore_volumes_info
     my $output = '';
     my $freespace;
     my $freespace_percent;
+    my $capacity;
     my $used_capacity;
     my $used_capacity_percent;
     my $ref_store;
@@ -78,8 +79,18 @@ sub datastore_volumes_info
                      $freespace = simplify_number(convert_number($store->summary->freeSpace) / 1024 / 1024);
                      }
 
-                  $used_capacity = convert_number($store->summary->capacity);
-                  $used_capacity_percent = simplify_number(convert_number($store->info->freeSpace) / $used_capacity * 100);
+                  $capacity = convert_number($store->summary->capacity);
+                  $used_capacity_percent = simplify_number(convert_number($store->summary->freeSpace) / $capacity * 100);
+
+                  if ($gigabyte)
+                     {
+                     $capacity = simplify_number(convert_number($store->summary->capacity) / 1024 / 1024 / 1024);
+                     }
+                  else
+                     {
+                     $capacity = simplify_number(convert_number($store->summary->capacity) / 1024 / 1024);
+                     }
+
                   if ($usedspace)
                      {
                      if ($gigabyte)
@@ -95,6 +106,7 @@ sub datastore_volumes_info
                      }
   
                      $used_capacity_percent =  sprintf "%.0f", $used_capacity_percent;
+                     $freespace =  sprintf "%.2f", $freespace;
 
                   if (($warn_is_percent) || ($crit_is_percent))
                      {
@@ -110,11 +122,11 @@ sub datastore_volumes_info
                         }
                      }
 
-                  $perfdata = $perfdata . " " . $name . "=" . $freespace . "$uom;" . $perf_thresholds . ";;";
+                  $perfdata = $perfdata . " " . $name . "=" . $freespace . "$uom;" . $perf_thresholds . ";;" . $capacity;
 
                   if (!$alertonly || $actual_state != 0)
                      {
-                     $output = $output . "$name" . " (" . $volume_type . ")" . ($usedspace ? " used" : " free") . ": ". $freespace . " $uom (" . $used_capacity_percent . "%)". $multiline;
+                     $output = $output . "$name" . " (" . $volume_type . ")" . ($usedspace ? " used" : " free") . ": ". $freespace . " / " . $capacity . " $uom (" . $used_capacity_percent . "%)". $multiline;
                      }
                   }
                else
