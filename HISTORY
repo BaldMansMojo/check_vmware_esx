@@ -585,3 +585,14 @@ History:
   - README
     - Updated installation notes
   - Optional pathname for sessionfile
+
+- 10 Dec 2013 M.Fuerstenau version 0.8.15
+  - datastore_volumes_info()
+    - Changed "For all volumes" to "For all selected volumes". This should fit all. The subroutine datastore_volumes_info
+      is called from several subroutines and to make a difference here for a single volume or more volumes will cause
+      a lot of unnecessary work just for cosmetics.
+    - Fixed typo in error message.
+    - Modified error messages
+  - Removed plausibility check whether critical must be greater than warning. In case of freespace for example it must
+    be the other way round. The plausibility check was nice but too complicated for all the different conditions.
+  - check_against_threshold() - Cleaned up and partially rewritten.

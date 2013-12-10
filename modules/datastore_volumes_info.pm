@@ -8,7 +8,7 @@ sub datastore_volumes_info
     my $freespace_percent;
     my $capacity;
     my $used_capacity;
-    my $used_capacity_percent;
+    my $capacity_percent;
     my $ref_store;
     my $store;
     my $name;
@@ -80,7 +80,8 @@ sub datastore_volumes_info
                      }
 
                   $capacity = convert_number($store->summary->capacity);
-                  $used_capacity_percent = simplify_number(convert_number($store->summary->freeSpace) / $capacity * 100);
+                  $capacity_percent = simplify_number(convert_number($store->summary->freeSpace) / $capacity * 100);
+                  $capacity_percent =  sprintf "%.0f", $capacity_percent;
 
                   if ($gigabyte)
                      {
@@ -102,15 +103,24 @@ sub datastore_volumes_info
                         {
                         $freespace = simplify_number(convert_number($store->summary->capacity) / 1024 / 1024) - $freespace;
                         }
-                     $used_capacity_percent = 100 - $used_capacity_percent;
+                     $capacity_percent = 100 - $capacity_percent;
                      }
   
-                     $used_capacity_percent =  sprintf "%.0f", $used_capacity_percent;
-                     $freespace =  sprintf "%.2f", $freespace;
+                  $freespace =  sprintf "%.2f", $freespace;
 
+                  if (defined($warning) || defined($critical))
+                     {
+                     if (!(defined($warning) && defined($critical)))
+                        {
+                        print "For checking thresholds on volumes you MUST specify threshols for warning AND critical. Otherwise it is not possible";
+                        print " to determine whether you are checking for used or free space!\n";
+                        exit 2;
+                        }
+                     }
+                     
                   if (($warn_is_percent) || ($crit_is_percent))
                      {
-                     $actual_state = check_against_threshold($used_capacity_percent);
+                     $actual_state = check_against_threshold($capacity_percent);
                      $state = check_state($state, $actual_state);
                      }
                   else
@@ -126,7 +136,7 @@ sub datastore_volumes_info
 
                   if (!$alertonly || $actual_state != 0)
                      {
-                     $output = $output . "$name" . " (" . $volume_type . ")" . ($usedspace ? " used" : " free") . ": ". $freespace . " / " . $capacity . " $uom (" . $used_capacity_percent . "%)". $multiline;
+                     $output = $output . "$name" . " (" . $volume_type . ")" . ($usedspace ? " used" : " free") . ": ". $freespace . " / " . $capacity . " $uom (" . $capacity_percent . "%)". $multiline;
                      }
                   }
                else
@@ -147,17 +157,17 @@ sub datastore_volumes_info
        chop($output);
        if ( $state == 0 )
           {
-          $output = "For all volumes: " . $multiline . $output;
+          $output = "For all selected volumes: " . $multiline . $output;
           }
        else
           {
           if ($alertonly)
              {
-             $output = "Alerts for the following volumes: " . $multiline . $output;
+             $output = "Alerts for the following volumes (warn:" . $warning . "%,crit:" . $critical . "%):" . $multiline . $output;
              }
              else
              {
-             $output = "Alerts some for the following volumes (please check): " . $multiline . $output;
+             $output = "Alerts found for some for the following volumes (warn:" . $warning . "%,crit:" . $critical . "%):" . $multiline . $output;
              }
           }
        }

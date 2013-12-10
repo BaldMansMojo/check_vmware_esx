@@ -641,6 +641,17 @@
 #   - README
 #     - Updated installation notes
 #   - Optional pathname for sessionfile
+#
+# - 10 Dec 2013 M.Fuerstenau version 0.8.15
+#   - datastore_volumes_info()
+#     - Changed "For all volumes" to "For all selected volumes". This should fit all. The subroutine datastore_volumes_info
+#       is called from several subroutines and to make a difference here for a single volume or more volumes will cause
+#       a lot of unnecessary work just for cosmetics.
+#     - Fixed typo in error message.
+#     - Modified error messages
+#   - Removed plausibility check whether critical must be greater than warning. In case of freespace for example it must
+#     be the other way round. The plausibility check was nice but too complicated for all the different conditions.
+#   - check_against_threshold() - Cleaned up and partially rewritten.
 
 use strict;
 use warnings;
@@ -723,6 +734,7 @@ our $subselect;
 
 our $warning;                                  # Warning threshold.
 our $critical;                                 # Critical threshold.
+our $reverse_threshold;                        # Flag. Needed if critical must be smaller than warning
 
 our $crit_is_percent;                          # Flag. If it is set to one critical threshold is percent.
 our $warn_is_percent;                          # Flag. If it is set to one warning threshold is percent.
@@ -733,7 +745,7 @@ my  $plugin_cache="/var/nagios_plugin_cache/"; # Directory for caching plaugin d
                                                # because it speeds up operation    
 our $listsensors;                              # This flag set in conjunction with -l runtime -s health or -s sensors
                                                # will list all sensors
-my  $usedspace;                                # Show used spaced instead of free
+our $usedspace;                                # Show used spaced instead of free
 our $gigabyte;                                 # Output in gigabyte instead of megabyte
                                                
 our $alertonly;                                # vmfs - list only alerting volumes
@@ -965,16 +977,6 @@ if (defined($critical))
       }
    }
 
-# Is critical greater than warning?
-if (defined($warning) && defined($critical))
-   {
-   if ( $warning >= $critical)
-      {
-      print "ERROR! Warning should not be greater or equal than critical\n";
-      exit 1;
-      }
-   }
-
 # Check for authfile or valid username/password
 
 if ((!defined($password) || !defined($username) || defined($authfile)) && (defined($password) || defined($username) || !defined($authfile)) && (defined($password) || defined($username) || defined($authfile) || !defined($sessionfile_name)))
@@ -1100,6 +1102,7 @@ if ($@)
       $result = 2;
       }
    }
+# Hier noch kleiner Bock!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (defined($sessionfile_name) and -e $sessionfile_name)
    {
    $vim->unset_logout_on_disconnect();
@@ -1381,28 +1384,49 @@ sub check_against_threshold
     {
     my $check_result = shift(@_);
     my $return_state = 0;
+ 
 
-    if (defined($warning) && defined($critical))
+    if ((defined($warning)) && (defined($critical)))
        {
-       if ( $check_result >= $warning  && $check_result < $critical)
+       if ( $warning >= $critical )
           {
-          $return_state = 1;
+          if ( $check_result <= $warning)
+             {
+             $return_state = 1;
+             }
+          if ( $check_result <= $critical)
+             {
+             $return_state = 2;
+             }
+          }
+       else
+          {
+          if ( $check_result >= $warning)
+             {
+             $return_state = 1;
+             }
+          if ( $check_result >= $critical)
+             {
+             $return_state = 2;
+             }
           }
        }
-          
-    if (defined($warning))
+    else
        {
-       if ( $check_result >= $warning)
+       if (defined($warning))
           {
-          $return_state = 1;
+          if ( $check_result >= $warning)
+             {
+             $return_state = 1;
+             }
           }
-       }
 
-    if (defined($critical))
-       {
-       if ( $check_result >= $critical)
+       if (defined($critical))
           {
-          $return_state = 2;
+          if ( $check_result >= $critical)
+             {
+             $return_state = 2;
+             }
           }
        }
     return $return_state;
