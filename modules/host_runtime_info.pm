@@ -154,6 +154,7 @@ sub host_runtime_info
           else
              {
              $output = $up . "/" . @$vm_views . " VMs up." . $multiline . $output;
+             $perfdata = "vms_total=" .  @$vm_views . ";;;; vms_up=" . $up . ";;;;";
              }
           }
        }
