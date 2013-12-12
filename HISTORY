@@ -604,3 +604,9 @@ History:
       -  Same for error plus an error counter for the alarms
   - Main selection - GetOptions. Unce upon a time I had kicked out $timeout unintended. Fixed now. Thanks to 
     Andreas Daubner for the hint.
+
+- 12 Dec 2013 M.Fuerstenau version 0.8.17
+  - host_net_info()
+    - Changed output
+    - Added total number of NICs
+

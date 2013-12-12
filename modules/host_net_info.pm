@@ -14,6 +14,7 @@ sub host_net_info
     my $network_config;
     my $OKCount = 0;
     my $BadCount = 0;
+    my $TotalCount = 0;
     my @switches = ();
     my $switch;
     my $nic_key;
@@ -154,6 +155,7 @@ sub host_net_info
        foreach (@{$network_config->pnic})
                {
                $NIC{$_->key} = $_;
+               $TotalCount++;
                }
 
        if (exists($network_config->{vswitch}))
@@ -181,12 +183,13 @@ sub host_net_info
                                         {
                                         $output_nic = $output_nic . ", ";
                                         }
-                                     $output_nic = $output_nic . $NIC{$nic_key}->device . " is unplugged";
+                                     $output_nic = $output_nic . $multiline . $NIC{$nic_key}->device . " is unplugged";
                                      $state = 2;
                                      $BadCount++;
                                      }
                                   else
                                      {
+                                     $output_nic = $output_nic . $multiline . $NIC{$nic_key}->device . " is ok";
                                      $OKCount++;
                                      }
                                   }
@@ -194,28 +197,14 @@ sub host_net_info
                        }
                }
 
-       if (!$BadCount)
-          {
-          if ($subselect ne "all")
-             {
-             $output = "All $OKCount NICs are connected";
-             }
-          else
-             {
-             $output = $output . ", All $OKCount NICs are connected";
-             }
-          }
-       else
-          {
-          if ($subselect ne "all")
-             {
-             $output = $BadCount ."/" . ($BadCount + $OKCount) . " NICs are disconnected: " . $output_nic;
-             }
-          else
-             {
-             $output = $output . ", " . $BadCount ."/" . ($BadCount + $OKCount) . " NICs are disconnected: " . $output_nic;
-             }
-          }
+        if ($subselect ne "all")
+           {
+           $output = "NICs total:" . $TotalCount . " NICs attached to switch:" . ($OKCount + $BadCount) . " NICs connected:" . $OKCount . " NICs disconnected:" . $BadCount . $output_nic;
+           }
+        else
+           {
+           $output = $output . " NICs total:" . $TotalCount . " NICs attached to switch:" . ($OKCount + $BadCount) . " NICs connected:" . $OKCount . " NICs disconnected:" . $BadCount0;
+           }
        }
 
     if ($true_sub_sel == 0)
