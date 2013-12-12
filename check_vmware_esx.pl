@@ -652,6 +652,14 @@
 #   - Removed plausibility check whether critical must be greater than warning. In case of freespace for example it must
 #     be the other way round. The plausibility check was nice but too complicated for all the different conditions.
 #   - check_against_threshold() - Cleaned up and partially rewritten.
+#
+# - 12 Dec 2013 M.Fuerstenau version 0.8.16
+#   - datastore_volumes_info()
+#     - Some small fixes
+#       - Changed the output for OK from  "For all selected volumes" to "OK for all seleted volumes."
+#       -  Same for error plus an error counter for the alarms
+#   - Main selection - GetOptions. Unce upon a time I had kicked out $timeout unintended. Fixed now. Thanks to 
+#     Andreas Daubner for the hint.
 
 use strict;
 use warnings;
@@ -671,10 +679,6 @@ use datastore_volumes_info;
 
 $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0; 
 
-# Only for debugging
-use Data::Dumper;
-$Data::Dumper::Indent = 1;
-#print "------------------------------------------\n" . Dumper ($store) . "\n" . "------------------------------------------\n";
 
 if ( $@ )
    {
@@ -817,6 +821,7 @@ GetOptions
 	                                 "sessionfiledir=s" => \$sessionfile_dir,
 	 "B=s" => \$blacklist,           "exclude=s"        => \$blacklist,
 	 "W=s" => \$whitelist,           "include=s"        => \$whitelist,
+         "t=s" => \$timeout,             "timeout=s"        => \$timeout,
 	                                 "ignore_unknown"   => \$ignoreunknown,
 	                                 "trace"            => \$trace,
                                          "listsensors"      => \$listsensors,

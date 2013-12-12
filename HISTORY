@@ -602,3 +602,5 @@ History:
     - Some small fixes
       - Changed the output for OK from  "For all selected volumes" to "OK for all seleted volumes."
       -  Same for error plus an error counter for the alarms
+  - Main selection - GetOptions. Unce upon a time I had kicked out $timeout unintended. Fixed now. Thanks to 
+    Andreas Daubner for the hint.

@@ -163,17 +163,17 @@ sub datastore_volumes_info
        chop($output);
        if ( $state == 0 )
           {
-          $output = "OK for all selected volumes" . $multiline . $output;
+          $output = "OK for all selected volumes." . $multiline . $output;
           }
        else
           {
           if ($alertonly)
              {
-             $output = $alertcnt . " alerts for the selected volumes (warn:" . $warning . "%,crit:" . $critical . "%):" . $multiline . $output;
+             $output = $alertcnt . " alerts for the selected volumes (warn:" . $warning . "%,crit:" . $critical . "%)." . $multiline . $output;
              }
              else
              {
-             $output = $alertcnt . " alerts found for some for the selected volumes (warn:" . $warning . "%,crit:" . $critical . "%):" . $multiline . $output;
+             $output = $alertcnt . " alerts found for some for the selected volumes (warn:" . $warning . "%,crit:" . $critical . "%)." . $multiline . $output;
              }
           }
        }
