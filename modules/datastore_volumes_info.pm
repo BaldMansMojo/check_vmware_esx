@@ -14,6 +14,7 @@ sub datastore_volumes_info
     my $name;
     my $volume_type;
     my $uom = "MB";
+    my $alertcnt = 0;
         
     if (defined($subselect) && defined($blacklist) && !defined($isregexp))
        {
@@ -122,6 +123,10 @@ sub datastore_volumes_info
                      {
                      $actual_state = check_against_threshold($capacity_percent);
                      $state = check_state($state, $actual_state);
+                     if ( $state >= 0 )
+                        {
+                        $alertcnt++;
+                        }
                      }
                   else
                      {
@@ -143,6 +148,7 @@ sub datastore_volumes_info
                   {
                   $state = 2;
                   $output = $output . "'$name' is not accessible, ";
+                  $alertcnt++;
                   }
             
                if (!$isregexp && defined($subselect) && ($name eq $subselect))
@@ -157,17 +163,17 @@ sub datastore_volumes_info
        chop($output);
        if ( $state == 0 )
           {
-          $output = "For all selected volumes: " . $multiline . $output;
+          $output = "OK for all selected volumes" . $multiline . $output;
           }
        else
           {
           if ($alertonly)
              {
-             $output = "Alerts for the following volumes (warn:" . $warning . "%,crit:" . $critical . "%):" . $multiline . $output;
+             $output = $alertcnt . " alerts for the selected volumes (warn:" . $warning . "%,crit:" . $critical . "%):" . $multiline . $output;
              }
              else
              {
-             $output = "Alerts found for some for the following volumes (warn:" . $warning . "%,crit:" . $critical . "%):" . $multiline . $output;
+             $output = $alertcnt . " alerts found for some for the selected volumes (warn:" . $warning . "%,crit:" . $critical . "%):" . $multiline . $output;
              }
           }
        }

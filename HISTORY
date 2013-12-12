@@ -596,3 +596,9 @@ History:
   - Removed plausibility check whether critical must be greater than warning. In case of freespace for example it must
     be the other way round. The plausibility check was nice but too complicated for all the different conditions.
   - check_against_threshold() - Cleaned up and partially rewritten.
+
+- 12 Dec 2013 M.Fuerstenau version 0.8.16
+  - datastore_volumes_info()
+    - Some small fixes
+      - Changed the output for OK from  "For all selected volumes" to "OK for all seleted volumes."
+      -  Same for error plus an error counter for the alarms
