@@ -12,14 +12,14 @@ sub host_mounted_media_info
     my $displayname;
     my $devices;
    
-    $host_view = Vim::find_entity_view(view_type => 'HostSystem', filter => $host, properties => ['name', 'runtime']);
+    $host_view = Vim::find_entity_view(view_type => 'HostSystem', filter => $host, properties => ['name', 'runtime.inMaintenanceMode']);
     if (!defined($host_view))
        {
        print "Host " . $$host{"name"} . " does not exist\n";
        exit 2;
        }
 
-    if ($host_view->runtime->inMaintenanceMode)
+    if (($host_view->get_property('runtime.inMaintenanceMode')) eq "true")
        {
        print "Notice: " . $host_view->name . " is in maintenance mode, check skipped\n";
        exit 0;
@@ -107,7 +107,7 @@ sub host_mounted_media_info
     if ($count)
        {
        $output = "VMs mounted host media devices (floppy, cd or dvd):" . $multiline . $output;
-       $state = 2;
+       $state = 1;
        }
     else
        {
