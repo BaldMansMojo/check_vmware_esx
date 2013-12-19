@@ -93,7 +93,6 @@ sub print_help
        print "                                     But the check itself is ok.\n";
        print "                                     With this option the plugin will return 0 (0) instead of 3 (3).\n";
        print "-t, --timeout=INTEGER                Seconds before plugin times out (default: 30)\n";
-       print "-v, --verbose                        Show details for command-line debugging (can repeat up to 3 times)\n";
        print "    --trace=<level>                  Set verbosity level of vSphere API request/respond trace.\n";
        print "\n";
 
@@ -301,8 +300,8 @@ sub print_help
        print "                                    a filter to file out the <br>. A sed oneliner like the following\n";
        print "                                    will do the job: sed 's/<[^<>]*>//g'\n";
        print "\n";
-       print "Host service info:\n";
-       print "------------------\n";
+       print "Service info:\n";
+       print "-------------\n";
        print "-S, --select=service                shows host service info.\n";
        print "-B, --exclude=<black_list>          blacklist services.\n";
        print "-W, --include=<white_list>          whitelist services.\n";
@@ -313,8 +312,8 @@ sub print_help
        print "                                    a filter to file out the <br>. A sed oneliner like the following\n";
        print "                                    will do the job: sed 's/<[^<>]*>//g'\n";
        print "\n";
-       print "Host runtime info:\n";
-       print "------------------\n";
+       print "Runtime info:\n";
+       print "-------------\n";
        print "\n";
        print "\n";
        print "-S, --select=runtime                shows runtime info. Used without -s show all runtime info:\n";
@@ -367,8 +366,8 @@ sub print_help
        print "    --isregexp                      whether to treat blacklist and whitelist as regexp\n";
    
        print "\n";
-       print "Host storage info:\n";
-       print "------------------\n";
+       print "Storage info:\n";
+       print "-------------\n";
        print "\n";
    
        print "        * storage - shows Host storage info\n";
