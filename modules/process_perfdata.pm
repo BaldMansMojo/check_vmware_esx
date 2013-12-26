@@ -118,7 +118,7 @@ sub return_host_performance_values
        exit 2;
        }
 
-    if (uc($$host_view[0]->get_property('runtime.inMaintenanceMode')) eq "TRUE")
+    if (($$host_view[0]->get_property('runtime.inMaintenanceMode')) eq "true")
        {
        print "Notice: " . $$host_view[0]->name . " is in maintenance mode, check skipped\n";
        exit 0;

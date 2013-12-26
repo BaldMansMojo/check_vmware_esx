@@ -125,5 +125,10 @@ with blanks in it. Quite stupid.
 Optional a path different from the default one can be set with --sessionfilename=<directory>.
 
 
+Storage
+=======
+
+The module host_storage_info.pm (contains host_storage_info()) is a extensive rewrite. Most of the code was rewritten.
+It wasn't tested with iSCSI. Normally it should work but I couldn't test it because I have no iSCSI. Please test it an give me feedback.
 
 

@@ -658,8 +658,59 @@
 #     - Some small fixes
 #       - Changed the output for OK from  "For all selected volumes" to "OK for all seleted volumes."
 #       -  Same for error plus an error counter for the alarms
+#     - Parameter usedspace was ignored on volume checks because a local variable defined with my instead of a more global
+#       one. Changed it from my to our fixed it. Thanks to dgoetz for reporting (and fixing) this.
+#     - Capacity is now displayed and deliverd as perfdata
 #   - Main selection - GetOptions. Unce upon a time I had kicked out $timeout unintended. Fixed now. Thanks to 
 #     Andreas Daubner for the hint.
+#
+# - 12 Dec 2013 M.Fuerstenau version 0.8.17
+#   - host_net_info()
+#     - Changed output
+#     - Added total number of NICs
+#
+# - 13 Dec 2013 M.Fuerstenau version 0.8.18
+#   - host_mounted_media()
+#     - Delivers now a warning instead of a critical
+#
+# - 25 Dec 2013 M.Fuerstenau version 0.9.0
+#   - help()
+#     - Removed -v/--verbose. The code was not debugging the plugin but not for working with it.
+#   - host_storage_info()
+#     - Removed optional switch for adaptermodel. Displaying the adapter model is default now.
+#     - Removed upper case conversion for status. The status was converted (for examplele online to ONLINE) and
+#       compared with a upper case string like "ONLINE". Sensefull like a second asshole.
+#     - Added working blacklist/whitelist.
+#       - Blacklist: blacklisted adapters will not be displayed.
+#       - Whitelist: only whitelisted adapters will be displayed.
+#     - Removed perfdata for the number of hostbusadapters. These perfdata was absolutely senseless.     
+#     - Status for hostbusadapters was not checked correctly. The check was only done for online and unknown but NOT(!!)
+#       for offline and unbound.
+#     - LUN states were not correct. UNKNOWN is not a valid state. Not all states different from unknown are 
+#       supposed to be critical. From the docs:
+#
+#       degraded             One or more paths to the LUN are down, but I/O is still possible. Further
+#                            path failures may result in lost connectivity.
+#       error                The LUN is dead and/or not reachable.
+#       lostCommunication    No more paths are available to the LUN.
+#       off                  The LUN is off.
+#       ok                   The LUN is on and available.
+#       quiesced             The LUN is inactive.
+#       timeout              All Paths have been down for the timeout condition determined by a
+#                            user-configurable host advanced option.
+#       unknownState         The LUN state is unknown.
+#
+#     - Removed number of LUNs as perfdata. Senseless (again).
+#     - In the original selection for the displayed LUN the displayName was used first, then the deviceName and
+#       the last one was the canonical name. Unfortunately in the GUI SCSI ID, canonical name an runtime name is
+#       displayed. So using the freely configurable DisplayName is senseless. The device name is formed from the
+#       path (/vmfs/devices/disks/) followed by the canonical name. So it is either senseless.
+#     - The real numeric LUN number wasn'nt display. Fixed. Output is now LUN, canonical name, everything from
+#       the display name not equal canonical name and status.  
+#     - Complete rewrite of the paths part. Only the state of the multipath was checked but not the state of the
+#       paths. So a multipath can be "Active" which is ok but the second line is dead. So if the active path becomes
+#       dead the failover won't work.There must be an alarm for a standby path too. It is now grouped in the output.
+#     - Multiline support for this.
 
 use strict;
 use warnings;
@@ -679,6 +730,10 @@ use datastore_volumes_info;
 
 $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0; 
 
+# Only for debugging
+use Data::Dumper;
+$Data::Dumper::Indent = 1;
+#print "------------------------------------------\n" . Dumper ($store) . "\n" . "------------------------------------------\n";
 
 if ( $@ )
    {
@@ -1805,7 +1860,7 @@ sub vm_runtime_info
                 }
 
              chop($tools_status);
-
+# Reminder: Hier pruefen auf zu alte Tools Version und Warning
              if (($tools_status eq "Running-Newest") || ($tools_status eq "Running-Unmanaged"))
                 {
                 $state = 0;
@@ -2643,6 +2698,7 @@ sub cluster_runtime_info
                 }
                 elsif ($subselect eq "listhost")
                 {
+# Reminder: Wie bei host_runtime_info die virtuellen Maschinen als performancedaten ausgeben
                         my %host_state_strings = ("poweredOn" => "UP", "poweredOff" => "DOWN", "suspended" => "SUSPENDED", "standBy" => "STANDBY", "MaintenanceMode" => "Maintenance Mode");
                         my $host_views = Vim::find_entity_views(view_type => 'HostSystem', begin_entity => $cluster_view, properties => ['name', 'runtime.powerState']);
 
