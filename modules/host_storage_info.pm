@@ -366,8 +366,6 @@ sub host_storage_info
                   {
                   foreach $path (@{$mpInfolun->path})
                           {
-                          $status = 3; # For unknown or other statuses
-                          $pathState = "unknown";
                           $scsi_id = $path->lun;
                           $scsi_id =~ s/^.*-//;
                           

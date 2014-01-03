@@ -123,6 +123,19 @@ sub host_disk_io_info
              }
           return ($state, $output);
           }
+       
+       if ($subselect eq "total_latency")
+          {
+          $values = return_host_performance_values($host, 'disk', ('totalLatency.average:*'));
+          if (defined($values))
+             {
+             $value = simplify_number(convert_number($$values[0][0]->value), 0);
+             $perfdata = $perfdata . " io_total_latency=" . $value . "ms;" . $perf_thresholds . ";;";
+             $output = "io total latency=" . $value . " ms";
+             $state = check_against_threshold($value);
+             }
+          return ($state, $output);
+          }
         get_me_out("Unknown HOST IO subselect");
         }
      else
@@ -134,7 +147,7 @@ sub host_disk_io_info
            exit 2;
            }
         
-        $values = return_host_performance_values($host, 'disk', ('commandsAborted.summation:*', 'busResets.summation:*', 'read.average:*', 'totalReadLatency.average:*', 'write.average:*', 'totalWriteLatency.average:*', 'usage.average:*', 'kernelLatency.average:*', 'deviceLatency.average:*', 'queueLatency.average:*'));
+        $values = return_host_performance_values($host, 'disk', ('commandsAborted.summation:*', 'busResets.summation:*', 'read.average:*', 'totalReadLatency.average:*', 'write.average:*', 'totalWriteLatency.average:*', 'usage.average:*', 'kernelLatency.average:*', 'deviceLatency.average:*', 'queueLatency.average:*', 'totalLatency.average:*'));
         if (defined($values))
            {
            $value = simplify_number(convert_number($$values[0][0]->value), 0);
@@ -167,15 +180,19 @@ sub host_disk_io_info
 
            $value = simplify_number(convert_number($$values[0][7]->value), 0);
            $perfdata = $perfdata . " io_kernel_latency=" . $value . "ms;;;";
-           $output = $output . "kernel latency=" . $value . " ms, ";
+           $output = $output . "io kernel latency=" . $value . " ms, ";
 
            $value = simplify_number(convert_number($$values[0][8]->value), 0);
            $perfdata = $perfdata . " io_device_latency=" . $value . "ms;;;";
-           $output = $output . "device latency=" . $value . " ms, ";
+           $output = $output . "io device latency=" . $value . " ms, ";
 
            $value = simplify_number(convert_number($$values[0][9]->value), 0);
            $perfdata = $perfdata . " io_queue_latency=" . $value . "ms;;;";
-           $output = $output . "queue latency=" . $value ." ms";
+           $output = $output . "io queue latency=" . $value ." ms";
+
+           $value = simplify_number(convert_number($$values[0][10]->value), 0);
+           $perfdata = $perfdata . " io_total_latency=" . $value . "ms;;;";
+           $output = $output . "io total latency=" . $value ." ms";
 
            $state = 0;
            }

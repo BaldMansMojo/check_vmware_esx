@@ -651,3 +651,64 @@ History:
       paths. So a multipath can be "Active" which is ok but the second line is dead. So if the active path becomes
       dead the failover won't work.There must be an alarm for a standby path too. It is now grouped in the output.
     - Multiline support for this.
+
+- 03 Jan 20143 M.Fuerstenau version 0.9.1
+  - check_vmware_esx.pl
+    Added new flag --ignore_warning. This will map a warning to ok.
+  - host_runtime_info() - some minor changes
+    - Changed state to powerstate. In the original version the power state was mapped:
+      poweredOn => UP
+      poweredOff => DOWN
+      suspended => SUSPENDED
+      This suggested a machine state but it is only a powerstate. All other than UP caused a critical. But this is 
+      not true. A power off machine can also be ok. But to be sure that it is noticed we will have a warning for
+      powerd off and suspended
+    - Perfdata changed.
+      - vm_up -> vm_powerdon
+      - New: vm_poweroff
+      - New: vm_suspended
+  - vm_runtime_info() -> vm_runtime_info.pm
+    - Removed a lot of unnecessary variables and hashes. Rewritten a lot.
+    - Connection state. Only "connected" was checked. All other caused a critical error without a usefull message.
+      This wa a little bit incomplete. Corrected. States delivered from VMware are connected, disconnected,
+      inaccessible, invalid and orphaned.
+    - Removed cpu. VirtualMachineRuntimeInfo maxCpuUsage (in Mhz) doesn't make so much sense for monitoring/alerting.
+      See VMware docs for further information for this performance counter.
+    - Removed mem. VirtualMachineRuntimeInfo maxMemoryUsage doesn't make so much sense for monitoring/alerting.
+      See VMware docs for further information for this performance counter.
+    - Changed state to powerstate. In the original version the power state was mapped:
+      poweredOn => UP
+      poweredOff => DOWN
+      suspended => SUSPENDED
+      This suggested a machine state but it is only a powerstate. All other than UP caused a critical. But this is 
+      not true. A power off machine can also be ok. But to be sure that it is noticed we will have a warning for
+      powerd off and suspended
+    - Changed guest to gueststate. This is more descriptive.
+      Removed mapping in guest state. Mapping was "running" => "Running", "notrunning" => "Not running",
+      "shuttingdown" => "Shutting down", "resetting" => "Resetting", "standby" => "Standby", "unknown" => "Unknown".
+      This was not necessary from a technical point of view. The original messages are clearly understandable.
+    - The guest states were not interpreted correctly. In check_vmware_api.pl all states different from running
+      caused a "Critical" error. But this is nonsense. A planned shutted down machine is not an error. It's daily
+      business. But the operator should probably have a notice of that. So it causing a "Warning".
+
+      The states are (from the docs):
+      running      -> Guest is running normally. (returns 0)
+      shuttingdown -> Guest has a pending shutdown command. (returns 1)
+      resetting    -> Guest has a pending reset command. (returns 1)
+      standby      -> Guest has a pending standby command. (returns 1)
+      notrunning   -> Guest is not running. (returns 1)
+      unknown      -> Guest information is not available. (returns 3)
+
+    - Rewritten subselect tools. VirtualMachineToolsStatus was deprecated. As of vSphere API 4.0
+      VirtualMachineToolsVersionStatus and VirtualMachineToolsRunningStatus
+      has to be used. So a great part of this subselect was not working.
+  - vm_disk_io_info()
+    - Minor bug in output and perfdata corrected. I/O is not in MB but in MB/s. Some
+      of the counters were in MB.
+    - Corrected help. The original on was nonsense.
+    - Changed all values to KB/s because so it is equal to host disk I/O and so it
+      it is deleverd from the API.
+  - help()
+    - Some corrections.
+  - host_disk_io_info()
+    - added total_latency.

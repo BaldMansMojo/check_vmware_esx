@@ -35,11 +35,12 @@ sub host_runtime_info
     my $storageStatusInfo;;
     my $type;
     my $unit;
-    my $up;
+    my $poweredon = 0;      # Virtual machine powerstate
+    my $poweredoff = 0;     # Virtual machine powerstate
+    my $suspended = 0;      # Virtual machine powerstate
     my $value;
     my $vm;
     my $vm_state;
-    my %vm_state_strings;
     my $vm_views;
     my $true_sub_sel=1;     # Just a flag. To have only one return at the en
                             # we must ensure that we had a valid subselect. If
@@ -92,7 +93,6 @@ sub host_runtime_info
     if (($subselect eq "listvms") || ($subselect eq "all"))
        {
        $true_sub_sel = 0;
-       %vm_state_strings = ("poweredOn" => "UP", "poweredOff" => "DOWN", "suspended" => "SUSPENDED");
        $vm_views = Vim::find_entity_views(view_type => 'VirtualMachine', begin_entity => $host_view, properties => ['name', 'runtime']);
 
        if (!defined($vm_views))
@@ -106,7 +106,6 @@ sub host_runtime_info
           }
        else
           {
-          $up = 0;
           foreach $vm (@$vm_views)
                   {
                   if (defined($isregexp))
@@ -133,28 +132,31 @@ sub host_runtime_info
                         }
                       }
 
-                  $vm_state = $vm_state_strings{$vm->runtime->powerState->val};
+                  $vm_state = $vm->runtime->powerState->val;
                
-                  if ($vm_state eq "UP")
+                  if ($vm_state eq "poweredOn")
                      {
-                     $up++;
-                     $output = $output . $vm->name . "(" . $vm_state . ")" . $multiline;
+                     $poweredon++;
                      }
-                  else
+                  if ($vm_state eq "poweredOff")
                      {
-                     $output = $vm->name . "(" . $vm_state . ")" . $multiline . $output;
+                     $poweredoff++;
                      }
+                  if ($vm_state eq "suspended")
+                     {
+                     $suspended++;
+                     }
+                  $output = $output . $vm->name . " (" . $vm_state . ")" . $multiline;
                   }
-          chop($output);
 
           if ($subselect eq "all")
              {
-             $output = $up . "/" . @$vm_views . " VMs up - ";
+             $output = $poweredon . "/" . @$vm_views . " VMs powered on - ";
              }
           else
              {
-             $output = $up . "/" . @$vm_views . " VMs up." . $multiline . $output;
-             $perfdata = "vms_total=" .  @$vm_views . ";;;; vms_up=" . $up . ";;;;";
+             $output = $poweredon . "/" . @$vm_views . " VMs powered on." . $multiline . $output;
+             $perfdata = "vms_total=" .  @$vm_views . ";;;; vms_poweredon=" . $poweredon . ";;;; vms_poweredoff=" . $poweredoff . ";;;; vms_suspended=" . $suspended . ";;;;";
              }
           }
        }

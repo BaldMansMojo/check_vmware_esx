@@ -711,6 +711,67 @@
 #       paths. So a multipath can be "Active" which is ok but the second line is dead. So if the active path becomes
 #       dead the failover won't work.There must be an alarm for a standby path too. It is now grouped in the output.
 #     - Multiline support for this.
+#
+# - 03 Jan 20143 M.Fuerstenau version 0.9.1
+#   - check_vmware_esx.pl
+#     Added new flag --ignore_warning. This will map a warning to ok.
+#   - host_runtime_info() - some minor changes
+#     - Changed state to powerstate. In the original version the power state was mapped:
+#       poweredOn => UP
+#       poweredOff => DOWN
+#       suspended => SUSPENDED
+#       This suggested a machine state but it is only a powerstate. All other than UP caused a critical. But this is 
+#       not true. A power off machine can also be ok. But to be sure that it is noticed we will have a warning for
+#       powerd off and suspended
+#     - Perfdata changed.
+#       - vm_up -> vm_powerdon
+#       - New: vm_poweroff
+#       - New: vm_suspended
+#   - vm_runtime_info() -> vm_runtime_info.pm
+#     - Removed a lot of unnecessary variables and hashes. Rewritten a lot.
+#     - Connection state. Only "connected" was checked. All other caused a critical error without a usefull message.
+#       This wa a little bit incomplete. Corrected. States delivered from VMware are connected, disconnected,
+#       inaccessible, invalid and orphaned.
+#     - Removed cpu. VirtualMachineRuntimeInfo maxCpuUsage (in Mhz) doesn't make so much sense for monitoring/alerting.
+#       See VMware docs for further information for this performance counter.
+#     - Removed mem. VirtualMachineRuntimeInfo maxMemoryUsage doesn't make so much sense for monitoring/alerting.
+#       See VMware docs for further information for this performance counter.
+#     - Changed state to powerstate. In the original version the power state was mapped:
+#       poweredOn => UP
+#       poweredOff => DOWN
+#       suspended => SUSPENDED
+#       This suggested a machine state but it is only a powerstate. All other than UP caused a critical. But this is 
+#       not true. A power off machine can also be ok. But to be sure that it is noticed we will have a warning for
+#       powerd off and suspended
+#     - Changed guest to gueststate. This is more descriptive.
+#       Removed mapping in guest state. Mapping was "running" => "Running", "notrunning" => "Not running",
+#       "shuttingdown" => "Shutting down", "resetting" => "Resetting", "standby" => "Standby", "unknown" => "Unknown".
+#       This was not necessary from a technical point of view. The original messages are clearly understandable.
+#     - The guest states were not interpreted correctly. In check_vmware_api.pl all states different from running
+#       caused a "Critical" error. But this is nonsense. A planned shutted down machine is not an error. It's daily
+#       business. But the operator should probably have a notice of that. So it causing a "Warning".
+#
+#       The states are (from the docs):
+#       running      -> Guest is running normally. (returns 0)
+#       shuttingdown -> Guest has a pending shutdown command. (returns 1)
+#       resetting    -> Guest has a pending reset command. (returns 1)
+#       standby      -> Guest has a pending standby command. (returns 1)
+#       notrunning   -> Guest is not running. (returns 1)
+#       unknown      -> Guest information is not available. (returns 3)
+#
+#     - Rewritten subselect tools. VirtualMachineToolsStatus was deprecated. As of vSphere API 4.0
+#       VirtualMachineToolsVersionStatus and VirtualMachineToolsRunningStatus
+#       has to be used. So a great part of this subselect was not working.
+#   - vm_disk_io_info()
+#     - Minor bug in output and perfdata corrected. I/O is not in MB but in MB/s. Some
+#       of the counters were in MB.
+#     - Corrected help. The original on was nonsense.
+#     - Changed all values to KB/s because so it is equal to host disk I/O and so it
+#       it is deleverd from the API.
+#   - help()
+#     - Some corrections.
+#   - host_disk_io_info()
+#     - added total_latency.
 
 use strict;
 use warnings;
@@ -730,11 +791,6 @@ use datastore_volumes_info;
 
 $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0; 
 
-# Only for debugging
-use Data::Dumper;
-$Data::Dumper::Indent = 1;
-#print "------------------------------------------\n" . Dumper ($store) . "\n" . "------------------------------------------\n";
-
 if ( $@ )
    {
    print "No VMware::VIRuntime found. Please download ";
@@ -748,7 +804,7 @@ if ( $@ )
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.8.9';                   # Contains the program version number
+our $prog_version = '0.9.1';                   # Contains the program version number
 our $ProgName = basename($0);
 
 #my  $help = '';                                # If some help is wanted....
@@ -831,6 +887,7 @@ our $multiline;                                # Multiline output in overview. T
 my  $multiline_def="\n";                       # Default for $multiline;
 
 our $ignoreunknown;                            # Maps unknown to ok
+our $ignorewarning;                            # Maps warning to ok
 our $listall;                                  # used for host. Lists all available devices(use for listing purpose only)
 
 
@@ -878,6 +935,7 @@ GetOptions
 	 "W=s" => \$whitelist,           "include=s"        => \$whitelist,
          "t=s" => \$timeout,             "timeout=s"        => \$timeout,
 	                                 "ignore_unknown"   => \$ignoreunknown,
+	                                 "ignore_warning"   => \$ignorewarning,
 	                                 "trace"            => \$trace,
                                          "listsensors"      => \$listsensors,
                                          "usedspace"        => \$usedspace,
@@ -1181,6 +1239,15 @@ if (defined($ignoreunknown))
       $result = 0;
       }
    }
+# Added for mapping warning to ok - M.Fuerstenau - 31 Dec 2013
+
+if (defined($ignorewarning))
+   {
+   if ($result eq 2)
+      {
+      $result = 0;
+      }
+   }
 
 # Now we remove the leading init string and whitespaces from the perfdata
 $perfdata =~ s/^$perfdata_init//;
@@ -1276,6 +1343,8 @@ sub main_select
           }
        if ($select eq "runtime")
           {
+          require vm_runtime_info;
+          import vm_runtime_info;
           ($result, $output) = vm_runtime_info($vmname);
           return($result, $output);
           }
@@ -1738,198 +1807,6 @@ sub isnotwhitelisted
 
 
 
-sub vm_runtime_info
-    {
-    my ($vmname) = @_;
-    my $state = 2;
-    my $output = 'VM RUNTIME Unknown error';
-    my $runtime;
-    my $tools_status;
-    my $tools_runstate;
-    my $tools_version;
-    my %vm_guest_state;
-    my %vm_tools_strings;
-    my %vm_tools_status;
-    my $issues;
-    my %vm_state_strings;
-    my $actual_state;
-    my $status;
-    
-    my $vm_view = Vim::find_entity_view(view_type => 'VirtualMachine', filter => {name => $vmname}, properties => ['name', 'runtime', 'overallStatus', 'guest', 'configIssue']);
-
-    if (!defined($vm_view))
-       {
-       print "VMware machine " . $vmname . " does not exist\n";
-       exit 2;
-       }
-
-    $runtime = $vm_view->runtime;
-
-    if (defined($subselect))
-       {
-       if ($subselect eq "con")
-          {
-          $output = "$vmname connection state=" . $runtime->connectionState->val;
-          if ($runtime->connectionState->val eq "connected")
-             {
-             $state = 0;
-             }
-          return ($state, $output);
-          }
-
-       if ($subselect eq "cpu")
-          {
-          $output = "$vmname max cpu=" . $runtime->maxCpuUsage . " MHz";
-          $state = 0;
-          return ($state, $output);
-          }
-
-       if ($subselect eq "mem")
-          {
-          $output = "$vmname max mem=" . $runtime->maxMemoryUsage . " MB";
-          $state = 0;
-          return ($state, $output);
-          }
-
-       if ($subselect eq "state")
-          {
-          %vm_state_strings = ("poweredOn" => "UP", "poweredOff" => "DOWN", "suspended" => "SUSPENDED");
-          $actual_state = $vm_state_strings{$runtime->powerState->val};
-          $output = "$vmname run state=" . $actual_state;
-
-          if ($actual_state eq "UP")
-             {
-             if ($actual_state eq "UP")
-                {
-                $state = 0;
-                }
-             }
-          return ($state, $output);
-          }
-
-       if ($subselect eq "status")
-          {
-          $status = $vm_view->overallStatus->val;
-          $output = "$vmname overall status=" . $status;
-          $state = check_health_state($status);
-          return ($state, $output);
-          }
-
-       if ($subselect eq "consoleconnections")
-          {
-          $output = "$vmname console connections=" . $runtime->numMksConnections;
-          $state = check_against_threshold($runtime->numMksConnections);
-          return ($state, $output);
-          }
-
-       if ($subselect eq "guest")
-          {
-          %vm_guest_state = ("running" => "Running", "notRunning" => "Not running", "shuttingDown" => "Shutting down", "resetting" => "Resetting", "standby" => "Standby", "unknown" => "Unknown");
-          $actual_state = $vm_guest_state{$vm_view->guest->guestState};
-          $output = "$vmname guest state=" . $actual_state;
-          if ($actual_state eq "Running")
-             {
-             $state = 0;
-             }
-          return ($state, $output);
-          }
-
-       if ($subselect eq "tools")
-          {
-          if (exists($vm_view->guest->{toolsRunningStatus}) && defined($vm_view->guest->toolsRunningStatus))
-             {
-             $tools_runstate = $vm_view->guest->toolsRunningStatus;
-             }
-          if (exists($vm_view->guest->{toolsVersionStatus}) && defined($vm_view->guest->toolsVersionStatus))
-             {
-             $tools_version = $vm_view->guest->toolsVersionStatus;
-             }
-
-          if (defined($tools_runstate) || defined($tools_version))
-             {
-             %vm_tools_strings = ("guestToolsCurrent" => "Newest", "guestToolsNeedUpgrade" => "Old", "guestToolsNotInstalled" => "Not installed", "guestToolsUnmanaged" => "Unmanaged", "guestToolsExecutingScripts" => "Starting", "guestToolsNotRunning" => "Not running", "guestToolsRunning" => "Running");
-
-             if (defined($tools_runstate))
-                {
-                $tools_status = $vm_tools_strings{$tools_runstate} . "-";
-                }
-   
-             if (defined($tools_version))
-                {
-                $tools_status = $tools_status . $vm_tools_strings{$tools_version} . "-";
-                }
-
-             chop($tools_status);
-# Reminder: Hier pruefen auf zu alte Tools Version und Warning
-             if (($tools_status eq "Running-Newest") || ($tools_status eq "Running-Unmanaged"))
-                {
-                $state = 0;
-                }
-             }
-          else
-             {
-             %vm_tools_strings = ("toolsNotInstalled" => "Not installed", "toolsNotRunning" => "Not running", "toolsOk" => "0", "toolsOld" => "Old", "notDefined" => "Not defined");
-             $tools_status = $vm_view->guest->toolsStatus;
-
-             if (defined($tools_status))
-                {
-                $tools_status = $vm_tools_strings{$tools_status->val};
-                }
-             else
-                {
-                $tools_status = $vm_tools_strings{"notDefined"};
-                }
-
-             if ($tools_status eq "0")
-                {
-                $state = 0;
-                }
-             }
-          $output = "$vmname tools status=" . $tools_status;
-          return ($state, $output);
-          }
-
-       if ($subselect eq "issues")
-          {
-          $issues = $vm_view->configIssue;
-
-          if (defined($issues))
-             {
-             $output = "\"$vmname\": ";
-             foreach (@$issues)
-                     {
-                     $output = $output . $_->fullFormattedMessage . "(caused by " . $_->userName . "); ";
-                     }
-             }
-          else
-             {
-             $state = 0;
-             $output = "$vmname has no config issues";
-             }
-          return ($state, $output);
-          }
-       get_me_out("Unknown VM RUNTIME subselect");
-       }
-    else
-       {
-       %vm_state_strings = ("poweredOn" => "UP", "poweredOff" => "DOWN", "suspended" => "SUSPENDED");
-       %vm_tools_status = ("toolsNotInstalled" => "Not installed", "toolsNotRunning" => "Not running", "toolsOk" => "0", "toolsOld" => "Old");
-       %vm_guest_state = ("running" => "Running", "notRunning" => "Not running", "shuttingDown" => "Shutting down", "resetting" => "Resetting", "standby" => "Standby", "unknown" => "Unknown");
-       $state = 0;
-       $output = "$vmname status=" . $vm_view->overallStatus->val . ", run state=" . $vm_state_strings{$runtime->powerState->val} . ", guest state=" . $vm_guest_state{$vm_view->guest->guestState} . ", max cpu=" . $runtime->maxCpuUsage . " MHz, max mem=" . $runtime->maxMemoryUsage . " MB, console connections=" . $runtime->numMksConnections . ", tools status=" . $vm_tools_status{$vm_view->guest->toolsStatus->val} . ", ";
-       $issues = $vm_view->configIssue;
-
-       if (defined($issues))
-          {
-          $output = $output . @$issues . " config issue(s)";
-          }
-       else
-          {
-          $output = $output . "has no config issues";
-          }
-       }
-       return ($state, $output);
-    }
 
 #==========================================================================| DC |============================================================================#
 

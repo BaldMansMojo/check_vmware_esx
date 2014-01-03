@@ -12,9 +12,9 @@ sub vm_disk_io_info
           $values = return_host_vmware_performance_values($vmname, 'disk', ('usage.average:*'));
           if (defined($values))
              {
-             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
-             $perfdata = $perfdata . " io_usage=" . $value . "MB;" . $perf_thresholds . ";;";
-             $output = "$vmname io usage=" . $value . " MB";
+             $value = simplify_number(convert_number($$values[0][0]->value), 0);
+             $perfdata = $perfdata . " io_usage=" . $value . "KB/s;" . $perf_thresholds . ";;";
+             $output = "$vmname io usage=" . $value . " KB/s";
              $state = check_against_threshold($value);
              }
           return ($state, $output);
@@ -25,9 +25,9 @@ sub vm_disk_io_info
           $values = return_host_vmware_performance_values($vmname, 'disk', ('read.average:*'));
           if (defined($values))
              {
-             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
-             $perfdata = $perfdata . " io_read=" . $value . "MB/s;" . $perf_thresholds . ";;";
-             $output = "$vmname io read=" . $value . " MB/s";
+             $value = simplify_number(convert_number($$values[0][0]->value), 0);
+             $perfdata = $perfdata . " io_read=" . $value . "KB/s;" . $perf_thresholds . ";;";
+             $output = "$vmname io read=" . $value . " KB/s";
              $state = check_against_threshold($value);
              }
           return ($state, $output);
@@ -38,9 +38,9 @@ sub vm_disk_io_info
           $values = return_host_vmware_performance_values($vmname, 'disk', ('write.average:*'));
           if (defined($values))
              {
-             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
-             $perfdata = $perfdata . " io_write=" . $value . "MB/s;" . $perf_thresholds . ";;";
-             $output = "$vmname io write=" . $value . " MB/s";
+             $value = simplify_number(convert_number($$values[0][0]->value), 0);
+             $perfdata = $perfdata . " io_write=" . $value . "KB/s;" . $perf_thresholds . ";;";
+             $output = "$vmname io write=" . $value . " KB/s";
              $state = check_against_threshold($value);
              }
           return ($state, $output);
@@ -61,17 +61,17 @@ sub vm_disk_io_info
        $values = return_host_vmware_performance_values($vmname, 'disk', ('usage.average:*', 'read.average:*', 'write.average:*'));
        if (defined($values))
           {
-          $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
-          $perfdata = $perfdata . " io_usage=" . $value . "MB;;;";
-          $output = "$vmname io usage=" . $value . " MB, ";
+          $value = simplify_number(convert_number($$values[0][0]->value), 0);
+          $perfdata = $perfdata . " io_usage=" . $value . "KB/s;;;";
+          $output = "$vmname io usage=" . $value . " KB/s, ";
 
-          $value = simplify_number(convert_number($$values[0][1]->value) / 1024);
-          $perfdata = $perfdata . " io_read=" . $value . "MB;;;";
-          $output = $output . "read=" . $value . " MB/s, ";
+          $value = simplify_number(convert_number($$values[0][1]->value), 0);
+          $perfdata = $perfdata . " io_read=" . $value . "KB/s;;;";
+          $output = $output . "read=" . $value . " KB/s, ";
 
-          $value = simplify_number(convert_number($$values[0][2]->value) / 1024);
-          $perfdata = $perfdata . " io_write=" . $value . "MB;;;";
-          $output = $output . "write=" . $value . " MB/s";
+          $value = simplify_number(convert_number($$values[0][2]->value), 0);
+          $perfdata = $perfdata . " io_write=" . $value . "KB/s;;;";
+          $output = $output . "write=" . $value . " KB/s";
 
           $state = 0;
           }
