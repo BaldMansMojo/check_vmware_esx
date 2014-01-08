@@ -132,3 +132,9 @@ The module host_storage_info.pm (contains host_storage_info()) is a extensive re
 It wasn't tested with iSCSI. Normally it should work but I couldn't test it because I have no iSCSI. Please test it an give me feedback.
 
 
+Help
+====
+
+A lot of general options is listed more than once. Why? The help is very complex and large. By having all options for a a select/subselect listed
+nearby we avoid scrolling up/down and minimize confusion which (general) option is valid.
+

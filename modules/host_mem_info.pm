@@ -1,8 +1,8 @@
 sub host_mem_info
     {
     my ($host) = @_;
-    my $state = 2;
-    my $output = 'HOST MEM Unknown error';
+    my $state = 0;
+    my $output;
     my $value;
     my $vm;
     my $host_view;
@@ -10,196 +10,210 @@ sub host_mem_info
     my $vm_views;
     my @vms = ();
     my $index;
+    my $actual_state;            # Hold the actual state for to be compared
+    my $true_sub_sel=1;          # Just a flag. To have only one return at the en
+                                 # we must ensure that we had a valid subselect. If
+                                 # no subselect is given we select all
+                                 # 0 -> existing subselect
+                                 # 1 -> non existing subselect
     
-    if (defined($subselect))
+    ($host_view, $values) = return_host_performance_values($host, 'mem', ( 'usage.average', 'consumed.average','swapused.average', 'overhead.average', 'vmmemctl.average'));
+
+    if (!defined($subselect))
        {
-       if ($subselect eq "usage")
+       # This means no given subselect. So all checks must be performemed
+       # Therefore with all set no threshold check can be performed
+       $subselect = "all";
+       $true_sub_sel = 0;
+       if ($perf_thresholds ne ';')
           {
-          $values = return_host_performance_values($host, 'mem', ('usage.average'));
-          if (defined($values))
-             {
-             $value = simplify_number(convert_number($$values[0][0]->value) * 0.01);
-             }
+          print_help();
+          print "\nERROR! Thresholds only allowed with subselects!\n\n";
+          exit 2;
+          }
+       }
 
-          if (defined($value))
+    if (($subselect eq "usage") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+       if (defined($values))
+          {
+          $value = simplify_number(convert_number($$values[0][0]->value) * 0.01);
+          if ($subselect eq "all")
              {
-             $perfdata = $perfdata . " mem_usage=" . $value . "%;" . $perf_thresholds . ";;";
              $output = "mem usage=" . $value . "%"; 
-             $state = check_against_threshold($value);
+             $perfdata = "mem_usage=" . $value . "%;" . $perf_thresholds . ";;";
              }
-          return ($state, $output);
+          else
+             {
+             $actual_state = check_against_threshold($value);
+             $output = "mem usage=" . $value . "%"; 
+             $perfdata = "mem_usage=" . $value . "%;" . $perf_thresholds . ";;";
+             $state = check_state($state, $actual_state);
+             }
           }
-          
-       if ($subselect eq "consumed")
+       }
+       
+    if (($subselect eq "consumed") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+       if (defined($values))
           {
-          $values = return_host_performance_values($host, 'mem', ('consumed.average'));
-          if (defined($values))
+          $value = simplify_number(convert_number($$values[0][1]->value) / 1024);
+          if ($subselect eq "all")
              {
-             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
-             }
-             
-          if (defined($value))
-             {
+             $output = $output . " - consumed memory=" . $value . " MB";
              $perfdata = $perfdata . " consumed_memory=" . $value . "MB;" . $perf_thresholds . ";;";
+             }
+          else
+             {
+             $actual_state = check_against_threshold($value);
              $output = "consumed memory=" . $value . " MB";
-             $state = check_against_threshold($value);
+             $perfdata = "consumed_memory=" . $value . "MB;" . $perf_thresholds . ";;";
+             $state = check_state($state, $actual_state);
              }
-          return ($state, $output);
           }
+       }
 
-       if ($subselect eq "swapused")
+    if (($subselect eq "swapused") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+       
+       if (defined($values))
           {
-          ($host_view, $values) = return_host_performance_values($host, 'mem', ('swapused.average'));
-          
-          if (defined($values))
+          $value = simplify_number(convert_number($$values[0][2]->value) / 1024);
+          if ($subselect eq "all")
              {
-             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
+             $output = $output . " - swap used=" . $value . " MB";
              $perfdata = $perfdata . " mem_swap=" . $value . "MB;" . $perf_thresholds . ";;";
-             $output = "swap used=" . $value . " MB: ";
-             $state = check_against_threshold($value);
-             if ($state != 0)
+             }
+          else
+             {
+             $actual_state = check_against_threshold($value);
+             $output = "swap used=" . $value . " MB";
+             $perfdata = "mem_swap=" . $value . "MB;" . $perf_thresholds . ";;";
+             $state = check_state($state, $actual_state);
+
+             if ($actual_state != 0)
                 {
                 $vm_views = Vim::find_entity_views(view_type => 'VirtualMachine', begin_entity => $$host_view[0], properties => ['name', 'runtime.powerState']);
-
-                if (!defined($vm_views))
+   
+                if (defined($vm_views))
                    {
-                   print "Runtime error\n";
-                   exit 2;
-                   }
-
-                if (!@$vm_views)
-                   {
-                   print "There are no VMs.\n";
-                   exit 2;
-                   }
-
-                @vms = ();
-                foreach $vm (@$vm_views)
-                        {
-                        push(@vms, $vm) if ($vm->get_property('runtime.powerState')->val eq "poweredOn");
-                        }
-             
-                $values = generic_performance_values(\@vms, 'mem', ('swapped.average'));
-                if (defined($values))
-                   {
-                   foreach $index (0..@vms-1)
-                           {
-                           $value = simplify_number(convert_number($$values[$index][0]->value) / 1024);
-                           if ($value > 0)
+                   if (@$vm_views)
+                      {
+                      @vms = ();
+                      foreach $vm (@$vm_views)
                               {
-                              $output = $output . $vms[$index]->name . " (" . $value . "MB), " if ($value > 0);
+                              if ($vm->get_property('runtime.powerState')->val eq "poweredOn")
+                                 {
+                                 push(@vms, $vm);
+                                 }
                               }
-                           }
+                   
+                      $values = generic_performance_values(\@vms, 'mem', ('swapped.average'));
+                      if (defined($values))
+                         {
+                         foreach $index (0..@vms-1)
+                                 {
+                                 $value = simplify_number(convert_number($$values[$index][0]->value) / 1024);
+                                 if ($value > 0)
+                                    {
+                                    if ($value > 0)
+                                       {
+                                       $output = $output . $multiline . $vms[$index]->name . " (" . $value . "MB)";
+                                       }
+                                    }
+                                 }
+                         }
+                      }
+      
                    }
                 }
-             chop($output);
-             chop($output);
              }
-          return ($state, $output);
           }
+       }
 
-       if ($subselect eq "overhead")
+    if (($subselect eq "overhead") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+       if (defined($values))
           {
-          $values = return_host_performance_values($host, 'mem', ('overhead.average'));
-          if (defined($values))
+          $value = simplify_number(convert_number($$values[0][3]->value) / 1024);
+          if ($subselect eq "all")
              {
-             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
+             $output = $output . " - overhead=" . $value . " MB";
              $perfdata = $perfdata . " mem_overhead=" . $value . "MB;" . $perf_thresholds . ";;";
-             $output = "overhead=" . $value . " MB";
-             $state = check_against_threshold($value);
              }
-          return ($state, $output);
-          }
-
-       if ($subselect eq "memctl")
-          {
-          ($host_view, $values) = return_host_performance_values($host, 'mem', ('vmmemctl.average'));
-          if (defined($values))
+          else
              {
-             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
+             $actual_state = check_against_threshold($value);
+             $output = "overhead=" . $value . " MB";
+             $perfdata = "mem_overhead=" . $value . "MB;" . $perf_thresholds . ";;";
+             $state = check_state($state, $actual_state);
+             }
+          }
+       }
+
+    if (($subselect eq "memctl") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+       if (defined($values))
+          {
+          $value = simplify_number(convert_number($$values[0][4]->value) / 1024);
+          if ($subselect eq "all")
+             {
+             $output = $output . " - memctl=" . $value . " MB: ";
              $perfdata = $perfdata . " mem_memctl=" . $value . "MB;" . $perf_thresholds . ";;";
-             $output = "memctl=" . $value . " MB: ";
-             $state = check_against_threshold($value);
-             if ($state != 0)
+             }
+          else
+             {
+             $actual_state = check_against_threshold($value);
+             $output = "memctl=" . $value . " MB";
+             $perfdata = "mem_memctl=" . $value . "MB;" . $perf_thresholds . ";;";
+             $state = check_state($state, $actual_state);
+
+             if ($actual_state != 0)
                 {
                 $vm_views = Vim::find_entity_views(view_type => 'VirtualMachine', begin_entity => $$host_view[0], properties => ['name', 'runtime.powerState']);
-
-                if (!defined($vm_views))
+   
+                if (defined($vm_views))
                    {
-                   print "Runtime error\n";
-                   exit 2;
-                   }
-
-                if (!@$vm_views)
-                   {
-                   print "There are no VMs.\n";
-                   exit 2;
-                   }
-
-                foreach $vm (@$vm_views)
-                        {
-                        if ($vm->get_property('runtime.powerState')->val eq "poweredOn")
-                           {
-                           push(@vms, $vm) if ($vm->get_property('runtime.powerState')->val eq "poweredOn");
-                           }
-                        }
-                $values = generic_performance_values(\@vms, 'mem', ('vmmemctl.average'));
-
-                if (defined($values))
-                   {
-                   foreach $index (0..@vms-1)
-                           {
-                           $value = simplify_number(convert_number($$values[$index][0]->value) / 1024);
-                           if ($value > 0)
+                   if (@$vm_views)
+                      {
+                      foreach $vm (@$vm_views)
                               {
-                              $output = $output . $vms[$index]->name . " (" . $value . "MB), ";
+                              if ($vm->get_property('runtime.powerState')->val eq "poweredOn")
+                                 {
+                                 push(@vms, $vm);
+                                 }
                               }
-                           }
+                      $values = generic_performance_values(\@vms, 'mem', ('vmmemctl.average'));
+         
+                      if (defined($values))
+                         {
+                         foreach $index (0..@vms-1)
+                                 {
+                                 $value = simplify_number(convert_number($$values[$index][0]->value) / 1024);
+                                 if ($value > 0)
+                                    {
+                                    $output = $output . $multiline . $vms[$index]->name . " (" . $value . "MB)";
+                                    }
+                                 }
+                         }
+                      }
                    }
                 }
-             chop($output);
-             chop($output);
              }
-          return ($state, $output);
           }
-       # So we have decided to use a subselect but submitted no valid one we have to leave,
+       }
+
+    if ($true_sub_sel == 1)
+       {
        get_me_out("Unknown HOST MEM subselect");
        }
     else
        {
-        if ($perf_thresholds ne ';')
-           {
-           print_help();
-           print "\nERROR! Thresholds only allowed with subselects!\n\n";
-           exit 2;
-           }
-
-       $values = return_host_performance_values($host, 'mem', ('consumed.average', 'usage.average', 'overhead.average', 'swapused.average', 'vmmemctl.average'));
-       
-       if (defined($values))
-          {
-          $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
-          $perfdata = $perfdata . " consumed_memory=" . $value . "MB;;;";
-          $output = "consumed memory=" . $value  . " MB (";
-
-          $value = simplify_number(convert_number($$values[0][1]->value) * 0.01);
-          $perfdata = $perfdata . " mem_usage=" . $value . "%;;;";
-          $output = $output . $value . "%), overhead=";
-
-          $value = simplify_number(convert_number($$values[0][2]->value) / 1024);
-          $perfdata = $perfdata . " mem_overhead=" . $value . "MB;;;";
-          $output = $output . $value . " MB, swap used=";
-
-          $value = simplify_number(convert_number($$values[0][3]->value) / 1024);
-          $perfdata = $perfdata . " mem_swap=" . $value . "MB;;;";
-          $output = $output . $value . " MB, memctl=";
-
-          $value = simplify_number(convert_number($$values[0][4]->value) / 1024);
-          $perfdata = $perfdata . " mem_memctl=" . $value . "MB;;;";
-          $output = $output . $value . " MB";
-
-          $state = 0;
-          }
        return ($state, $output);
        }
     }

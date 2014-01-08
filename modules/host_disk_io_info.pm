@@ -2,203 +2,271 @@ sub host_disk_io_info
     {
     my ($host) = @_;
     my $value;
-    my $state = 2;
-    my $output = 'HOST IO Unknown error';
+    my $state = 0;
+    my $output;
+    my $actual_state;            # Hold the actual state for to be compared
+    my $true_sub_sel=1;          # Just a flag. To have only one return at the en
+                                 # we must ensure that we had a valid subselect. If
+                                 # no subselect is given we select all
+                                 # 0 -> existing subselect
+                                 # 1 -> non existing subselect
 
-    if (defined($subselect))
+    $values = return_host_performance_values($host, 'disk', ('commandsAborted.summation:*', 'busResets.summation:*', 'read.average:*', 'totalReadLatency.average:*', 'write.average:*', 'totalWriteLatency.average:*', 'usage.average:*', 'kernelLatency.average:*', 'deviceLatency.average:*', 'queueLatency.average:*', 'totalLatency.average:*'));
+
+    if (!defined($subselect))
        {
-       if ($subselect eq "aborted")
+       # This means no given subselect. So all checks must be performemed
+       # Therefore with all set no threshold check can be performed
+       $subselect = "all";
+       $true_sub_sel = 0;
+       if ($perf_thresholds ne ';')
           {
-          $values = return_host_performance_values($host, 'disk', ('commandsAborted.summation:*'));
-          if (defined($values))
+          print "hier\n";
+          print_help();
+          print "\nERROR! Thresholds only allowed with subselects!\n\n";
+          exit 2;
+          }
+       }
+
+    if (($subselect eq "aborted") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+       if (defined($values))
+          {
+          $value = simplify_number(convert_number($$values[0][0]->value), 0);
+          if ($subselect eq "all")
              {
-             $value = simplify_number(convert_number($$values[0][0]->value), 0);
-             $perfdata = $perfdata . " io_aborted=" . $value . ";" . $perf_thresholds . ";;";
+             $output = "I/O commands aborted=" . $value;
+             $perfdata = "io_aborted=" . $value . ";" . $perf_thresholds . ";;";
+             }
+          else
+             {
+             $actual_state = check_against_threshold($value);
              $output = "io commands aborted=" . $value;
+             $perfdata = "io_aborted=" . $value . ";" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
-          return ($state, $output);
           }
+       }
 
-       if ($subselect eq "resets")
+    if (($subselect eq "resets") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+       if (defined($values))
           {
-          $values = return_host_performance_values($host, 'disk', ('busResets.summation:*'));
-          if (defined($values))
+          $value = simplify_number(convert_number($$values[0][1]->value), 0);
+          if ($subselect eq "all")
              {
-             $value = simplify_number(convert_number($$values[0][0]->value), 0);
+             $output =  $output . " - I/O bus resets=" . $value;
              $perfdata = $perfdata . " io_busresets=" . $value . ";" . $perf_thresholds . ";;";
-             $output = "io bus resets=" . $value;
+             }
+          else
+             {
+             $actual_state = check_against_threshold($value);
+             $output = "I/O bus resets=" . $value;
+             $perfdata = "io_busresets=" . $value . ";" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
-          return ($state, $output);
           }
-       
-       if ($subselect eq "read")
+       }
+    
+    if (($subselect eq "read") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+       if (defined($values))
           {
-          $values = return_host_performance_values($host, 'disk', ('read.average:*'));
-          if (defined($values))
+          $value = simplify_number(convert_number($$values[0][2]->value), 0);
+          if ($subselect eq "all")
              {
-             $value = simplify_number(convert_number($$values[0][0]->value), 0);
+             $output = $output . " - I/O read=" . $value . " KB/sec.";
              $perfdata = $perfdata . " io_read=" . $value . "KB;" . $perf_thresholds . ";;";
-             $output = "io read=" . $value . " KB/sec.";
+             }
+          else
+             {
+             $actual_state = check_against_threshold($value);
+             $output = "I/O read=" . $value . " KB/sec.";
+             $perfdata = "io_read=" . $value . "KB;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
-          return ($state, $output);
           }
-       
-       if ($subselect eq "read_latency")
+       }
+    
+    if (($subselect eq "read_latency") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+       if (defined($values))
           {
-          $values = return_host_performance_values($host, 'disk', ('totalReadLatency.average:*'));
-          if (defined($values))
+          $value = simplify_number(convert_number($$values[0][3]->value), 0);
+          if ($subselect eq "all")
              {
-             $value = simplify_number(convert_number($$values[0][0]->value), 0);
+             $output = $output . " - I/O read latency=" . $value . " ms";
              $perfdata = $perfdata . " io_read_latency=" . $value . "ms;" . $perf_thresholds . ";;";
-             $output = "io read latency=" . $value . " ms";
+             }
+          else
+             {
+             $actual_state = check_against_threshold($value);
+             $output = "I/O read latency=" . $value . " ms";
+             $perfdata = "io_read_latency=" . $value . "ms;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
-          return ($state, $output);
           }
-       
-       if ($subselect eq "write")
+       }
+    
+    if (($subselect eq "write") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+       if (defined($values))
           {
-          $values = return_host_performance_values($host, 'disk', ('write.average:*'));
-          if (defined($values))
+          $value = simplify_number(convert_number($$values[0][4]->value), 0);
+          if ($subselect eq "all")
              {
-             $value = simplify_number(convert_number($$values[0][0]->value), 0);
+             $output = $output . " - I/O write=" . $value . " KB/sec.";
              $perfdata = $perfdata . " io_write=" . $value . "KB;" . $perf_thresholds . ";;";
-             $output = "io write=" . $value . " KB/sec.";
+             }
+          else
+             {
+             $actual_state = check_against_threshold($value);
+             $output = "I/O write=" . $value . " KB/sec.";
+             $perfdata = "io_write=" . $value . "KB;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
-          return ($state, $output);
           }
-       
-       if ($subselect eq "write_latency")
+       }
+    
+    if (($subselect eq "write_latency") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+       if (defined($values))
           {
-          $values = return_host_performance_values($host, 'disk', ('totalWriteLatency.average:*'));
-          if (defined($values))
+          $value = simplify_number(convert_number($$values[0][5]->value), 0);
+          if ($subselect eq "all")
              {
-             $value = simplify_number(convert_number($$values[0][0]->value), 0);
+             $output = $output . "I/O write latency=" . $value . " ms";
              $perfdata = $perfdata . " io_write_latency=" . $value . "ms;" . $perf_thresholds . ";;";
-             $output = "io write latency=" . $value . " ms";
+             }
+          else
+             {
+             $actual_state = check_against_threshold($value);
+             $output = "I/O write latency=" . $value . " ms";
+             $perfdata = "io_write_latency=" . $value . "ms;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
-          return ($state, $output);
           }
-       
-       if ($subselect eq "kernel_latency")
+       }
+    
+    if (($subselect eq "usage") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+       if (defined($values))
           {
-          $values = return_host_performance_values($host, 'disk', ('kernelLatency.average:*'));
-          if (defined($values))
+          $value = simplify_number(convert_number($$values[0][6]->value), 0);
+          if ($subselect eq "all")
              {
-             $value = simplify_number(convert_number($$values[0][0]->value), 0);
+             $output = $output . " - I/O_usage=" . $value . " KB/sec.";
+             $perfdata = $perfdata . " io_usage=" . $value . "KB;;;";
+             }
+          else
+             {
+             $actual_state = check_against_threshold($value);
+             $output = "I/O_usage=" . $value . " KB/sec., ";
+             $perfdata = "io_usage=" . $value . "KB;;;";
+             $state = check_against_threshold($value);
+             }
+          }
+       }
+
+    if (($subselect eq "kernel_latency") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+       if (defined($values))
+          {
+          $value = simplify_number(convert_number($$values[0][7]->value), 0);
+          if ($subselect eq "all")
+             {
+             $output = $output . " - I/O kernel latency=" . $value . " ms";
              $perfdata = $perfdata . " io_kernel_latency=" . $value . "ms;" . $perf_thresholds . ";;";
-             $output = "io kernel latency=" . $value . " ms";
+             }
+          else
+             {
+             $actual_state = check_against_threshold($value);
+             $output = "I/O kernel latency=" . $value . " ms";
+             $perfdata = "io_kernel_latency=" . $value . "ms;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
-          return ($state, $output);
           }
-       
-       if ($subselect eq "device_latency")
+       }
+    
+    if (($subselect eq "device_latency") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+       if (defined($values))
           {
-          $values = return_host_performance_values($host, 'disk', ('deviceLatency.average:*'));
-          if (defined($values))
+          $value = simplify_number(convert_number($$values[0][8]->value), 0);
+          if ($subselect eq "all")
              {
-             $value = simplify_number(convert_number($$values[0][0]->value), 0);
+             $output = $output . " - I/O device latency=" . $value . " ms";
              $perfdata = $perfdata . " io_device_latency=" . $value . "ms;" . $perf_thresholds . ";;";
-             $output = "io device latency=" . $value . " ms";
+             }
+          else
+             {
+             $actual_state = check_against_threshold($value);
+             $output = "I/O device latency=" . $value . " ms";
+             $perfdata = "io_device_latency=" . $value . "ms;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
-          return ($state, $output);
           }
-       
-       if ($subselect eq "queue_latency")
+       }
+    
+    if (($subselect eq "queue_latency") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+       if (defined($values))
           {
-          $values = return_host_performance_values($host, 'disk', ('queueLatency.average:*'));
-          if (defined($values))
+          $value = simplify_number(convert_number($$values[0][9]->value), 0);
+          if ($subselect eq "all")
              {
-             $value = simplify_number(convert_number($$values[0][0]->value), 0);
+             $output = $output . " - I/O queue latency=" . $value . " ms";
              $perfdata = $perfdata . " io_queue_latency=" . $value . "ms;" . $perf_thresholds . ";;";
-             $output = "io queue latency=" . $value . " ms";
-             $state = check_against_threshold($value);
              }
-          return ($state, $output);
-          }
-       
-       if ($subselect eq "total_latency")
-          {
-          $values = return_host_performance_values($host, 'disk', ('totalLatency.average:*'));
-          if (defined($values))
+          else
              {
-             $value = simplify_number(convert_number($$values[0][0]->value), 0);
-             $perfdata = $perfdata . " io_total_latency=" . $value . "ms;" . $perf_thresholds . ";;";
-             $output = "io total latency=" . $value . " ms";
+             $actual_state = check_against_threshold($value);
+             $output = "I/O queue latency=" . $value . " ms";
+             $perfdata = "io_queue_latency=" . $value . "ms;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
-          return ($state, $output);
           }
-        get_me_out("Unknown HOST IO subselect");
-        }
-     else
-        {
-        if ($perf_thresholds ne ';')
-           {
-           print_help();
-           print "\nERROR! Thresholds only allowed with subselects!\n\n";
-           exit 2;
-           }
-        
-        $values = return_host_performance_values($host, 'disk', ('commandsAborted.summation:*', 'busResets.summation:*', 'read.average:*', 'totalReadLatency.average:*', 'write.average:*', 'totalWriteLatency.average:*', 'usage.average:*', 'kernelLatency.average:*', 'deviceLatency.average:*', 'queueLatency.average:*', 'totalLatency.average:*'));
-        if (defined($values))
-           {
-           $value = simplify_number(convert_number($$values[0][0]->value), 0);
-           $perfdata = $perfdata . " io_aborted=" . $value . ";;;";
-           $output = "io commands aborted=" . $value . ", ";
+       }
+    
+    if (($subselect eq "total_latency") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+       if (defined($values))
+          {
+          $value = simplify_number(convert_number($$values[0][10]->value), 0);
+          if ($subselect eq "all")
+             {
+             $output = $output . " - I/O total latency=" . $value . " ms";
+             $perfdata = $perfdata . " io_total_latency=" . $value . "ms;" . $perf_thresholds . ";;";
+             }
+          else
+             {
+             $actual_state = check_against_threshold($value);
+             $output = "I/O total latency=" . $value . " ms";
+             $perfdata = "io_total_latency=" . $value . "ms;" . $perf_thresholds . ";;";
+             $state = check_against_threshold($value);
+             }
+          }
+       }
 
-           $value = simplify_number(convert_number($$values[0][1]->value), 0);
-           $perfdata = $perfdata . " io_busresets=" . $value . ";;;";
-           $output = $output . "io bus resets=" . $value . ", ";
-
-           $value = simplify_number(convert_number($$values[0][2]->value), 0);
-           $perfdata = $perfdata . " io_read=" . $value . "KB;;;";
-           $output = $output . "io read=" . $value . " KB/sec., ";
-
-           $value = simplify_number(convert_number($$values[0][3]->value), 0);
-           $perfdata = $perfdata . " io_read_latency=" . $value . "ms;;;";
-           $output = $output . "io read latency=" . $value . " ms, ";
-
-           $value = simplify_number(convert_number($$values[0][4]->value), 0);
-           $perfdata = $perfdata . " io_write=" . $value . "KB;;;";
-           $output = $output . "write=" . $value . " KB/sec., ";
-
-           $value = simplify_number(convert_number($$values[0][5]->value), 0);
-           $perfdata = $perfdata . " io_write_latency=" . $value . "ms;;;";
-           $output = $output . "write latency=" . $value . " ms, ";
-
-           $value = simplify_number(convert_number($$values[0][6]->value), 0);
-           $perfdata = $perfdata . " io_usage=" . $value . "KB;;;";
-           $output = $output . "io_usage=" . $value . " KB/sec., ";
-
-           $value = simplify_number(convert_number($$values[0][7]->value), 0);
-           $perfdata = $perfdata . " io_kernel_latency=" . $value . "ms;;;";
-           $output = $output . "io kernel latency=" . $value . " ms, ";
-
-           $value = simplify_number(convert_number($$values[0][8]->value), 0);
-           $perfdata = $perfdata . " io_device_latency=" . $value . "ms;;;";
-           $output = $output . "io device latency=" . $value . " ms, ";
-
-           $value = simplify_number(convert_number($$values[0][9]->value), 0);
-           $perfdata = $perfdata . " io_queue_latency=" . $value . "ms;;;";
-           $output = $output . "io queue latency=" . $value ." ms";
-
-           $value = simplify_number(convert_number($$values[0][10]->value), 0);
-           $perfdata = $perfdata . " io_total_latency=" . $value . "ms;;;";
-           $output = $output . "io total latency=" . $value ." ms";
-
-           $state = 0;
-           }
-        return ($state, $output);
-        }
-
+    if ($true_sub_sel == 1)
+       {
+       get_me_out("Unknown HOST IO subselect");
+       }
+    else
+       {
+       return ($state, $output);
+       }
     }
 
 # A module always must end with a returncode of 1. So placing 1 at the end of a module 

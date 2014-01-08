@@ -769,9 +769,43 @@
 #     - Changed all values to KB/s because so it is equal to host disk I/O and so it
 #       it is deleverd from the API.
 #   - help()
-#     - Some corrections.
+#     - Some small bug fixes.
 #   - host_disk_io_info()
 #     - added total_latency.
+#
+# - 08 Jan 20143 M.Fuerstenau version 0.9.2
+#   - help()
+#     - Some small bug fixes.
+#   - vm_disk_io_info()
+#     - Removed duplicated code. (if subselect ..... else ....)
+#       The code was 90% identical.
+#   - host_disk_io_info()
+#     - Removed duplicated code. (if subselect ..... else ....)
+#       The code was 90% identical.
+#     - Bug fix. Usage was given without subselect but missing as subselect. Not
+#       detected earlier due to the duplicate code.
+#   - host_cpu_info()
+#     - Removed duplicated code. (if subselect ..... else ....)
+#       The code was 90% identical.
+#     - Added usage as subselect.
+#   - vm_cpu_info()
+#     - Removed duplicated code. (if subselect ..... else ....)
+#       The code was 90% identical.
+#     - Added usage as subselect.
+#   - host_mem_info()
+#     - Removed duplicated code. (if subselect ..... else ....)
+#       The code was 90% identical.
+#     - swapused
+#       - I swapused is a subselect there should be enhanced information about
+#         the virtual machines and should be available. If this won't work
+#         nothing will happen. In the past this caused a critical error which
+#         is nonsense here.
+#      - memctl
+#        - Same as swapused
+#   - vm_mem_info()
+#     - Removed duplicated code. (if subselect ..... else ....)
+#       The code was 90% identical.
+#     - Added vmmemctl.average (memctl) to monitor balloning.
 
 use strict;
 use warnings;
@@ -790,6 +824,11 @@ use datastore_volumes_info;
 # Prevent SSL certificate validation
 
 $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0; 
+
+# Only for debugging
+use Data::Dumper;
+$Data::Dumper::Indent = 1;
+#print "------------------------------------------\n" . Dumper ($store) . "\n" . "------------------------------------------\n";
 
 if ( $@ )
    {
