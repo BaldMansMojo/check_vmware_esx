@@ -166,14 +166,14 @@ sub host_runtime_info
 
           if ($subselect eq "all")
              {
-             $output = $suspended . "/" . @$vm_views . " VMs powered suspended - ";
+             $output = $suspended . "/" . @$vm_views . " VMs suspended - ";
              $output = $output . $poweredoff . "/" . @$vm_views . " VMs powered off - ";
              $output = $output . $poweredon . "/" . @$vm_views . " VMs powered on - ";
              }
           else
              {
-             $output = $suspended . "/" . @$vm_views . " VMs powered on - ";
-             $output = $output . $poweredoff . "/" . @$vm_views . " VMs powered on - ";
+             $output = $suspended . "/" . @$vm_views . " VMs suspended - ";
+             $output = $output . $poweredoff . "/" . @$vm_views . " VMs powered off - ";
              $output = $output . $poweredon . "/" . @$vm_views . " VMs powered on." . $multiline;
              $output = $output . $suspended_out . $poweredoff_out . $poweredon_out;
              $perfdata = "vms_total=" .  @$vm_views . ";;;; vms_poweredon=" . $poweredon . ";;;; vms_poweredoff=" . $poweredoff . ";;;; vms_suspended=" . $suspended . ";;;;";
