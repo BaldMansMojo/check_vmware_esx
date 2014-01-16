@@ -828,11 +828,12 @@
 #     - Removed handing over of unnecessary parameters
 #   - dc_runtime_info() -> dc_runtime_info.pm
 #     - Code cleaned up and reformated
-#     - Added working blacklist/whitelist with the ability to use regular
-#       expressions
 #     - listvms
 #       - output now sorted by powerstate (suspended, poweredoff, powerdon)
+#       - Added working blacklist/whitelist with the ability to use regular
+#         expressions
 #       - Added --alertonly here
+#       - Added --multiline here
 #     - listhosts
 #       - %host_state_strings was mostly nonsense. The mapped poser states from
 #         for virtual machines were used. Hash removed. Using now the orginal 
@@ -852,15 +853,25 @@
 #         - unknown    -> If the host is disconnected, or notResponding, we can
 #                         not possibly have knowledge of its power state. Hence,
 #                         the host is marked as unknown. 
+#       - Added working blacklist/whitelist with the ability to use regular
+#         expressions
 #       - Added --alertonly here
+#       - Added --multiline here
 #     - listcluster
 #       - Removed senseless perf data
+#       - More detailed check than before
+#       - Added working blacklist/whitelist with the ability to use regular
+#         expressions
 #       - Added --alertonly here
+#       - Added --multiline here
 #     - status
 #       - Rewritten and reformatted
 #     - tools
 #       - Rewritten and reformatted
 #       - Improved more detailed output.
+#         expressions
+#       - Added --alertonly here
+#       - Added --multiline here
 
 use strict;
 use warnings;

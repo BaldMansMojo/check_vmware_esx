@@ -148,6 +148,9 @@ sub print_help
        print "                                    value in the nn% (i.e. 90%). If checking more than a single\n";
        print "                                    volume only percent is alloed as threshold.\n";
        print "\n";
+       print "Runtime Info:\n";
+       print "-------------\n";
+       print "\n";
        print "-S, --select=runtime                Shows all runtime info for the datacenter/Vcenter.\n";
        print "                                    No thresholds are allowed here\n";
        print "or with\n";
@@ -452,8 +455,6 @@ sub print_help
        print "\n";
        print "Runtime info:\n";
        print "-------------\n";
-       print "\n";
-       print "\n";
        print "-S, --select=runtime                Shows runtime info. Used without -s show all runtime info:\n";
        print "                                    VMs, overall status, connection state, health, storagehealth, temperature\n";
        print "                                    and sensor are represented as one value and without thresholds.\n";
@@ -666,8 +667,9 @@ sub print_help
        print "-s, --subselect=usage               Aggregated disk I/O rate.\n";
        print "or\n";
        print "\n";
-       print "Runtime:\n";
-       print "--------\n";
+       print "Runtime Info:\n";
+       print "-------------\n";
+       print "\n";
        print "-S, --select=runtime                Shows runtime info, When used without subselect\n";
        print "                                    no thresholds can be given.\n";
        print "or with\n";
