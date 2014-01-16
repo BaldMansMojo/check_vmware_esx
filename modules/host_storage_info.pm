@@ -4,8 +4,8 @@ sub host_storage_info
     my $count = 0;                        # Counter for items (adapter,luns etc.)
     my $warn_count = 0;                   # Warning counter for items (adapter,luns etc.)
     my $err_count = 0;                    # Error counter for items (adapter,luns etc.)
+    my $ignored = 0;                      # Counter for blacklisted items
 
-    my $ignored = 0;                      # The key of the disc. A string like
     my $state = 0;                        # Return state
     my $actual_state = 0;                 # Return state from the current check. Will be compared with $state
                                           # If higher than $state $state will be set to $actual_state
@@ -147,19 +147,16 @@ sub host_storage_info
                   if (isnotwhitelisted(\$whitelist, $isregexp, $dev->device))
                      {
                      $count++;
-                     $ignored++;
                      next;
                      }
                   if (isnotwhitelisted(\$whitelist, $isregexp, $dev->model))
                      {
                      $count++;
-                     $ignored++;
                      next;
                      }
                   if (isnotwhitelisted(\$whitelist, $isregexp, $dev->key))
                      {
                      $count++;
-                     $ignored++;
                      next;
                      }
                   }
@@ -287,7 +284,6 @@ sub host_storage_info
                   if (isnotwhitelisted(\$whitelist, $isregexp, $canonicalName))
                      {
                      $count++;
-                     $ignored++;
                      next;
                      }
                   }
@@ -397,7 +393,6 @@ sub host_storage_info
                                 if ($scsi_id ne $scsi_id_old)
                                    {
                                    $mpath_cnt++;
-                                   $ignored++;
                                    next;
                                    }
                                 }
@@ -559,5 +554,5 @@ sub host_storage_info
     }
 
 # A module always must end with a returncode of 1. So placing 1 at the end of a module 
-# is a commen method to ensure this.
+# is a common method to ensure this.
 1;

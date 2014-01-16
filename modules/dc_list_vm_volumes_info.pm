@@ -1,6 +1,5 @@
 sub dc_list_vm_volumes_info
     {
-    my ($blacklist, $whitelist) = @_;
     my $dc_views;
     my @datastores;
     my $dc;
@@ -21,9 +20,9 @@ sub dc_list_vm_volumes_info
                }
             }
 
-    return datastore_volumes_info(\@datastores, $subselect, $blacklist, $whitelist);
+    return datastore_volumes_info(\@datastores);
     }
 
 # A module always must end with a returncode of 1. So placing 1 at the end of a module 
-# is a commen method to ensure this.
+# is a common method to ensure this.
 1;

@@ -24,6 +24,9 @@ sub host_runtime_info
     my $fstate;
     my %host_maintenance_state;
     my $issues;
+    my $issue_out = '';
+    my $issue_cnt = 0;
+    my $issues_ignored_cnt = 0;
     my $itemref;
     my $item_ref;
     my $memoryStatusInfo;
@@ -35,18 +38,21 @@ sub host_runtime_info
     my $storageStatusInfo;;
     my $type;
     my $unit;
-    my $poweredon = 0;      # Virtual machine powerstate
-    my $poweredoff = 0;     # Virtual machine powerstate
-    my $suspended = 0;      # Virtual machine powerstate
+    my $poweredon = 0;         # Virtual machine powerstate
+    my $poweredoff = 0;        # Virtual machine powerstate
+    my $suspended = 0;         # Virtual machine powerstate
+    my $poweredon_out = '';    # Virtual machine powerstate temporary output
+    my $poweredoff_out = '';   # Virtual machine powerstate temporary output
+    my $suspended_out = '';    # Virtual machine powerstate temporary output
     my $value;
     my $vm;
     my $vm_state;
     my $vm_views;
-    my $true_sub_sel=1;     # Just a flag. To have only one return at the en
-                            # we must ensure that we had a valid subselect. If
-                            # no subselect is given we select all
-                            # 0 -> existing subselect
-                            # 1 -> non existing subselect
+    my $true_sub_sel=1;        # Just a flag. To have only one return at the en
+                               # we must ensure that we had a valid subselect. If
+                               # no subselect is given we select all
+                               # 0 -> existing subselect
+                               # 1 -> non existing subselect
 
     if ((!defined($subselect)) || ($subselect eq "health"))
        {
@@ -102,7 +108,14 @@ sub host_runtime_info
           }
        if (!@$vm_views)
           {
-          $output = "No VMs - ";
+          if ($subselect eq "all")
+             {
+             $output = $output . "No VMs - ";
+             }
+          else
+             {
+             $output = "No VMs - ";
+             }
           }
        else
           {
@@ -137,25 +150,32 @@ sub host_runtime_info
                   if ($vm_state eq "poweredOn")
                      {
                      $poweredon++;
+                     $poweredon_out = $poweredon_out . $vm->name . " (" . $vm_state . ")" . $multiline;
                      }
                   if ($vm_state eq "poweredOff")
                      {
                      $poweredoff++;
+                     $poweredoff_out = $poweredoff_out . $vm->name . " (" . $vm_state . ")" . $multiline;
                      }
                   if ($vm_state eq "suspended")
                      {
                      $suspended++;
+                     $suspended_out = $suspended_out . $vm->name . " (" . $vm_state . ")" . $multiline;
                      }
-                  $output = $output . $vm->name . " (" . $vm_state . ")" . $multiline;
                   }
 
           if ($subselect eq "all")
              {
-             $output = $poweredon . "/" . @$vm_views . " VMs powered on - ";
+             $output = $suspended . "/" . @$vm_views . " VMs powered suspended - ";
+             $output = $output . $poweredoff . "/" . @$vm_views . " VMs powered off - ";
+             $output = $output . $poweredon . "/" . @$vm_views . " VMs powered on - ";
              }
           else
              {
-             $output = $poweredon . "/" . @$vm_views . " VMs powered on." . $multiline . $output;
+             $output = $suspended . "/" . @$vm_views . " VMs powered on - ";
+             $output = $output . $poweredoff . "/" . @$vm_views . " VMs powered on - ";
+             $output = $output . $poweredon . "/" . @$vm_views . " VMs powered on." . $multiline;
+             $output = $output . $suspended_out . $poweredoff_out . $poweredon_out;
              $perfdata = "vms_total=" .  @$vm_views . ";;;; vms_poweredon=" . $poweredon . ";;;; vms_poweredoff=" . $poweredoff . ";;;; vms_suspended=" . $suspended . ";;;;";
              }
           }
@@ -180,15 +200,6 @@ sub host_runtime_info
        {
        $true_sub_sel = 0;
 
-       if ($subselect eq "all")
-          {
-          $output = $output . " - connection state=" . $runtime->connectionState->val;
-          }
-       else
-          {
-          $output = "connection state=" . $runtime->connectionState->val;
-          }
-
        if (lc($runtime->connectionState->val) eq "disconnected")
           {
           $state = 1;
@@ -196,6 +207,15 @@ sub host_runtime_info
        if (lc($runtime->connectionState->val) eq "notResponding")
           {
           $state = 2;
+          }
+
+       if ($subselect eq "all")
+          {
+          $output = $output . " - connection state=" . $runtime->connectionState->val;
+          }
+       else
+          {
+          $output = "connection state=" . $runtime->connectionState->val;
           }
        }
 
@@ -685,64 +705,56 @@ sub host_runtime_info
 
     if (($subselect eq "issues") || ($subselect eq "all"))
        {
-       $issues = $host_view->configIssue;
        $true_sub_sel = 0;
-       my $tmp_output = '';
+       $issues = $host_view->configIssue;
+       $actual_state = 0;
 
        if (defined($issues))
           {
-          if ($subselect eq "all")
-             {
-             $actual_state = 2;
-             $state = check_state($state, $actual_state);
-             $output = $output . @$issues . " config issue(s)";
-             }
-          else
-             {
-             foreach (@$issues)
+          foreach (@$issues)
+                  {
+                  $actual_state = 2;
+                  $issue_cnt++;
+                  if (defined($isregexp))
+                      {
+                      $isregexp = 1;
+                      }
+                   else
+                      {
+                      $isregexp = 0;
+                      }
+            
+                  if (defined($blacklist))
                      {
-                     if (defined($isregexp))
-                         {
-                         $isregexp = 1;
-                         }
-                      else
-                         {
-                         $isregexp = 0;
-                         }
-               
-                     if (defined($blacklist))
+                     $issues_ignored_cnt++;
+                     if (isblacklisted(\$blacklist, $isregexp, $_->fullFormattedMessage))
                         {
-                        if (isblacklisted(\$blacklist, $isregexp, $_->fullFormattedMessage))
-                           {
-                           next;
-                           }
+                        next;
                         }
-                     if (defined($whitelist))
-                        {
-                        if (isnotwhitelisted(\$whitelist, $isregexp, $_->fullFormattedMessage))
-                           {
-                           next;
-                           }
-                        }
-                     $output = $output . format_issue($_) . "; ";
                      }
-             $state = 2;
-             }
+                  if (defined($whitelist))
+                     {
+                     $issues_ignored_cnt++;
+                     if (isnotwhitelisted(\$whitelist, $isregexp, $_->fullFormattedMessage))
+                        {
+                        next;
+                        }
+                     }
+                  $issue_out = $issue_out . format_issue($_) . $multiline;
+                  }
+          }
+
+       if ($subselect eq "all")
+          {
+          $output = $output . " - " . $issue_cnt . " config issues  - " . $issues_ignored_cnt  . " config issues ignored";
           }
        else
           {
-          if ($subselect eq "all")
-             {
-             $actual_state = 0;
-             $state = check_state($state, $actual_state);
-             $output = $output . " - No config issues";
-             }
-          else
-             {
-             $state = 0;
-             $output = 'No config issues';
-             }
+          $output = $issue_cnt . " config issues - " . $issues_ignored_cnt  . " config issues ignored" . $multiline . $issue_out;
+          # Remove the last multiline regardless whether it is \n or <br>
+          $output =~ s/$multiline$//;
           }
+       $state = check_state($state, $actual_state);
        }
 
     if ($true_sub_sel == 1)
@@ -756,5 +768,5 @@ sub host_runtime_info
     }
 
 # A module always must end with a returncode of 1. So placing 1 at the end of a module 
-# is a commen method to ensure this.
+# is a common method to ensure this.
 1;

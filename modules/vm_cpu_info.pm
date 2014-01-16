@@ -101,5 +101,5 @@ sub vm_cpu_info
     }
 
 # A module always must end with a returncode of 1. So placing 1 at the end of a module 
-# is a commen method to ensure this.
+# is a common method to ensure this.
 1;

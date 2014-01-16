@@ -712,6 +712,7 @@ History:
     - Some corrections.
   - host_disk_io_info()
     - added total_latency.
+
 - 08 Jan 20143 M.Fuerstenau version 0.9.2
   - help()
     - Some small bug fixes.
@@ -745,3 +746,58 @@ History:
     - Removed duplicated code. (if subselect ..... else ....)
       The code was 90% identical.
     - Added vmmemctl.average (memctl) to monitor balloning.
+
+- 16 Jan 2014 M.Fuerstenau version 0.9.3
+  - All modules
+    - Corrected typo at the end. common instead of commen
+  - host_storage_info()
+    - Removed ignored counter for whitelisted items. A typical copy and paste
+      b...shit.
+  - vm_runtime_info()
+    - issues
+      - Some bugs with the output. Corrected.
+    - tools
+      - Minor bug fixed. Previously used variable was not removed.
+  - host_runtime_info()
+    - issues.
+      - Some bugs with the output. Corrected.
+    - listvms
+      - output now sorted by powerstate (suspended, poweredoff, powerdon)
+    - Corrected some minor bugs
+  - dc_list_vm_volumes_info()
+    - Removed handing over of unnecessary parameters
+  - dc_runtime_info() -> dc_runtime_info.pm
+    - Code cleaned up and reformated
+    - Added working blacklist/whitelist with the ability to use regular
+      expressions
+    - listvms
+      - output now sorted by powerstate (suspended, poweredoff, powerdon)
+      - Added --alertonly here
+    - listhosts
+      - %host_state_strings was mostly nonsense. The mapped poser states from
+        for virtual machines were used. Hash removed. Using now the orginal 
+        power states from the system (from the docs):
+        - poweredOff -> The host was specifically powered off by the user
+                        through VirtualCenter. This state is not a certain
+                        state, because after VirtualCenter issues the command
+                        to power off the host, the host might crash, or kill
+                        all the processes but fail to power off.
+        - poweredOn  -> The host is powered on
+        - standBy    -> The host was specifically put in standby mode, either
+                        explicitly by the user, or automatically by DPM. This
+                        state is not a cetain state, because after VirtualCenter
+                        issues the command to put the host in stand-by state,
+                        the host might crash, or kill all the processes but fail
+                        to power off.
+        - unknown    -> If the host is disconnected, or notResponding, we can
+                        not possibly have knowledge of its power state. Hence,
+                        the host is marked as unknown. 
+      - Added --alertonly here
+    - listcluster
+      - Removed senseless perf data
+      - Added --alertonly here
+    - status
+      - Rewritten and reformatted
+    - tools
+      - Rewritten and reformatted
+      - Improved more detailed output.

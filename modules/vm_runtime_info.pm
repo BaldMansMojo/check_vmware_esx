@@ -11,7 +11,7 @@ sub vm_runtime_info
     my $tools_out;               # Temporary output in the tools section
     my $issues;                  # Hold a reference to the array of issues
     my $issue_cnt = 0;           # Counter for issues
-    my $issue_out = "Issues: ";  # Temporary output in the issue section
+    my $issue_out = '';          # Temporary output in the issue section
     my $actual_state;            # Hold the actual state for to be compared
     my $true_sub_sel=1;          # Just a flag. To have only one return at the en
                                  # we must ensure that we had a valid subselect. If
@@ -220,11 +220,9 @@ sub vm_runtime_info
                 {
                 if ($vm_view->guest->toolsRunningStatus ne "guestToolsExecutingScripts")
                    {
-                   $toolsRunningStatus = $vm_view->guest->toolsRunningStatus;
-         
                    if ($vm_view->guest->toolsVersionStatus eq "guestToolsBlacklisted")
                       {
-                      $tools_out = "VMware Toolsareis installed and running, but the installed ";
+                      $tools_out = "VMware Tools are installed and running, but the installed ";
                       $tools_out = $tools_out ."version is known to have a grave bug and should ";
                       $tools_out = $tools_out ."be immediately upgraded.";
                       $actual_state = 2;
@@ -315,29 +313,28 @@ sub vm_runtime_info
        {
        $true_sub_sel = 0;
        $issues = $vm_view->configIssue;
+       $actual_state = 0;
 
        if (defined($issues))
           {
-          $actual_state = 2;
+          $issue_out = "Issues: ";
           foreach (@$issues)
                   {
+                  $actual_state = 2;
                   $issue_cnt++;
-                  $issue_out = $issue_out . $_->fullFormattedMessage . "(caused by " . $_->userName . "); ";
+                  $issue_out = $issue_out . $_->fullFormattedMessage . "(caused by " . $_->userName . ")" . $multiline;
                   }
-          }
-       else
-          {
-          $actual_state = 0;
-          $issue_out = $issue_out . $issue_cnt . " config issues";
           }
 
        if ($subselect eq "all")
           {
-          $output = $output . " - " . $issue_out;
+          $output = $output . " - " . $issue_cnt . " config issues";
           }
        else
           {
-          $output = $issue_out;
+          $output = $issue_cnt . " config issues" . $multiline . $issue_out;
+          # Remove the last multiline regardless whether it is \n or <br>
+          $output =~ s/$multiline$//;
           }
        $state = check_state($state, $actual_state);
        }
@@ -353,5 +350,5 @@ sub vm_runtime_info
     }
 
 # A module always must end with a returncode of 1. So placing 1 at the end of a module 
-# is a commen method to ensure this.
+# is a common method to ensure this.
 1;

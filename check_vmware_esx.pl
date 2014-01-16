@@ -712,7 +712,7 @@
 #       dead the failover won't work.There must be an alarm for a standby path too. It is now grouped in the output.
 #     - Multiline support for this.
 #
-# - 03 Jan 20143 M.Fuerstenau version 0.9.1
+# - 03 Jan 2014 M.Fuerstenau version 0.9.1
 #   - check_vmware_esx.pl
 #     Added new flag --ignore_warning. This will map a warning to ok.
 #   - host_runtime_info() - some minor changes
@@ -773,7 +773,7 @@
 #   - host_disk_io_info()
 #     - added total_latency.
 #
-# - 08 Jan 20143 M.Fuerstenau version 0.9.2
+# - 08 Jan 2014 M.Fuerstenau version 0.9.2
 #   - help()
 #     - Some small bug fixes.
 #   - vm_disk_io_info()
@@ -806,6 +806,61 @@
 #     - Removed duplicated code. (if subselect ..... else ....)
 #       The code was 90% identical.
 #     - Added vmmemctl.average (memctl) to monitor balloning.
+#
+# - 16 Jan 2014 M.Fuerstenau version 0.9.3
+#   - All modules
+#     - Corrected typo at the end. common instead of commen
+#   - host_storage_info()
+#     - Removed ignored counter for whitelisted items. A typical copy and paste
+#       b...shit.
+#   - vm_runtime_info()
+#     - issues
+#       - Some bugs with the output. Corrected.
+#     - tools
+#       - Minor bug fixed. Previously used variable was not removed.
+#   - host_runtime_info()
+#     - issues.
+#       - Some bugs with the output. Corrected.
+#     - listvms
+#       - output now sorted by powerstate (suspended, poweredoff, powerdon)
+#     - Corrected some minor bugs
+#   - dc_list_vm_volumes_info()
+#     - Removed handing over of unnecessary parameters
+#   - dc_runtime_info() -> dc_runtime_info.pm
+#     - Code cleaned up and reformated
+#     - Added working blacklist/whitelist with the ability to use regular
+#       expressions
+#     - listvms
+#       - output now sorted by powerstate (suspended, poweredoff, powerdon)
+#       - Added --alertonly here
+#     - listhosts
+#       - %host_state_strings was mostly nonsense. The mapped poser states from
+#         for virtual machines were used. Hash removed. Using now the orginal 
+#         power states from the system (from the docs):
+#         - poweredOff -> The host was specifically powered off by the user
+#                         through VirtualCenter. This state is not a certain
+#                         state, because after VirtualCenter issues the command
+#                         to power off the host, the host might crash, or kill
+#                         all the processes but fail to power off.
+#         - poweredOn  -> The host is powered on
+#         - standBy    -> The host was specifically put in standby mode, either
+#                         explicitly by the user, or automatically by DPM. This
+#                         state is not a cetain state, because after VirtualCenter
+#                         issues the command to put the host in stand-by state,
+#                         the host might crash, or kill all the processes but fail
+#                         to power off.
+#         - unknown    -> If the host is disconnected, or notResponding, we can
+#                         not possibly have knowledge of its power state. Hence,
+#                         the host is marked as unknown. 
+#       - Added --alertonly here
+#     - listcluster
+#       - Removed senseless perf data
+#       - Added --alertonly here
+#     - status
+#       - Rewritten and reformatted
+#     - tools
+#       - Rewritten and reformatted
+#       - Improved more detailed output.
 
 use strict;
 use warnings;
@@ -824,11 +879,6 @@ use datastore_volumes_info;
 # Prevent SSL certificate validation
 
 $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0; 
-
-# Only for debugging
-use Data::Dumper;
-$Data::Dumper::Indent = 1;
-#print "------------------------------------------\n" . Dumper ($store) . "\n" . "------------------------------------------\n";
 
 if ( $@ )
    {
@@ -1259,7 +1309,7 @@ if ($@)
       $result = 2;
       }
    }
-# Hier noch kleiner Bock!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 if (defined($sessionfile_name) and -e $sessionfile_name)
    {
    $vim->unset_logout_on_disconnect();
@@ -1529,12 +1579,14 @@ sub main_select
           {
           require dc_list_vm_volumes_info;
           import dc_list_vm_volumes_info;
-          ($result, $output) = dc_list_vm_volumes_info($blacklist, $whitelist);
+          ($result, $output) = dc_list_vm_volumes_info();
           return($result, $output);
           }
        if ($select eq "runtime")
           {
-          ($result, $output) = dc_runtime_info($blacklist);
+          require dc_runtime_info;
+          import dc_runtime_info;
+          ($result, $output) = dc_runtime_info();
           return($result, $output);
           }
        if ($select eq "soap")
@@ -1676,17 +1728,17 @@ sub check_health_state
     my ($actual_state) = shift(@_);
     my $state = 3;
 
-    if (uc($actual_state) eq "GREEN")
+    if (lc($actual_state) eq "green")
        {
        $state = 0
        }
 
-    if (uc($actual_state) eq "YELLOW")
+    if (lc($actual_state) eq "yellow")
        {
        $state = 1;
        }
  
-    if (uc($actual_state) eq "RED")
+    if (lc($actual_state) eq "red")
        {
        $state = 2;
        }
@@ -1839,426 +1891,6 @@ sub isnotwhitelisted
        }
     return $ret;
     }
-
-#==========================================================================| VM |============================================================================#
-
-
-
-
-
-
-#==========================================================================| DC |============================================================================#
-
-
-
-
-sub dc_runtime_info
-{
-        my ($blacklist) = @_;
-
-        my $state = 2;
-        my $output = 'DC RUNTIME Unknown error';
-        my $runtime;
-
-        if (defined($subselect))
-        {
-                if ($subselect eq "listvms")
-                {
-                        my %vm_state_strings = ("poweredOn" => "UP", "poweredOff" => "DOWN", "suspended" => "SUSPENDED");
-                        my $vm_views = Vim::find_entity_views(view_type => 'VirtualMachine', properties => ['name', 'runtime']);
-
-                        if (!defined($vm_views))
-                           {
-                           print "Runtime error\n";
-                           exit 2;
-                           }
-
-                        if (!@$vm_views)
-                           {
-                           print "There are no VMs.\n";
-                           exit 2;
-                           }
-
-                        my $up = 0;
-                        $output = '';
-
-                        foreach my $vm (@$vm_views) {
-                                my $vm_state = $vm_state_strings{$vm->runtime->powerState->val};
-                                if ($vm_state eq "UP")
-                                {
-                                        $up++;
-                                        $output = $output . $vm->name . "(UP), ";
-                                }
-                                else
-                                {
-                                        $output = $vm->name . "(" . $vm_state . "), " . $output;
-                                }
-                        }
-
-                        chop($output);
-                        chop($output);
-                        $state = 0;
-                        $output = $up . "/" . @$vm_views . " VMs up: " . $output;
-                        $perfdata = $perfdata . " vmcount=" . $up . ";" . $perf_thresholds . ";;";
-
-                        if ( $perf_thresholds eq 1 )
-                           {
-                           $state = check_against_threshold($up);
-                           }
-                }
-                elsif ($subselect eq "listhost")
-                {
-                        my %host_state_strings = ("unknown" => "3", "poweredOn" => "UP", "poweredOff" => "DOWN", "suspended" => "SUSPENDED", "standBy" => "STANDBY", "MaintenanceMode" => "Maintenance Mode");
-                        my $host_views = Vim::find_entity_views(view_type => 'HostSystem', properties => ['name', 'runtime.powerState']);
-
-                        if (!defined($host_views))
-                           {
-                           print "Runtime error\n";
-                           exit 2;
-                           }
-
-                        if (!@$host_views)
-                           {
-                           print "There are no VMs.\n";
-                           exit 2;
-                           }
-
-                        my $up = 0;
-                        my $unknown = 0;
-                        $output = '';
-
-                        foreach my $host (@$host_views) {
-                                $host->update_view_data(['name', 'runtime.powerState']);
-                                my $host_state = $host_state_strings{$host->get_property('runtime.powerState')->val};
-                                $unknown += $host_state eq "3";
-                                if ($host_state eq "UP") {
-                                        $up++;
-                                        $output = $output . $host->name . "(UP), ";
-                                }
-                                else
-                                {
-                                        $output = $host->name . "(" . $host_state . "), " . $output;
-                                }
-                        }
-
-                        chop($output);
-                        chop($output);
-                        $state = 0;
-                        $output = $up . "/" . @$host_views . " Hosts up: " . $output;
-                        $perfdata = $perfdata . " hostcount=" . $up . ";" . $perf_thresholds . ";;";
- 
-                        if ( $perf_thresholds eq 1 )
-                           {
-                           $state = check_against_threshold($up);
-                           }
-
-                        if ($state == 0 && $unknown)
-                           {
-                           $state = 3;
-                           }
-                }
-                elsif ($subselect eq "listcluster")
-                {
-                        my %cluster_state_strings = ("gray" => "3", "green" => "GREEN", "red" => "RED", "yellow" => "YELLOW");
-                        my $cluster_views = Vim::find_entity_views(view_type => 'ClusterComputeResource', properties => ['name', 'overallStatus']);
-
-                        if (!defined($cluster_views))
-                           {
-                           print "Runtime error\n";
-                           exit 2;
-                           }
-
-                        if (!@$cluster_views)
-                           {
-                           print "There are no Clusters.\n";
-                           exit 2;
-                           }
-
-                        my $green = 0;
-                        my $unknown = 0;
-                        $output = '';
-
-                        foreach my $cluster (@$cluster_views) {
-                                $cluster->update_view_data(['name', 'overallStatus']);
-                                my $cluster_state = $cluster_state_strings{$cluster->get_property('overallStatus')->val};
-                                $unknown += $cluster_state eq "3";
-                                if ($cluster_state eq "GREEN") {
-                                        $green++;
-                                        $output = $output . $cluster->name . "(GREEN), ";
-                                }
-                                else
-                                {
-                                        $output = $cluster->name . "(" . $cluster_state . "), " . $output;
-                                }
-                        }
-
-                        chop($output);
-                        chop($output);
-                        $state = 0;
-                        $output = $green . "/" . @$cluster_views . " Cluster green: " . $output;
-                        $perfdata = $perfdata . " clustercount=" . $green . ";" . $perf_thresholds . ";;";
-
-                        if ( $perf_thresholds eq 1 )
-                           {
-                           $state = check_against_threshold($green);
-                           }
-
-                        if ($state == 0 && $unknown)
-                           {
-                           $state = 3;
-                           }
-                }
-                elsif ($subselect eq "tools")
-                {
-                        my $vm_views = Vim::find_entity_views(view_type => 'VirtualMachine', properties => ['name', 'runtime.powerState', 'summary.guest']);
-
-                        if (!defined($vm_views))
-                           {
-                           print "Runtime error\n";
-                           exit 2;
-                           }
-
-                        if (!@$vm_views)
-                           {
-                           print "There are no VMs.\n";
-                           exit 2;
-                           }
-
-                        $output = '';
-                        my $tools_ok = 0;
-                        my $vms_up = 0;
-                        foreach my $vm (@$vm_views) {
-                                my $name = $vm->name;
-                                if (defined($blacklist))
-                                {
-                                        next if ($blacklist =~ m/(^|\s|\t|,)\Q$name\E($|\s|\t|,)/);
-                                }
-                                if ($vm->get_property('runtime.powerState')->val eq "poweredOn")
-                                {
-                                        my $vm_guest = $vm->get_property('summary.guest');
-                                        my $tools_status;
-                                        my $tools_runstate;
-                                        my $tools_version;
-                                        $tools_runstate = $vm_guest->toolsRunningStatus if (exists($vm_guest->{toolsRunningStatus}) && defined($vm_guest->toolsRunningStatus));
-                                        $tools_version = $vm_guest->toolsVersionStatus if (exists($vm_guest->{toolsVersionStatus}) && defined($vm_guest->toolsVersionStatus));
-
-                                        $vms_up++;
-                                        if (defined($tools_runstate) || defined($tools_version))
-                                        {
-                                                my %vm_tools_strings = ("guestToolsCurrent" => "Newest", "guestToolsNeedUpgrade" => "Old", "guestToolsNotInstalled" => "Not installed", "guestToolsUnmanaged" => "Unmanaged", "guestToolsExecutingScripts" => "Starting", "guestToolsNotRunning" => "Not running", "guestToolsRunning" => "Running");
-                                                $tools_status = $vm_tools_strings{$tools_runstate} . "-" if (defined($tools_runstate));
-                                                $tools_status = $tools_status . $vm_tools_strings{$tools_version} . "-" if (defined($tools_version));
-                                                chop($tools_status);
-                                                if ($tools_status eq "Running-Newest")
-                                                {
-                                                        $output = $output . $name . "(Running-Newest), ";
-                                                        $tools_ok++;
-                                                }
-                                                else
-                                                {
-                                                        $output = $name . "(" . $tools_status . "), " . $output;
-                                                }
-                                        }
-                                        else
-                                        {
-                                                my %vm_tools_strings = ("toolsNotInstalled" => "Not installed", "toolsNotRunning" => "Not running", "toolsOk" => "0", "toolsOld" => "Old", "notDefined" => "Not defined");
-                                                $tools_status = $vm_guest->toolsStatus;
-                                                if (defined($tools_status))
-                                                {
-                                                        $tools_status = $vm_tools_strings{$tools_status->val};
-                                                        if ($tools_status eq "0")
-                                                        {
-                                                                $output = $output . $name . "(0), ";
-                                                                $tools_ok++;
-                                                        }
-                                                        else
-                                                        {
-                                                                $output = $name . "(" . $tools_status . "), " . $output;
-                                                        }
-                                                }
-                                                else
-                                                {
-                                                        $output = $name . "(" . $vm_tools_strings{"notDefined"} . "), " . $output;
-                                                }
-                                        }
-                                }
-                        }
-                        chop($output);
-                        chop($output);
-                        if ($vms_up)
-                        {
-                                $tools_ok /= $vms_up / 100;
-                        }
-                        else
-                        {
-                                $tools_ok = 100;
-                        }
-
-                        if ( $perf_thresholds eq 1 )
-                           {
-                           $state = check_against_threshold($tools_ok);
-                           }
-
-                        $perfdata = $perfdata . " toolsok=" . $tools_ok . "%;" . $perf_thresholds . ";;";
-                }
-                elsif ($subselect eq "status")
-                {
-                        my $dc_views = Vim::find_entity_views(view_type => 'Datacenter', properties => ['name', 'overallStatus']);
-
-                        if (!defined($dc_views))
-                           {
-                           print "There are no Datacenter\n";
-                           exit 2;
-                           }
-
-                        $state = 0;
-                        $output = '';
-                        foreach my $dc (@$dc_views) {
-                                if (defined($dc->overallStatus))
-                                {
-                                        my $status = $dc->overallStatus->val;
-                                        $output = $output . $dc->name . " overall status=" . $status . ", ";
-                                        $status = check_health_state($status);
-                                        $state = 3 if ($status == 3);
-                                        $state = check_state($state, $status) if (($state != 3) || ($status != 0));
-                                }
-                                else
-                                {
-                                        $output = $output . "Insufficient rights to access " . $dc->name . " status info on the DC, ";
-                                        $state = check_state($state, 1);
-                                }
-                        }
-                        if ($output) {
-                                chop($output);
-                                chop($output);
-                        }
-                }
-                elsif ($subselect eq "issues")
-                {
-                        my $dc_views = Vim::find_entity_views(view_type => 'Datacenter', properties => ['name', 'configIssue']);
-
-                        if (!defined($dc_views))
-                           {
-                           print "There are no Datacenter\n";
-                           exit 2;
-                           }
-
-                        my $issues_count = 0;
-                        $output = '';
-
-                        foreach my $dc (@$dc_views) {
-                                my $issues = $dc->configIssue;
-
-                                if (defined($issues))
-                                {
-                                        foreach (@$issues)
-                                        {
-                                                if (defined($blacklist))
-                                                {
-                                                        my $name = ref($_);
-                                                        next if ($blacklist =~ m/(^|\s|\t|,)\Q$name\E($|\s|\t|,)/);
-                                                }
-                                                $output = $output . format_issue($_) . "(" . $dc->name . "); ";
-                                                $issues_count++;
-                                        }
-                                }
-                        }
-
-                        if ($output eq '')
-                        {
-                                $state = 0;
-                                $output = 'No config issues';
-                        }
-                        $perfdata = $perfdata . " issues=" . $issues_count;
-                }
-                else
-                {
-                get_me_out("Unknown DC RUNTIME subselect");
-                }
-        }
-        else
-        {
-                my $dc_views = Vim::find_entity_views(view_type => 'Datacenter', properties => ['name', 'overallStatus', 'configIssue']);
-
-                if (!defined($dc_views))
-                   {
-                   print "There are no Datacenter\n";
-                   exit 2;
-                   }
-
-                my %host_maintenance_state = (0 => "no", 1 => "yes");
-                my $vm_views = Vim::find_entity_views(view_type => 'VirtualMachine', properties => ['name', 'runtime.powerState']);
-
-                if (!defined($vm_views))
-                   {
-                   print "Runtime error\n";
-                   exit 2;
-                   }
-
-                my $up = 0;
-
-                if (@$vm_views)
-                {
-                        foreach my $vm (@$vm_views) {
-                                $up += $vm->get_property('runtime.powerState')->val eq "poweredOn";
-                        }
-                        $output = $up . "/" . @$vm_views . " VMs up, ";
-                }
-                else
-                {
-                        $output = "No VMs installed, ";
-                }
-                $perfdata = $perfdata . " vmcount=" . $up . ";" . $perf_thresholds . ";;";
-
-                my $host_views = Vim::find_entity_views(view_type => 'HostSystem', properties => ['name', 'runtime.powerState']);
-
-                if (!defined($host_views))
-                   {
-                   print "Runtime error\n";
-                   exit 2;
-                   }
-
-                $up = 0;
-
-                if (@$host_views)
-                {
-                        foreach my $host (@$host_views) {
-                                $up += $host->get_property('runtime.powerState')->val eq "poweredOn"
-                        }
-                        $output = $output . $up . "/" . @$host_views . " Hosts up, ";
-                }
-                else
-                {
-                        $output = $output . "there are no hosts, ";
-                }
-                $perfdata = $perfdata . " hostcount=" . $up . ";;;;";
-
-                $state = 0;
-
-                foreach my $dc (@$dc_views) {
-                        $output = $output . $dc->name . " overall status=" . $dc->overallStatus->val . ", " if (defined($dc->overallStatus));
-                }
-
-                my $issue_count = 0;
-                foreach my $dc (@$dc_views) {
-                        my $issues = $dc->configIssue;
-                        $issue_count += @$issues if (defined($issues));
-                }
-                
-                if ($issue_count)
-                {
-                        $output = $output . $issue_count . " config issue(s)";
-                        $perfdata = $perfdata . " config_issues=" . $issue_count;
-                }
-                else
-                {
-                        $output = $output . "no config issues";
-                        $perfdata = $perfdata . " config_issues=" . 0;
-                }
-        }
-
-        return ($state, $output);
-}
 
 #=====================================================================| Cluster |============================================================================#
 
