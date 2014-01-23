@@ -74,13 +74,17 @@ sub print_help
        {
        print "\nBecause the output of the complete help is very large you have to select what you want:\n\n";
        help_options();
-       print "<--Hit enter for next page-->";
-       $page = <STDIN>;
-       undef $page;
+       if(-t STDOUT) {
+           print "<--Hit enter for next page-->";
+           $page = <STDIN>;
+           undef $page;
+       }
        hint();
-       print "<--Hit enter for next page-->";
-       $page = <STDIN>;
-       undef $page;
+       if(-t STDOUT) {
+            print "<--Hit enter for next page-->";
+            $page = <STDIN>;
+            undef $page;
+       }
        version_lic();
        exit 0;
        }
