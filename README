@@ -88,6 +88,13 @@ Ensure the the path to the perl interpreter in the program is set to the right p
 -> If using a session file adjust the path for the sessionfile ($plugin_cache in variable definition)
 
 
+Optional
+--------
+
+Some people prefer a single file instead of modules. Use this makefile for Sven Nierlein to generate a single file plugin. Maybe it is a little
+bit slower than the modularized version. Test it.If you open issues in GitHub be careful with line numbers and so on.
+
+
 HTML in output caused by --multiline
 ====================================
 
@@ -128,8 +135,24 @@ Optional a path different from the default one can be set with --sessionfilename
 Storage
 =======
 
-The module host_storage_info.pm (contains host_storage_info()) is a extensive rewrite. Most of the code was rewritten.
-It wasn't tested with iSCSI. Normally it should work but I couldn't test it because I have no iSCSI. Please test it an give me feedback.
+The module host_storage_info.pm (contains host_storage_info()) is a extensive rewrite. Most of the code was rewritten. It now tested with iSCSI by
+customers and it is reported to run without problems.
+
+Multipath:
+- - - - - 
+
+The orignial version was as buggy and misleading as a piece of code can be. A threshold here was absolute nonsense. Why? At top level is a LUN which
+has a SCSI-ID. This LUN is connected to the storage in a SAN with a virtual path called a multipath because it consists of several physical
+connections(physical paths). I f you break down the data deliverd by VMware you will see that in the section for each physical path the associated
+multipath with it's state was also listed. check_vmware_api.pl (and check_esx3.pl) counted all those multipath entry. For example if you had 4 physical
+paths for one multipath the counted 4 multipaths and checked the multipath state. This was absolute nonsense because (under normal conditions) a 
+multipath state is is only dead if all physical paths (4 in the example) are dead.
+
+The new check checks the state of the multipath AND the state of the physical paths. So for example if you have two parallel FC switches in a multipath
+environment and one is dead the multipath state is still ok but you will get an alarm now for the broken connection regardless if a switch, a line or a 
+controller is broken.
+
+This is much more detailed then counting lines.
 
 
 Help

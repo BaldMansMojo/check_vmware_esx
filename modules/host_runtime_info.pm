@@ -661,11 +661,11 @@ sub host_runtime_info
                         
                      if (exists($base_units{$itemref->{unit}}))
                         {
-                        $perfdata = $perfdata . " " . $itemref->{name} . "=" . ($itemref->{value} * 10 ** $itemref->{power10}) . $base_units{$itemref->{unit}} . ";;;;";
+                        $perfdata = $perfdata . " \"" . $itemref->{name} . "=" . ($itemref->{value} * 10 ** $itemref->{power10}) . $base_units{$itemref->{unit}} . ";;;;\"";
                         }
                         else
                         {
-                        $perfdata = $perfdata . " " . $itemref->{name} . "=" . ($itemref->{value} * 10 ** $itemref->{power10}) . ";;;;";
+                        $perfdata = $perfdata . " \"" . $itemref->{name} . "=" . ($itemref->{value} * 10 ** $itemref->{power10}) . ";;;;\"";
                         }
                      }
              }
@@ -681,7 +681,7 @@ sub host_runtime_info
                              {
                              $output = $output . $multiline;
                              }
-                          $output = $output . "$status2text{$curstate} : $name = $value $unit";
+                          $output = $output . $status2text{$curstate} . ": " . $name . " = " . $value . $unit;
                           }
                   }
 

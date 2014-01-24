@@ -872,6 +872,19 @@
 #         expressions
 #       - Added --alertonly here
 #       - Added --multiline here
+#
+# - 24 Jan 2014 M.Fuerstenau version 0.9.4
+#   - Merged pull request from Sven Nierlein
+#     - Modified hel to work with Thruk
+#     - Added Makefile. This is optional. Calling it generates a single file
+#       from all the modules. Maybe it is a little bit slower than the modules.
+#       The readon for modules was speed and better maintenance.
+#   - host_runtime_info()
+#     - Added quotes in perfdata for temp.
+#   - Enhanced README. Explained the differences un host_storage_info() between
+#     the original one and this one
+#   - host_net_info()
+#     - Minor bugfix in output. Corrected typo.
 
 use strict;
 use warnings;
@@ -1320,7 +1333,7 @@ if ($@)
       $result = 2;
       }
    }
-
+# Hier noch kleiner Bock!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (defined($sessionfile_name) and -e $sessionfile_name)
    {
    $vim->unset_logout_on_disconnect();

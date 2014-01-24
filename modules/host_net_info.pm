@@ -203,7 +203,7 @@ sub host_net_info
            }
         else
            {
-           $output = $output . " NICs total:" . $TotalCount . " NICs attached to switch:" . ($OKCount + $BadCount) . " NICs connected:" . $OKCount . " NICs disconnected:" . $BadCount0;
+           $output = $output . " NICs total:" . $TotalCount . " NICs attached to switch:" . ($OKCount + $BadCount) . " NICs connected:" . $OKCount . " NICs disconnected:" . $BadCount;
            }
        }
 
