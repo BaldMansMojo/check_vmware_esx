@@ -1,5 +1,10 @@
 #!/usr/bin/make -f
 
+# This Makefile by Sven Nierlein is completely optional. It is for users
+# who prefer a single big file instead of modules. According to my tests
+# modules are a little bit faster. Don't make patches based on the big
+# file. For patches always use modules
+
 all: check_vmware_esx
 
 check_vmware_esx: check_vmware_esx.pl modules/*.pm
