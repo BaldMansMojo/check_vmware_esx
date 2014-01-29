@@ -885,6 +885,31 @@
 #     the original one and this one
 #   - host_net_info()
 #     - Minor bugfix in output. Corrected typo.
+#
+# - 29 Jan 2014 M.Fuerstenau version 0.9.5
+#   - host_runtime_info()
+#     - Minor bug. Corrected quotes in perfdata for temp.
+#   - vm_net_info()
+#     - Quotes in perfdata
+#     - Removed VM name from output
+#   - vm_mem_info()
+#     - Quotes in perfdata
+#   - vm_disk_io_info()
+#     - Quotes in perfdata
+#   - vm_cpu_info()
+#     - Quotes in perfdata
+#   - host_net_info()
+#     - Quotes in perfdata
+#   - host_mem_info()
+#     - Quotes in perfdata
+#   - host_disk_io_info()
+#     - Quotes in perfdata
+#   - host_cpu_info()
+#     - Quotes in perfdata
+#   - dc_runtime_info()
+#     - Quotes in perfdata
+#   - datastore_volumes_info()
+#     - Quotes in perfdata
 
 use strict;
 use warnings;

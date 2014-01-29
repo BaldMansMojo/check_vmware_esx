@@ -36,13 +36,13 @@ sub vm_cpu_info
           if ($subselect eq "all")
              {
              $output = "CPU wait=" . $value . " ms";
-             $perfdata = "cpu_wait=" . $value . "ms;" . $perf_thresholds . ";;";
+             $perfdata = "\'cpu_wait\'=" . $value . "ms;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "CPU wait=" . $value . " ms";
-             $perfdata = "cpu_wait=" . $value . "ms;" . $perf_thresholds . ";;";
+             $perfdata = "\'cpu_wait\'=" . $value . "ms;" . $perf_thresholds . ";;";
              $state = check_state($state, $actual_state);
              }
           }
@@ -57,13 +57,13 @@ sub vm_cpu_info
           if ($subselect eq "all")
              {
              $output = $output . " - CPU ready=" . $value . " ms";
-             $perfdata = $perfdata . " cpu_ready=" . $value . "ms;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'cpu_ready\'=" . $value . "ms;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "CPU ready=" . $value . " ms";
-             $perfdata = "cpu_ready=" . $value . "ms;" . $perf_thresholds . ";;";
+             $perfdata = "\'cpu_ready\'=" . $value . "ms;" . $perf_thresholds . ";;";
              $state = check_state($state, $actual_state);
              }
           }
@@ -78,13 +78,13 @@ sub vm_cpu_info
           if ($subselect eq "all")
              {
              $output = $output . " - CPU usage=" . $value . "%"; 
-             $perfdata = $perfdata . " cpu_usage=" . $value . "%;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'cpu_usage\'=" . $value . "%;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "CPU usage=" . $value . "%"; 
-             $perfdata = "cpu_usage=" . $value . "%;" . $perf_thresholds . ";;";
+             $perfdata = "\'cpu_usage\'=" . $value . "%;" . $perf_thresholds . ";;";
              $state = check_state($state, $actual_state);
              }
           }

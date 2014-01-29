@@ -37,13 +37,13 @@ sub vm_disk_io_info
           if ($subselect eq "all")
              {
              $output = "I/O usage=" . $value . " KB/s";
-             $perfdata = $perfdata . " io_usage=" . $value . "KB/s;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'io_usage\'=" . $value . "KB/s;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "I/O usage=" . $value . " KB/s";
-             $perfdata = "io_usage=" . $value . "KB/s;" . $perf_thresholds . ";;";
+             $perfdata = "\'io_usage\'=" . $value . "KB/s;" . $perf_thresholds . ";;";
              $state = check_state($state, $actual_state);
              }
           }
@@ -58,13 +58,13 @@ sub vm_disk_io_info
           if ($subselect eq "all")
              {
              $output = $output . " - I/O read=" . $value . " KB/s";
-             $perfdata = $perfdata . " io_read=" . $value . "KB/s;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'io_read\'=" . $value . "KB/s;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "I/O read=" . $value . " KB/s";
-             $perfdata = " io_read=" . $value . "KB/s;" . $perf_thresholds . ";;";
+             $perfdata = " \'io_read\'=" . $value . "KB/s;" . $perf_thresholds . ";;";
              $state = check_state($state, $actual_state);
              }
           }
@@ -79,13 +79,13 @@ sub vm_disk_io_info
           if ($subselect eq "all")
              {
              $output = $output . " - I/O write=" . $value . " KB/s";
-             $perfdata = $perfdata . " io_write=" . $value . "KB/s;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'io_write\'=" . $value . "KB/s;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "I/O write=" . $value . " KB/s";
-             $perfdata = " io_write=" . $value . "KB/s;" . $perf_thresholds . ";;";
+             $perfdata = " \'io_write\'=" . $value . "KB/s;" . $perf_thresholds . ";;";
              $state = check_state($state, $actual_state);
              }
           }

@@ -137,7 +137,7 @@ sub datastore_volumes_info
                         }
                      }
 
-                  $perfdata = $perfdata . " " . $name . "=" . $freespace . "$uom;" . $perf_thresholds . ";;" . $capacity;
+                  $perfdata = $perfdata . " \'" . $name . "\'=" . $freespace . "$uom;" . $perf_thresholds . ";;" . $capacity;
 
                   if (!$alertonly || $actual_state != 0)
                      {

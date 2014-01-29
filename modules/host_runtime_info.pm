@@ -176,7 +176,7 @@ sub host_runtime_info
              $output = $output . $poweredoff . "/" . @$vm_views . " VMs powered off - ";
              $output = $output . $poweredon . "/" . @$vm_views . " VMs powered on." . $multiline;
              $output = $output . $suspended_out . $poweredoff_out . $poweredon_out;
-             $perfdata = "vms_total=" .  @$vm_views . ";;;; vms_poweredon=" . $poweredon . ";;;; vms_poweredoff=" . $poweredoff . ";;;; vms_suspended=" . $suspended . ";;;;";
+             $perfdata = "\'vms_total\'=" .  @$vm_views . ";;;; \'vms_poweredon\'=" . $poweredon . ";;;; \'vms_poweredoff\'=" . $poweredoff . ";;;; \'vms_suspended\'=" . $suspended . ";;;;";
              }
           }
        }
@@ -661,11 +661,11 @@ sub host_runtime_info
                         
                      if (exists($base_units{$itemref->{unit}}))
                         {
-                        $perfdata = $perfdata . " \"" . $itemref->{name} . "=" . ($itemref->{value} * 10 ** $itemref->{power10}) . $base_units{$itemref->{unit}} . ";;;;\"";
+                        $perfdata = $perfdata . " \'" . $itemref->{name} . "\'=" . ($itemref->{value} * 10 ** $itemref->{power10}) . $base_units{$itemref->{unit}} . ";;;;";
                         }
                         else
                         {
-                        $perfdata = $perfdata . " \"" . $itemref->{name} . "=" . ($itemref->{value} * 10 ** $itemref->{power10}) . ";;;;\"";
+                        $perfdata = $perfdata . " \'" . $itemref->{name} . "\'=" . ($itemref->{value} * 10 ** $itemref->{power10}) . ";;;;";
                         }
                      }
              }

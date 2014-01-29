@@ -43,7 +43,7 @@ sub host_net_info
        if (defined($values))
           {
           $value = simplify_number(convert_number($$values[0][0]->value));
-          $perfdata = $perfdata . " net_usage=" . $value . $perf_thresholds . ";;";
+          $perfdata = $perfdata . " \'net_usage\'=" . $value . $perf_thresholds . ";;";
           $output = "net usage=" . $value . " KBps";
           if ($subselect ne "all")
              {
@@ -70,7 +70,7 @@ sub host_net_info
        if (defined($values))
           {
           $value = simplify_number(convert_number($$values[0][0]->value));
-          $perfdata = $perfdata . " net_receive=" . $value . $perf_thresholds . ";;";
+          $perfdata = $perfdata . " \'net_receive\'=" . $value . $perf_thresholds . ";;";
           if ($subselect ne "all")
              {
              $output = "net receive=" . $value . " KBps";
@@ -101,7 +101,7 @@ sub host_net_info
        if (defined($values))
           {
           $value = simplify_number(convert_number($$values[0][0]->value));
-          $perfdata = $perfdata . " net_send=" . $value . $perf_thresholds . ";;";
+          $perfdata = $perfdata . " \'net_send\'=" . $value . $perf_thresholds . ";;";
           if ($subselect ne "all")
              {
              $output = "net send=" . $value . " KBps";

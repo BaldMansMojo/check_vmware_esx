@@ -162,7 +162,7 @@ sub dc_runtime_info
              $output = $output . $poweredoff . "/" . @$vm_views . " VMs powered off - ";
              $output = $output . $poweredon . "/" . @$vm_views . " VMs powered on." . $multiline;
              $output = $output . $suspended_out . $poweredoff_out . $poweredon_out;
-             $perfdata = "vms_total=" .  @$vm_views . ";;;; vms_poweredon=" . $poweredon . ";;;; vms_poweredoff=" . $poweredoff . ";;;; vms_suspended=" . $suspended . ";;;;";
+             $perfdata = "\'vms_total\'=" .  @$vm_views . ";;;; \'vms_poweredon\'=" . $poweredon . ";;;; \'vms_poweredoff\'=" . $poweredoff . ";;;; \'vms_suspended\'=" . $suspended . ";;;;";
              }
           # Remove the last multiline regardless whether it is \n or <br>
           $output =~ s/$multiline$//;

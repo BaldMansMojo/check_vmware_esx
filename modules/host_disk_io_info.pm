@@ -37,13 +37,13 @@ sub host_disk_io_info
           if ($subselect eq "all")
              {
              $output = "I/O commands aborted=" . $value;
-             $perfdata = "io_aborted=" . $value . ";" . $perf_thresholds . ";;";
+             $perfdata = "\'io_aborted\'=" . $value . ";" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "io commands aborted=" . $value;
-             $perfdata = "io_aborted=" . $value . ";" . $perf_thresholds . ";;";
+             $perfdata = "\'io_aborted\'=" . $value . ";" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
           }
@@ -58,13 +58,13 @@ sub host_disk_io_info
           if ($subselect eq "all")
              {
              $output =  $output . " - I/O bus resets=" . $value;
-             $perfdata = $perfdata . " io_busresets=" . $value . ";" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'io_busresets\'=" . $value . ";" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "I/O bus resets=" . $value;
-             $perfdata = "io_busresets=" . $value . ";" . $perf_thresholds . ";;";
+             $perfdata = "\'io_busresets\'=" . $value . ";" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
           }
@@ -79,13 +79,13 @@ sub host_disk_io_info
           if ($subselect eq "all")
              {
              $output = $output . " - I/O read=" . $value . " KB/sec.";
-             $perfdata = $perfdata . " io_read=" . $value . "KB;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'io_read\'=" . $value . "KB;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "I/O read=" . $value . " KB/sec.";
-             $perfdata = "io_read=" . $value . "KB;" . $perf_thresholds . ";;";
+             $perfdata = "\'io_read\'=" . $value . "KB;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
           }
@@ -100,13 +100,13 @@ sub host_disk_io_info
           if ($subselect eq "all")
              {
              $output = $output . " - I/O read latency=" . $value . " ms";
-             $perfdata = $perfdata . " io_read_latency=" . $value . "ms;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'io_read_latency\'=" . $value . "ms;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "I/O read latency=" . $value . " ms";
-             $perfdata = "io_read_latency=" . $value . "ms;" . $perf_thresholds . ";;";
+             $perfdata = "\'io_read_latency\'=" . $value . "ms;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
           }
@@ -121,13 +121,13 @@ sub host_disk_io_info
           if ($subselect eq "all")
              {
              $output = $output . " - I/O write=" . $value . " KB/sec.";
-             $perfdata = $perfdata . " io_write=" . $value . "KB;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'io_write\'=" . $value . "KB;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "I/O write=" . $value . " KB/sec.";
-             $perfdata = "io_write=" . $value . "KB;" . $perf_thresholds . ";;";
+             $perfdata = "\'io_write\'=" . $value . "KB;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
           }
@@ -142,13 +142,13 @@ sub host_disk_io_info
           if ($subselect eq "all")
              {
              $output = $output . "I/O write latency=" . $value . " ms";
-             $perfdata = $perfdata . " io_write_latency=" . $value . "ms;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'io_write_latency\'=" . $value . "ms;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "I/O write latency=" . $value . " ms";
-             $perfdata = "io_write_latency=" . $value . "ms;" . $perf_thresholds . ";;";
+             $perfdata = "\'io_write_latency\'=" . $value . "ms;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
           }
@@ -163,13 +163,13 @@ sub host_disk_io_info
           if ($subselect eq "all")
              {
              $output = $output . " - I/O_usage=" . $value . " KB/sec.";
-             $perfdata = $perfdata . " io_usage=" . $value . "KB;;;";
+             $perfdata = $perfdata . " \'io_usage\'=" . $value . "KB;;;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "I/O_usage=" . $value . " KB/sec., ";
-             $perfdata = "io_usage=" . $value . "KB;;;";
+             $perfdata = "\'io_usage\'=" . $value . "KB;;;";
              $state = check_against_threshold($value);
              }
           }
@@ -184,13 +184,13 @@ sub host_disk_io_info
           if ($subselect eq "all")
              {
              $output = $output . " - I/O kernel latency=" . $value . " ms";
-             $perfdata = $perfdata . " io_kernel_latency=" . $value . "ms;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'io_kernel_latency\'=" . $value . "ms;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "I/O kernel latency=" . $value . " ms";
-             $perfdata = "io_kernel_latency=" . $value . "ms;" . $perf_thresholds . ";;";
+             $perfdata = "\'io_kernel_latency\'=" . $value . "ms;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
           }
@@ -205,13 +205,13 @@ sub host_disk_io_info
           if ($subselect eq "all")
              {
              $output = $output . " - I/O device latency=" . $value . " ms";
-             $perfdata = $perfdata . " io_device_latency=" . $value . "ms;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'io_device_latency\'=" . $value . "ms;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "I/O device latency=" . $value . " ms";
-             $perfdata = "io_device_latency=" . $value . "ms;" . $perf_thresholds . ";;";
+             $perfdata = "\'io_device_latency\'=" . $value . "ms;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
           }
@@ -226,13 +226,13 @@ sub host_disk_io_info
           if ($subselect eq "all")
              {
              $output = $output . " - I/O queue latency=" . $value . " ms";
-             $perfdata = $perfdata . " io_queue_latency=" . $value . "ms;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'io_queue_latency\'=" . $value . "ms;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "I/O queue latency=" . $value . " ms";
-             $perfdata = "io_queue_latency=" . $value . "ms;" . $perf_thresholds . ";;";
+             $perfdata = "\'io_queue_latency\'=" . $value . "ms;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
           }
@@ -247,13 +247,13 @@ sub host_disk_io_info
           if ($subselect eq "all")
              {
              $output = $output . " - I/O total latency=" . $value . " ms";
-             $perfdata = $perfdata . " io_total_latency=" . $value . "ms;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'io_total_latency\'=" . $value . "ms;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "I/O total latency=" . $value . " ms";
-             $perfdata = "io_total_latency=" . $value . "ms;" . $perf_thresholds . ";;";
+             $perfdata = "\'io_total_latency\'=" . $value . "ms;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
           }

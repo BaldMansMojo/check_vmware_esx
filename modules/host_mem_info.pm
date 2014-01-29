@@ -42,13 +42,13 @@ sub host_mem_info
           if ($subselect eq "all")
              {
              $output = "mem usage=" . $value . "%"; 
-             $perfdata = "mem_usage=" . $value . "%;" . $perf_thresholds . ";;";
+             $perfdata = "\'mem_usage\'=" . $value . "%;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "mem usage=" . $value . "%"; 
-             $perfdata = "mem_usage=" . $value . "%;" . $perf_thresholds . ";;";
+             $perfdata = "\'mem_usage\'=" . $value . "%;" . $perf_thresholds . ";;";
              $state = check_state($state, $actual_state);
              }
           }
@@ -63,13 +63,13 @@ sub host_mem_info
           if ($subselect eq "all")
              {
              $output = $output . " - consumed memory=" . $value . " MB";
-             $perfdata = $perfdata . " consumed_memory=" . $value . "MB;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'consumed_memory\'=" . $value . "MB;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "consumed memory=" . $value . " MB";
-             $perfdata = "consumed_memory=" . $value . "MB;" . $perf_thresholds . ";;";
+             $perfdata = "\'consumed_memory\'=" . $value . "MB;" . $perf_thresholds . ";;";
              $state = check_state($state, $actual_state);
              }
           }
@@ -85,13 +85,13 @@ sub host_mem_info
           if ($subselect eq "all")
              {
              $output = $output . " - swap used=" . $value . " MB";
-             $perfdata = $perfdata . " mem_swap=" . $value . "MB;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'mem_swap\'=" . $value . "MB;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "swap used=" . $value . " MB";
-             $perfdata = "mem_swap=" . $value . "MB;" . $perf_thresholds . ";;";
+             $perfdata = "\'mem_swap\'=" . $value . "MB;" . $perf_thresholds . ";;";
              $state = check_state($state, $actual_state);
 
              if ($actual_state != 0)
@@ -143,13 +143,13 @@ sub host_mem_info
           if ($subselect eq "all")
              {
              $output = $output . " - overhead=" . $value . " MB";
-             $perfdata = $perfdata . " mem_overhead=" . $value . "MB;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'mem_overhead\'=" . $value . "MB;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "overhead=" . $value . " MB";
-             $perfdata = "mem_overhead=" . $value . "MB;" . $perf_thresholds . ";;";
+             $perfdata = "\'mem_overhead\'=" . $value . "MB;" . $perf_thresholds . ";;";
              $state = check_state($state, $actual_state);
              }
           }
@@ -164,13 +164,13 @@ sub host_mem_info
           if ($subselect eq "all")
              {
              $output = $output . " - memctl=" . $value . " MB: ";
-             $perfdata = $perfdata . " mem_memctl=" . $value . "MB;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'mem_memctl\'=" . $value . "MB;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "memctl=" . $value . " MB";
-             $perfdata = "mem_memctl=" . $value . "MB;" . $perf_thresholds . ";;";
+             $perfdata = "\'mem_memctl\'=" . $value . "MB;" . $perf_thresholds . ";;";
              $state = check_state($state, $actual_state);
 
              if ($actual_state != 0)
