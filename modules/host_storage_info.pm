@@ -441,10 +441,18 @@ sub host_storage_info
                                 if ($multipathState eq "standby")
                                    {
                                    $mpath_tmp_output = $mpath_tmp_output . "Mpath State: " . $multipathState . $multiline; 
-                                   $actual_state = 1;
-                                   $state = check_state($state, $actual_state);
-                                   $this_mpath_error = 1;
-                                   $mpath_warn_cnt++;
+                                   if (defined($standbyok))
+                                      {
+                                      $actual_state = 0;
+                                      $state = check_state($state, $actual_state);
+                                      }
+                                   else
+                                      {
+                                      $actual_state = 1;
+                                      $state = check_state($state, $actual_state);
+                                      $this_mpath_error = 1;
+                                      $mpath_warn_cnt++;
+                                      }
                                    }
                                 if ($multipathState eq "unknown")
                                    {

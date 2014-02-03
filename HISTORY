@@ -850,3 +850,8 @@ History:
     - Quotes in perfdata
   - datastore_volumes_info()
     - Quotes in perfdata
+
+- 04 Feb 2014 M.Fuerstenau version 0.9.6
+  - host_storage_info()
+    - New switch --standbyok for storage systems where a standby multipath is ok
+      and not a warning.

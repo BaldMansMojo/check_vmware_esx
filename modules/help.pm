@@ -564,6 +564,8 @@ sub print_help
        print "                                    will do the job: sed 's/<[^<>]*>//g'\n";
        print "or with\n";
        print "-s, --subselect=path                List multipaths and the associated paths.\n";
+       print "    --standbyok                     For storage systems where a standby multipath\n";
+       print "                                    is ok and not a warning.\n";
        print "-B, --exclude=<black_list>          Blacklist paths.\n";
        print "-W, --include=<white_list>          Whitelist paths.\n";
        print "                                    A multipath SCSI ID is in the form:\n";

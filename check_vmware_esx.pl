@@ -910,6 +910,11 @@
 #     - Quotes in perfdata
 #   - datastore_volumes_info()
 #     - Quotes in perfdata
+#
+# - 04 Feb 2014 M.Fuerstenau version 0.9.6
+#   - host_storage_info()
+#     - New switch --standbyok for storage systems where a standby multipath is ok
+#       and not a warning
 
 use strict;
 use warnings;
@@ -1026,6 +1031,7 @@ my  $multiline_def="\n";                       # Default for $multiline;
 
 our $ignoreunknown;                            # Maps unknown to ok
 our $ignorewarning;                            # Maps warning to ok
+our $standbyok;                                # For multipathing if a standby multipath is ok
 our $listall;                                  # used for host. Lists all available devices(use for listing purpose only)
 
 
@@ -1081,6 +1087,7 @@ GetOptions
                                          "multiline"        => \$multiline,
                                          "isregexp"         => \$isregexp,
                                          "listall"          => \$listall,
+                                         "standbyok"        => \$standbyok,
                                          "sslport=s"        => \$sslport,
                                          "gigabyte"         => \$gigabyte,
 	 "V"   => \$version,             "version"          => \$version);
