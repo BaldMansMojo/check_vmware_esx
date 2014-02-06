@@ -970,7 +970,7 @@ if ( $@ )
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.3';                   # Contains the program version number
+our $prog_version = '0.9.7';                   # Contains the program version number
 our $ProgName = basename($0);
 
 #my  $help = '';                                # If some help is wanted....
