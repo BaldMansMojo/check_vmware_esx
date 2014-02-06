@@ -52,6 +52,12 @@ sub host_mem_info
              $state = check_state($state, $actual_state);
              }
           }
+       else
+          {
+          $actual_state = 3;
+          $output = "mem usage=Not available"; 
+          $state = check_state($state, $actual_state);
+          }
        }
        
     if (($subselect eq "consumed") || ($subselect eq "all"))
@@ -70,6 +76,21 @@ sub host_mem_info
              $actual_state = check_against_threshold($value);
              $output = "consumed memory=" . $value . " MB";
              $perfdata = "\'consumed_memory\'=" . $value . "MB;" . $perf_thresholds . ";;";
+             $state = check_state($state, $actual_state);
+             }
+          }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - consumed memory=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "consumed memory=Not available";
              $state = check_state($state, $actual_state);
              }
           }
@@ -92,7 +113,6 @@ sub host_mem_info
              $actual_state = check_against_threshold($value);
              $output = "swap used=" . $value . " MB";
              $perfdata = "\'mem_swap\'=" . $value . "MB;" . $perf_thresholds . ";;";
-             $state = check_state($state, $actual_state);
 
              if ($actual_state != 0)
                 {
@@ -130,6 +150,22 @@ sub host_mem_info
       
                    }
                 }
+             $state = check_state($state, $actual_state);
+             }
+          }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - swap used=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "swap used=Not available";
+             $state = check_state($state, $actual_state);
              }
           }
        }
@@ -153,6 +189,21 @@ sub host_mem_info
              $state = check_state($state, $actual_state);
              }
           }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - mem overhead=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "mem overhead=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          }
        }
 
     if (($subselect eq "memctl") || ($subselect eq "all"))
@@ -171,7 +222,6 @@ sub host_mem_info
              $actual_state = check_against_threshold($value);
              $output = "memctl=" . $value . " MB";
              $perfdata = "\'mem_memctl\'=" . $value . "MB;" . $perf_thresholds . ";;";
-             $state = check_state($state, $actual_state);
 
              if ($actual_state != 0)
                 {
@@ -204,6 +254,22 @@ sub host_mem_info
                       }
                    }
                 }
+             $state = check_state($state, $actual_state);
+             }
+          }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - memctl=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "memctl=Not available";
+             $state = check_state($state, $actual_state);
              }
           }
        }

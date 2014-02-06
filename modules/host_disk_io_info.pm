@@ -47,6 +47,12 @@ sub host_disk_io_info
              $state = check_against_threshold($value);
              }
           }
+       else
+          {
+          $actual_state = 3;
+          $output = "I/O commands aborted=Not available";
+          $state = check_state($state, $actual_state);
+          }
        }
 
     if (($subselect eq "resets") || ($subselect eq "all"))
@@ -66,6 +72,21 @@ sub host_disk_io_info
              $output = "I/O bus resets=" . $value;
              $perfdata = "\'io_busresets\'=" . $value . ";" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
+             }
+          }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - I/O bus resets=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "I/O bus resets=Not available";
+             $state = check_state($state, $actual_state);
              }
           }
        }
@@ -89,6 +110,21 @@ sub host_disk_io_info
              $state = check_against_threshold($value);
              }
           }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - I/O read=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "I/O read=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          }
        }
     
     if (($subselect eq "read_latency") || ($subselect eq "all"))
@@ -108,6 +144,21 @@ sub host_disk_io_info
              $output = "I/O read latency=" . $value . " ms";
              $perfdata = "\'io_read_latency\'=" . $value . "ms;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
+             }
+          }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - I/O read latency=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "I/O read latency=Not available";
+             $state = check_state($state, $actual_state);
              }
           }
        }
@@ -131,6 +182,21 @@ sub host_disk_io_info
              $state = check_against_threshold($value);
              }
           }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - I/O write=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "I/O write=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          }
        }
     
     if (($subselect eq "write_latency") || ($subselect eq "all"))
@@ -152,6 +218,21 @@ sub host_disk_io_info
              $state = check_against_threshold($value);
              }
           }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - I/O write latency==Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "I/O write latency==Not available";
+             $state = check_state($state, $actual_state);
+             }
+          }
        }
     
     if (($subselect eq "usage") || ($subselect eq "all"))
@@ -162,15 +243,30 @@ sub host_disk_io_info
           $value = simplify_number(convert_number($$values[0][6]->value), 0);
           if ($subselect eq "all")
              {
-             $output = $output . " - I/O_usage=" . $value . " KB/sec.";
+             $output = $output . " - I/O usage=" . $value . " KB/sec.";
              $perfdata = $perfdata . " \'io_usage\'=" . $value . "KB;;;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
-             $output = "I/O_usage=" . $value . " KB/sec., ";
+             $output = "I/O usage=" . $value . " KB/sec., ";
              $perfdata = "\'io_usage\'=" . $value . "KB;;;";
              $state = check_against_threshold($value);
+             }
+          }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - I/O usage=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "I/O usage=Not available";
+             $state = check_state($state, $actual_state);
              }
           }
        }
@@ -194,6 +290,21 @@ sub host_disk_io_info
              $state = check_against_threshold($value);
              }
           }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - I/O kernel latency=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "I/O kernel latency=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          }
        }
     
     if (($subselect eq "device_latency") || ($subselect eq "all"))
@@ -213,6 +324,21 @@ sub host_disk_io_info
              $output = "I/O device latency=" . $value . " ms";
              $perfdata = "\'io_device_latency\'=" . $value . "ms;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
+             }
+          }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - I/O device latency=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "I/O device latency=Not available";
+             $state = check_state($state, $actual_state);
              }
           }
        }
@@ -236,6 +362,21 @@ sub host_disk_io_info
              $state = check_against_threshold($value);
              }
           }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - I/O queue latency=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "I/O queue latency=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          }
        }
     
     if (($subselect eq "total_latency") || ($subselect eq "all"))
@@ -255,6 +396,21 @@ sub host_disk_io_info
              $output = "I/O total latency=" . $value . " ms";
              $perfdata = "\'io_total_latency\'=" . $value . "ms;" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
+             }
+          }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - I/O total latency=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "I/O total latency=Not available";
+             $state = check_state($state, $actual_state);
              }
           }
        }

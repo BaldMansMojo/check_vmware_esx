@@ -46,6 +46,12 @@ sub vm_mem_info
              $state = check_state($state, $actual_state);
              }
           }
+       else
+          {
+          $actual_state = 3;
+          $output = "mem usage=Not available"; 
+          $state = check_state($state, $actual_state);
+          }
        }
     
     if (($subselect eq "consumed") || ($subselect eq "all"))
@@ -64,6 +70,21 @@ sub vm_mem_info
              $actual_state = check_against_threshold($value);
              $output = "consumed memory=" . $value . " MB";
              $perfdata = "\'consumed_memory\'=" . $value . "MB;" . $perf_thresholds . ";;";
+             $state = check_state($state, $actual_state);
+             }
+          }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - consumed memory=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "consumed memory=Not available";
              $state = check_state($state, $actual_state);
              }
           }
@@ -88,6 +109,21 @@ sub vm_mem_info
              $state = check_state($state, $actual_state);
              }
           }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - mem overhead=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "mem overhead=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          }
        }
     
     if (($subselect eq "active") || ($subselect eq "all"))
@@ -109,6 +145,21 @@ sub vm_mem_info
              $state = check_state($state, $actual_state);
              }
           }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - mem active=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "mem active=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          }
        }
 
     if (($subselect eq "memctl") || ($subselect eq "all"))
@@ -127,6 +178,21 @@ sub vm_mem_info
              $actual_state = check_against_threshold($value);
              $output = "memctl=" . $value . " MB";
              $perfdata = "\'memctl\'=" . $value . "MB;" . $perf_thresholds . ";;";
+             $state = check_state($state, $actual_state);
+             }
+          }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - memctl=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "memctl=Not available";
              $state = check_state($state, $actual_state);
              }
           }

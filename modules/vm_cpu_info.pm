@@ -46,6 +46,12 @@ sub vm_cpu_info
              $state = check_state($state, $actual_state);
              }
           }
+       else
+          {
+          $actual_state = 3;
+          $output = "CPU wait=Not available";
+          $state = check_state($state, $actual_state);
+          }
        }
 
     if (($subselect eq "ready") || ($subselect eq "all"))
@@ -67,6 +73,21 @@ sub vm_cpu_info
              $state = check_state($state, $actual_state);
              }
           }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - CPU ready=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "CPU ready=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          }
        }
 
     if (($subselect eq "usage") || ($subselect eq "all"))
@@ -85,6 +106,21 @@ sub vm_cpu_info
              $actual_state = check_against_threshold($value);
              $output = "CPU usage=" . $value . "%"; 
              $perfdata = "\'cpu_usage\'=" . $value . "%;" . $perf_thresholds . ";;";
+             $state = check_state($state, $actual_state);
+             }
+          }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - CPU usage=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "CPU usage=Not available";
              $state = check_state($state, $actual_state);
              }
           }

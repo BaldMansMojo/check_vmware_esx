@@ -5,7 +5,6 @@ sub host_net_info
     {
     my ($host) = @_;
     my $state = 0;
-    my $actual_state = $state;
     my $value;
     my $output;
     my $output_nic = "";
@@ -19,14 +18,19 @@ sub host_net_info
     my $switch;
     my $nic_key;
     my %NIC = ();
-    my $true_sub_sel=0;     # 0 -> true subselect - 1 -> false subselect
+    my $actual_state;            # Hold the actual state for to be compared
+    my $true_sub_sel=1;          # Just a flag. To have only one return at the en
+                                 # we must ensure that we had a valid subselect. If
+                                 # no subselect is given we select all
+                                 # 0 -> existing subselect
+                                 # 1 -> non existing subselect
         
     if (!defined($subselect))
        {
        # This means no given subselect. So all checks must be performemed
        # Therefore with all set no threshold check can be performed
        $subselect = "all";
-       $true_sub_sel = 1;
+       $true_sub_sel = 0;
        
        if ( $perf_thresholds ne ";")
           {
@@ -35,98 +39,112 @@ sub host_net_info
           }
        }
 
+    $values = return_host_performance_values($host, 'net', ('usage.average', 'received.average', 'transmitted.average'));
+
+
     if (($subselect eq "usage") || ($subselect eq "all"))
        {
-       $true_sub_sel = 1;
-       $values = return_host_performance_values($host, 'net', ('usage.average'));
+       $true_sub_sel = 0;
 
        if (defined($values))
           {
           $value = simplify_number(convert_number($$values[0][0]->value));
-          $perfdata = $perfdata . " \'net_usage\'=" . $value . $perf_thresholds . ";;";
-          $output = "net usage=" . $value . " KBps";
-          if ($subselect ne "all")
+          if ($subselect eq "all")
+             {
+             $output = "net usage=" . $value . " KBps";
+             $perfdata = "\'net_usage\'=" . $value . $perf_thresholds . ";;";
+             }
+          else
              {
              $actual_state = check_against_threshold($value);
+             $output = "net usage=" . $value . " KBps";
+             $perfdata = "\'net_usage\'=" . $value . $perf_thresholds . ";;";
+             $state = check_state($state, $actual_state);
              }
           }
        else
           {
-          $output = "net usage=NOT AVAILABLE";
-          $actual_state = 1;
-          }
-           
-       if ($actual_state != 0)
-          {
+          $actual_state = 3;
+          $output = "net usage=Not available";
           $state = check_state($state, $actual_state);
           }
        }
    
     if (($subselect eq "receive") || ($subselect eq "all"))
        {
-       $true_sub_sel = 1;
-       $values = return_host_performance_values($host, 'net', ('received.average'));
-
+       $true_sub_sel = 0;
        if (defined($values))
           {
-          $value = simplify_number(convert_number($$values[0][0]->value));
-          $perfdata = $perfdata . " \'net_receive\'=" . $value . $perf_thresholds . ";;";
-          if ($subselect ne "all")
+          $value = simplify_number(convert_number($$values[0][1]->value));
+          if ($subselect eq "all")
              {
-             $output = "net receive=" . $value . " KBps";
-             $actual_state = check_against_threshold($value);
+             $output = $output . " net receive=" . $value . " KBps";
+             $perfdata = $perfdata . " \'net_receive\'=" . $value . $perf_thresholds . ";;";
              }
           else
              {
-             $output = $output . ", net receive=" . $value . " KBps";
+             $actual_state = check_against_threshold($value);
+             $output = "net receive=" . $value . " KBps";
+             $perfdata = "\'net_receive\'=" . $value . $perf_thresholds . ";;";
+             $state = check_state($state, $actual_state);
              }
           }
        else
           {
-          $output = "net receive=NOT AVAILABLE";
-          $actual_state = 1;
-          }
-
-       if ($actual_state != 0)
-          {
-          $state = check_state($state, $actual_state);
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " net receive=Not available"; 
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "net receive=Not available"; 
+             $state = check_state($state, $actual_state);
+             }
           }
        }
   
     if (($subselect eq "send") || ($subselect eq "all"))
        {
-       $true_sub_sel = 1;
-       $values = return_host_performance_values($host, 'net', ('transmitted.average'));
-
+       $true_sub_sel = 0;
        if (defined($values))
           {
-          $value = simplify_number(convert_number($$values[0][0]->value));
-          $perfdata = $perfdata . " \'net_send\'=" . $value . $perf_thresholds . ";;";
-          if ($subselect ne "all")
+          $value = simplify_number(convert_number($$values[0][2]->value));
+          if ($subselect eq "all")
              {
-             $output = "net send=" . $value . " KBps";
-             $actual_state = check_against_threshold($value);
+             $output =$output . ", net send=" . $value . " KBps"; 
+             $perfdata = $perfdata . " \'net_send\'=" . $value . $perf_thresholds . ";;";
              }
-             else
+          else
              {
-             $output = $output . ", net send=" . $value . " KBps";
+             $actual_state = check_against_threshold($value);
+             $output = "net send=" . $value . " KBps"; 
+             $perfdata = "\'net_send\'=" . $value . $perf_thresholds . ";;";
+             $state = check_against_threshold($value);
              }
           }
        else
           {
-          $output = "net send=NOT AVAILABLE";
-          $actual_state = 1;
-          }
-
-       if ($actual_state != 0)
-          {
-          $state = check_state($state, $actual_state);
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output =$output . ", net send=Not available"; 
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "net send=Not available"; 
+             $state = check_state($state, $actual_state);
+             }
           }
        }
 
     if (($subselect eq "nic") || ($subselect eq "all"))
        {
-       $true_sub_sel = 1;
+       $true_sub_sel = 0;
        $host_view = Vim::find_entity_view(view_type => 'HostSystem', filter => $host, properties => ['name', 'configManager.networkSystem', 'runtime.inMaintenanceMode']);
 
        if (!defined($host_view))
@@ -207,7 +225,7 @@ sub host_net_info
            }
        }
 
-    if ($true_sub_sel == 0)
+    if ($true_sub_sel == 1)
        {
        get_me_out("Unknown HOST NET subselect");
        }

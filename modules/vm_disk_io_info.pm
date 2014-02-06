@@ -47,6 +47,12 @@ sub vm_disk_io_info
              $state = check_state($state, $actual_state);
              }
           }
+       else
+          {
+          $actual_state = 3;
+          $output = "I/O usage=Not available";
+          $state = check_state($state, $actual_state);
+          }
        }
     
     if (($subselect eq "read") || ($subselect eq "all"))
@@ -68,6 +74,21 @@ sub vm_disk_io_info
              $state = check_state($state, $actual_state);
              }
           }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - I/O read=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "I/O read=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          }
        }
 
     if (($subselect eq "write") || ($subselect eq "all"))
@@ -86,6 +107,21 @@ sub vm_disk_io_info
              $actual_state = check_against_threshold($value);
              $output = "I/O write=" . $value . " KB/s";
              $perfdata = " \'io_write\'=" . $value . "KB/s;" . $perf_thresholds . ";;";
+             $state = check_state($state, $actual_state);
+             }
+          }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - I/O write=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "I/O write=Not available";
              $state = check_state($state, $actual_state);
              }
           }

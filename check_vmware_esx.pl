@@ -915,6 +915,29 @@
 #   - host_storage_info()
 #     - New switch --standbyok for storage systems where a standby multipath is ok
 #       and not a warning
+#
+# - 06 Feb 2014 M.Fuerstenau version 0.9.7
+#   - Bugfixes/Enhancements
+#     - In some cases it might happen that no performance counters are delivered
+#       by VMware. Especially if the version is old (4.x, 3.x). Under these
+#       circumstances an undef was returned by the routines from process_perfdata.pm
+#       and not handled correctly in the calling subroutines. Fixed.
+#       Affected subroutines:
+#       - host_cpu_info()
+#       - vm_net_info()
+#       - vm_mem_info()
+#       - vm_net_info()
+#       - vm_disk_io_info()
+#       - vm_cpu_info()
+#       - host_net_info()
+#       - host_mem_info()
+#       - host_disk_io_info()
+#   - vm_net_info()
+#     - Rewritten to the same structure as similar modules
+#   - host_net_info()
+#     - Rewritten to the same structure as similar modules
+
+
 
 use strict;
 use warnings;
