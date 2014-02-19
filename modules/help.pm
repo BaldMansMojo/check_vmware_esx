@@ -282,7 +282,7 @@ sub print_help
        print "Uptime:\n";
        print "-------\n";
        print "\n";
-       print "-S, --select=uptimeu                Displays uptime of the vmware host.\n";
+       print "-S, --select=uptime                 Displays uptime of the vmware host.\n";
        print "or with\n";
        print "\n";
        print "CPU:\n";
