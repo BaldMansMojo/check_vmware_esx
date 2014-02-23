@@ -205,7 +205,7 @@
 #   - Corrected bug. Name of subroutine was sub check_percantage but this was a typo.
 #
 # - 7 Feb 2013 M.Fuerstenau version 0.7.5
-#   - Replaced $percc and $percw with $crit_is_percent and $warn_is_percent. This was just cosmetic for better readability.
+#   - Replaced $percc and $percw with $crit_is_percent and $warn_versionis_percent. This was just cosmetic for better readability.
 #   - Removed check_percentage(). It was replaced by two one liners directly in the code. Easier to read.
 #   - The only codeblocks using check_percentage() were the blocks checking warning and critical. But unfortunately the
 #     plausability check was not sufficient. Now it is tested that no other values than numbers and the % sign can be
@@ -327,7 +327,7 @@
 # - 30 Apr 2013 M.Fuerstenau version 0.7.25
 #   - Removed subroutines return_dc_performance_values, dc_cpu_info, dc_mem_info, dc_net_info and dc_disk_io_info.
 #     Monitored entity was view type HostSystem. This means, that the CPU of the data center server is monitored.
-#     The data center server (vcenter) is either a physical MS Windows server (which can be monitored better
+#     The data center server (vcenter) is either a physical MS Windows serversionver (which can be monitored better
 #     directly with SNMP and/or NSClient++) or the new Linux based appliance which is a virtual machine and
 #     can be monitored as any virtual machine. The OS (Linux) on that virtual machine can be monitored like
 #     any standard Linux.
@@ -415,7 +415,7 @@
 #     from each LUN on the host.read rate = # blocksRead per second x blockSize.
 #   - Added subselect write. Average number of kilobytes written to disk each second. Rate at which data is written
 #     to each LUN on the host.write rate = # blocksRead per second x blockSize
-#   - Added subselect usage. Aggregated disk I/O rate. For hosts, this metric includes the rates for all virtual
+#   - Added subselect usage. Aggregated disk I/O rate. For hosts, this metric versionincludes the rates for all virtual
 #     machines running on the host.
 #
 # - 21 Jun 2013 M.Fuerstenau version 0.7.35
@@ -936,6 +936,35 @@
 #     - Rewritten to the same structure as similar modules
 #   - host_net_info()
 #     - Rewritten to the same structure as similar modules
+#
+# - 24 Feb 2014 M.Fuerstenau version 0.9.8
+#   - Corrected a type in the help()
+#   - Moved the block for constructing the full path of the sessionfile downward to the authentication
+#     stuff to have all in one place.
+#   - Authentication:
+#     - To reduce amounts of login/logout events in the vShpere logfiles or a lot of open sessions using
+#       sessionfiles the login part has been rewritten. Using session files is now the default. Only one
+#       session file per host or vCenter is used as default
+#
+#       The sessionfile name is automatically set to the vSphere host or the vCenter (IP or name - whatever
+#       is used in the check).
+#
+#       Multiple sessions are possible using different session file names. To form different session file
+#       names the default name is enhenced by the value you set with --sessionfile.
+#
+#       NOTICE! All checks using the same session are serialized. So a lot of checks using only one session
+#       can cause timeouts. In this case you should enhence the number of sessions by using --sessionfile
+#       in the command definition and define the value in the service definition command as an extra argument
+#       so it can be used in the command definition as $ARGn$.
+#     - --sessionfile is now optional and only used to enhance the sessionfile name to have multiple sessions.
+#     - If a session logs in it sets a lock file (sessionfilename_locked).
+#     - The lock file is been set when the session starts and removed at the end of the plugin run.
+#     - A newly started check looks for the lock file and waits until it is no longer there. So here we
+#       have a serialization now. It will not hang forever due to the alarm routine.
+#     - Fixed bug "Can't call method "unset_logout_on_disconnect"". I mixed object orientated code and classical
+#       code. (Thanks copy & paste for this bug)
+#   - $timeout set to 40 seconds instead of 30 to have a little longer waiting before automatic cancelling
+#     the check to prevent unwanted cancelling due to longer waiting caused by serialization.
 
 
 
@@ -970,7 +999,7 @@ if ( $@ )
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.7';                   # Contains the program version number
+our $prog_version = '0.9.8';                   # Contains the program version number
 our $ProgName = basename($0);
 
 #my  $help = '';                                # If some help is wanted....
@@ -983,6 +1012,7 @@ my  $password;                                 # Password for vmware host or vsp
 my  $authfile;                                 # If username/password should read from a file ....
 my  $sessionfile_name;                         # Contains the name of the sessionfile if a
                                                # a sessionfile is used for faster authentication
+my  $sessionlockfile;                          # Lockfile to protect the session
 my  $sessionfile_dir;                          # Optinal. Contains the path to the sessionfile. Used in conjunction
                                                # with sessionfile
 my $vim;                                       # Needed to stroe results ov Vim.
@@ -1060,7 +1090,7 @@ our $listall;                                  # used for host. Lists all availa
 
 
 my  $trace;
-my  $timeout = 30;
+my  $timeout = 40;
 
 
 # 2. Define arrays and hashes  
@@ -1158,21 +1188,6 @@ if ($timeout)
 
 $output = "Unknown ERROR!";
 $result = 2;
-
-if (defined($sessionfile_name))
-   {
-   $sessionfile_name =~ s/ +//g;
-   if (defined($sessionfile_dir))
-      {
-      # If path contains trailing slash remove it
-      $sessionfile_dir =~ s/\/$//;
-      $sessionfile_name = $sessionfile_dir . "/" . $host . "_" . $sessionfile_name;
-      }
-   else
-      {
-      $sessionfile_name = $plugin_cache . $host . "_" . $sessionfile_name;
-      }
-   }
 
 # Check $subselect and if defined set it to upper case letters
 if (defined($subselect))
@@ -1329,31 +1344,80 @@ if (defined($sslport))
 
 $url2connect = "https://" . $url2connect . "/sdk/webService";
 
-if (defined($sessionfile_name))
+# Now let's do the login stuff
+
+if (defined($datacenter))
    {
-   if ( -e $sessionfile_name )
+   if (defined($sessionfile_name))
       {
-      eval {$vim = Vim::load_session(session_file => $sessionfile_name)};
-      if (($@ =~ /The session is not authenticated/gi) || (Opts::get_option("url") ne $url2connect))
-         {
-         unlink $sessionfile_name;
-         Util::connect($url2connect, $username, $password);
-         $vim = Vim::save_session(session_file => $sessionfile_name);
-         }
-      else
-         {
-         $vim = Vim::load_session(session_file => $sessionfile_name);
-         }
+      $sessionfile_name =~ s/ +//g;
+      $sessionfile_name = $datacenter . "_" . $sessionfile_name . "_session";
       }
-      else
+   else
       {
-      Util::connect($url2connect, $username, $password);
-      $vim = Vim::save_session(session_file => $sessionfile_name);
+      $sessionfile_name = $datacenter . "_session";
       }
    }
 else
    {
+   if (defined($sessionfile_name))
+      {
+      $sessionfile_name =~ s/ +//g;
+      $sessionfile_name = $host . "_" . $sessionfile_name . "_session";
+      }
+   else
+      {
+      $sessionfile_name = $host . "_session";
+      }
+   }
+   
+
+if (defined($sessionfile_dir))
+   {
+   # If path contains trailing slash remove it
+   $sessionfile_dir =~ s/\/$//;
+   $sessionfile_name = $sessionfile_dir . "/" . $sessionfile_name;
+   }
+else
+   {
+   $sessionfile_name = $plugin_cache . $sessionfile_name;
+   }
+
+$sessionlockfile = $sessionfile_name . "_locked";
+
+if ( -e $sessionfile_name )
+   {
+   # Session locked? Wait for free session
+   while ( -e $sessionlockfile )
+         {
+         sleep(1);
+         }
+
+   unless(open SESSION_LOCK_FILE, '>', $sessionlockfile)
+         {
+         die "Unable to open session lock file \"$sessionlockfile\"\n";
+         }
+   
+   eval {Vim::load_session(session_file => $sessionfile_name)};
+   if (($@ =~ /The session is not authenticated/gi) || (Opts::get_option("url") ne $url2connect))
+      {
+      unlink $sessionfile_name;
+      Util::connect($url2connect, $username, $password);
+      Vim::save_session(session_file => $sessionfile_name);
+      }
+   else
+      {
+      Vim::load_session(session_file => $sessionfile_name);
+      }
+   }
+else
+   {
+   unless(open SESSION_LOCK_FILE, '>', $sessionlockfile)
+         {
+         die "Unable to open session lock file \"$sessionlockfile\"\n";
+         }
    Util::connect($url2connect, $username, $password);
+   Vim::save_session(session_file => $sessionfile_name);
    }
 
 # Tracemode?
@@ -1391,7 +1455,8 @@ if ($@)
 # Hier noch kleiner Bock!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 if (defined($sessionfile_name) and -e $sessionfile_name)
    {
-   $vim->unset_logout_on_disconnect();
+   Vim::unset_logout_on_disconnect();
+   unlink $sessionlockfile;
    }
 else
    {

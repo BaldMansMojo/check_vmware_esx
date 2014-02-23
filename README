@@ -116,18 +116,108 @@ define command{
 Using a sessionfile
 ===================
 
-With version 0.8.13 the authentication system was rewritten. From that version on using a seesionfile for authorization works as expected.
+To reduce amounts of login/logout events in the vShpere logfiles or a lot of open sessions using sessionfiles the login part has been totally
+rewritten with version 0.9.8..
 
-The sessionfilename is given over to the program using the commandline switch  --sessionfile=<filename>. To have a uniq
-identifier the IP address of the adresses host/vcenter server is placed in front of the given name.
+Using session files is now the default. Only one session file per host or vCenter is used as default. The sessionfile name is automatically set
+to the vSphere host or the vCenter (IP or name - whatever is used in the check).
 
-Example:
---------
-192.168.10.12_duck
+Multiple sessions are possible using different session file names. To form different session file names the default name is enhenced by the value
+you set with --sessionfile.
 
-But a string like "duck" may not be a unique identifier. You can use any senseful Nagios macro for this in the command definition but beware
-to use things like the service description in case the description contains blanks. In this case you will create a filename
-with blanks in it. Quite stupid.
+NOTICE! All checks using the same session are serialized. So a lot of checks using only one session can cause timeouts. In this case you should
+enhence the number of sessions by using --sessionfile in the command definition and define the value in the service definition command as an extra
+argument so it can be used in the command definition as $ARGn$.
+
+--sessionfile is now optional and only used to enhance the sessionfile name to have multiple sessions.
+
+If a session logs in it sets a lock file (sessionfilename_locked). The lock file is been set when the session starts and removed at the end of the
+plugin run. A newly started check looks for the lock file and waits until it is no longer there. So here we have a serialization now. It will not
+hang forever due to the alarm routine. Therefore the default for the timeout is enhenced to 40 secs. instead of 30 secs..
+
+Example caommand and service check definition:
+----------------------------------------------
+
+define command{
+       command_name    check_vsphere_health
+       command_line    /MyPluginPath/check_vmware_esx.pl -H $HOSTADDRESS$ -u $ARG1$ -p $ARG2$ -S runtime -s health
+       }
+
+
+define service{
+       active_checks_enabled           1
+       passive_checks_enabled          1
+       parallelize_check               1
+       obsess_over_service             1
+       check_freshness                 0
+       notifications_enabled           1
+       event_handler_enabled           1
+       flap_detection_enabled          1
+       process_perf_data               0
+       retain_status_information       1
+       retain_nonstatus_information    1
+       
+       host_name                       vmsrv1
+       service_description             Health
+       is_volatile                     0
+       check_period                    24x7
+       max_check_attempts              5
+       normal_check_interval           5
+       retry_check_interval            1
+       contact_groups                  sysadmins
+       notification_interval           1440
+       notification_period             24x7
+       notification_options            c,w,r
+       check_command                   check_vsphere_health!Nagios!MyMonitorPassword
+       }
+
+Example for session file name and lock file name:
+-------------------------------------------------
+192.168.10.12_session (default)
+192.168.10.12_session_locked (default)
+
+
+Example caommand and service check definition (enhenced):
+---------------------------------------------------------
+
+define command{
+       command_name    check_vsphere_health
+       command_line    /MyPluginPath/check_vmware_esx.pl -H $HOSTADDRESS$ -u $ARG1$ -p $ARG2$ -S runtime -s health --sessionfile=$ARG3$
+       }
+
+
+define service{
+       active_checks_enabled           1
+       passive_checks_enabled          1
+       parallelize_check               1
+       obsess_over_service             1
+       check_freshness                 0
+       notifications_enabled           1
+       event_handler_enabled           1
+       flap_detection_enabled          1
+       process_perf_data               0
+       retain_status_information       1
+       retain_nonstatus_information    1
+       
+       host_name                       vmsrv1
+       service_description             Health
+       is_volatile                     0
+       check_period                    24x7
+       max_check_attempts              5
+       normal_check_interval           5
+       retry_check_interval            1
+       contact_groups                  sysadmins
+       notification_interval           1440
+       notification_period             24x7
+       notification_options            c,w,r
+       check_command                   check_vsphere_health!Nagios!MyMonitorPassword!healthchecks
+       }
+
+Example for session file name and lock file name:
+-------------------------------------------------
+192.168.10.12_healthchecks_session (enhenced)
+192.168.10.12_healthchecks_session_locked (enhenced)
+
 
 Optional a path different from the default one can be set with --sessionfilename=<directory>.
 

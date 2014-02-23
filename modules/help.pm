@@ -111,9 +111,24 @@ sub print_help
        print "Options for authentication:\n";
        print "===========================\n";
        print "\n";
-       print "     --sessionfile=<sessionfile>     If this option is set a session file will be used for login. The name will \n";
-       print "                                     be generated automatically. A good idea is to use the servicedescription. It is \n";
-       print "                                     combined with the hostname and so it is dynamic for every service.\n";
+       print "                                     To reduce amounts of login/logout events in the vShpere logfiles or a lot of\n";
+       print "                                     open sessions using sessionfiles the login part has been rewritten. Using session\n";
+       print "                                     files is now the default. Only one session file per host or vCenter is used as\n";
+       print "                                     default.\n";
+       print "\n";
+       print "                                     The sessionfile name is automatically set to the vSphere host or the vCenter\n";
+       print "                                     (IP or name - whatever is used in the check).\n";
+       print "\n";
+       print "                                     Multiple sessions are possible using different session file names. To form different\n";
+       print "                                     session file names the default name is enhenced by the value you set with\n";
+       print "                                     --sessionfile.\n";
+       print "\n";
+       print "                                     NOTICE! All checks using the same session are serialized. So a lot of checks\n";
+       print "                                     using only one session can cause timeouts. In this case you should enhence the\n";
+       print "                                     number of sessions by using --sessionfile in the command definition and define\n";
+       print "                                     the value in the service definition command as an extra argument so it can be used\n";
+       print "                                     in the command definition as $ARGn$.\n"
+       print "     --sessionfile=<sessionfile>     (Optional).Session file name enhencement.\n";
        print "     --sessionfiledir=<directory>    If this option is set a path different from the path stored in \$nagios_plugin_cache\n";
        print "                                     will be used.\n";
        print "-u, --username=<username>            Username to connect with.\n";
@@ -282,7 +297,7 @@ sub print_help
        print "Uptime:\n";
        print "-------\n";
        print "\n";
-       print "-S, --select=uptimeu                Displays uptime of the vmware host.\n";
+       print "-S, --select=uptime                 Displays uptime of the vmware host.\n";
        print "or with\n";
        print "\n";
        print "CPU:\n";

@@ -876,3 +876,32 @@ History:
     - Rewritten to the same structure as similar modules
   - host_net_info()
     - Rewritten to the same structure as similar modules
+
+- 24 Feb 2014 M.Fuerstenau version 0.9.8
+  - Corrected a type in the help()
+  - Moved the block for constructing the full path of the sessionfile downward to the authentication
+    stuff to have all in one place.
+  - Authentication:
+    - To reduce amounts of login/logout events in the vShpere logfiles or a lot of open sessions using
+      sessionfiles the login part has been rewritten. Using session files is now the default. Only one
+      session file per host or vCenter is used as default
+
+      The sessionfile name is automatically set to the vSphere host or the vCenter (IP or name - whatever
+      is used in the check).
+
+      Multiple sessions are possible using different session file names. To form different session file
+      names the default name is enhenced by the value you set with --sessionfile.
+
+      NOTICE! All checks using the same session are serialized. So a lot of checks using only one session
+      can cause timeouts. In this case you should enhence the number of sessions by using --sessionfile
+      in the command definition and define the value in the service definition command as an extra argument
+      so it can be used in the command definition as $ARGn$.
+    - --sessionfile is now optional and only used to enhance the sessionfile name to have multiple sessions.
+    - If a session logs in it sets a lock file (sessionfilename_locked).
+    - The lock file is been set when the session starts and removed at the end of the plugin run.
+    - A newly started check looks for the lock file and waits until it is no longer there. So here we
+      have a serialization now. It will not hang forever due to the alarm routine.
+    - Fixed bug "Can't call method "unset_logout_on_disconnect"". I mixed object orientated code and classical
+      code. (Thanks copy & paste for this bug)
+  - $timeout set to 40 seconds instead of 30 to have a little longer waiting before automatic cancelling
+     the check to prevent unwanted cancelling due to longer waiting caused by serialization.
