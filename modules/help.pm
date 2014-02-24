@@ -127,7 +127,7 @@ sub print_help
        print "                                     using only one session can cause timeouts. In this case you should enhence the\n";
        print "                                     number of sessions by using --sessionfile in the command definition and define\n";
        print "                                     the value in the service definition command as an extra argument so it can be used\n";
-       print "                                     in the command definition as $ARGn$.\n"
+       print "                                     in the command definition as $ARGn$.\n";
        print "     --sessionfile=<sessionfile>     (Optional).Session file name enhencement.\n";
        print "     --sessionfiledir=<directory>    If this option is set a path different from the path stored in \$nagios_plugin_cache\n";
        print "                                     will be used.\n";
