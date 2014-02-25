@@ -905,3 +905,17 @@ History:
       code. (Thanks copy & paste for this bug)
   - $timeout set to 40 seconds instead of 30 to have a little longer waiting before automatic cancelling
      the check to prevent unwanted cancelling due to longer waiting caused by serialization.
+
+- 25 Feb 2014 M.Fuerstenau version 0.9.9
+  - Bugfix and improvement for "lost" lock files. In case of a Nagios reload (or kill -HUP) Nagios is restarted with the
+    same PID as before. Unfortunately Nagios sends a SIGINT or SIGTERM to the plugins. This causes the plugin
+    to terminate without removing the lockfile.
+    - So we have to catch several signals now
+      - SIGINT and SIGTERM. One of this will be send from Nagios 
+      - SIGALRM. Caused by alarm(). Now with output usable in Nagios.
+    - Instead of generating an empty file as lock file we write the process identifier of the running plugin
+      process into the lock file. If a session crashes for some reason an a lock file is left we are in a 
+      situation where signal processing won't help. But here the next run of the plugin reads the PID and checks
+      for the process. If there is no process anymore it will remove the lock file and create a new one.
+  - Removed "die" for opening the authfile or the session lock file with an unless construct. The plugin will
+    report an "understandable" message to the monitor instead of causing an internal error code.

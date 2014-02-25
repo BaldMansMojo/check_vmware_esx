@@ -965,7 +965,20 @@
 #       code. (Thanks copy & paste for this bug)
 #   - $timeout set to 40 seconds instead of 30 to have a little longer waiting before automatic cancelling
 #     the check to prevent unwanted cancelling due to longer waiting caused by serialization.
-
+#
+# - 25 Feb 2014 M.Fuerstenau version 0.9.9
+#   - Bugfix and improvement for "lost" lock files. In case of a Nagios reload (or kill -HUP) Nagios is restarted with the
+#     same PID as before. Unfortunately Nagios sends a SIGINT or SIGTERM to the plugins. This causes the plugin
+#     to terminate without removing the lockfile.
+#     - So we have to catch several signals now
+#       - SIGINT and SIGTERM. One of this will be send from Nagios 
+#       - SIGALRM. Caused by alarm(). Now with output usable in Nagios.
+#     - Instead of generating an empty file as lock file we write the process identifier of the running plugin
+#       process into the lock file. If a session crashes for some reason an a lock file is left we are in a 
+#       situation where signal processing won't help. But here the next run of the plugin reads the PID and checks
+#       for the process. If there is no process anymore it will remove the lock file and create a new one.
+#   - Removed "die" for opening the authfile or the session lock file with an unless construct. The plugin will
+#     report an "understandable" message to the monitor instead of causing an internal error code.
 
 
 use strict;
@@ -994,15 +1007,26 @@ if ( $@ )
    exit 2;
    }
 
+# Let's catch some signals
+# Handle SIGALRM (timeout triggered by alarm() call)
+$SIG{ALRM} = 'catch_alarm';
+$SIG{INT}  = 'catch_intterm';
+$SIG{TERM} = 'catch_intterm';
+ 
+
 #--- Start presets and declarations -------------------------------------
 # 1. Define variables
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.8';                   # Contains the program version number
+our $prog_version = '0.9.9';                   # Contains the program version number
 our $ProgName = basename($0);
 
-#my  $help = '';                                # If some help is wanted....
+my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
+                                               # be stored in the lock file. 
+my  $PID_exists;                               # For testing for the process that wrote the lock file the last time
+my  $PID_old;                                  # PID read from lock file
+
 my  $help;                                     # If some help is wanted....
 my  $NoA="";                                   # Number of arguments handled over
                                                # the program
@@ -1183,6 +1207,7 @@ if ( $NoA == -1 )
 # If you have set a timeout exit with alarm()
 if ($timeout)
    {
+   # Start the timer to script timeout
    alarm($timeout);
    }
 
@@ -1296,7 +1321,11 @@ if (($warn_is_percent && !$crit_is_percent && defined($critical)) || (!$warn_is_
 
 if (defined($authfile))
    {
-   open (AUTH_FILE, $authfile) || die "Unable to open auth file \"$authfile\"\n";
+   unless(open AUTH_FILE, '<', $authfile)
+         {
+         print "Unable to open auth file \"$authfile\"\n";
+         exit 3;
+         }
    
    while ( <AUTH_FILE> )
          {
@@ -1387,7 +1416,32 @@ $sessionlockfile = $sessionfile_name . "_locked";
 
 if ( -e $sessionfile_name )
    {
-   # Session locked? Wait for free session
+   if ( -e $sessionlockfile )
+      {
+      # Session locked? First open the lock file for reading
+      unless(open SESSION_LOCK_FILE, '<', $sessionlockfile)
+            {
+            print "Unable to open session lock file \"$sessionlockfile\"\n";
+            exit 3;
+            }
+      # Second get the old PID
+      while(<SESSION_LOCK_FILE>)
+           {
+           $PID_old = $_;
+           }
+      close (SESSION_LOCK_FILE);    
+   
+      # Third - check for the process which wrote the lock file the last time
+      $PID_exists = kill 0, $PID_old;
+      
+      # Fourth - if the process is not available any more remove the lock file
+      if ( !$PID_exists )
+         {
+         unlink $sessionlockfile;
+         }
+      }
+
+   # Now we are sure that we have no dead lock file and we will wait for free session
    while ( -e $sessionlockfile )
          {
          sleep(1);
@@ -1395,9 +1449,12 @@ if ( -e $sessionfile_name )
 
    unless(open SESSION_LOCK_FILE, '>', $sessionlockfile)
          {
-         die "Unable to open session lock file \"$sessionlockfile\"\n";
+         print "Unable to create session lock file \"$sessionlockfile\"\n";
+         exit 3;
          }
-   
+   print SESSION_LOCK_FILE "$PID\n"; 
+   close (SESSION_LOCK_FILE);    
+
    eval {Vim::load_session(session_file => $sessionfile_name)};
    if (($@ =~ /The session is not authenticated/gi) || (Opts::get_option("url") ne $url2connect))
       {
@@ -1414,8 +1471,12 @@ else
    {
    unless(open SESSION_LOCK_FILE, '>', $sessionlockfile)
          {
-         die "Unable to open session lock file \"$sessionlockfile\"\n";
+         print "Unable to create session lock file \"$sessionlockfile\"\n";
+         exit 3;
          }
+   print SESSION_LOCK_FILE "$PID\n"; 
+   close (SESSION_LOCK_FILE);    
+
    Util::connect($url2connect, $username, $password);
    Vim::save_session(session_file => $sessionfile_name);
    }
@@ -1452,11 +1513,11 @@ if ($@)
       $result = 2;
       }
    }
-# Hier noch kleiner Bock!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 if (defined($sessionfile_name) and -e $sessionfile_name)
    {
    Vim::unset_logout_on_disconnect();
-   unlink $sessionlockfile;
+#   unlink $sessionlockfile;
    }
 else
    {
@@ -2036,6 +2097,30 @@ sub isnotwhitelisted
     return $ret;
     }
 
+# The "ejection seat". Display error message and leaves the program.
+sub get_me_out
+    {
+    my ($msg) = @_;
+    print "$msg\n";
+    print "\n";
+    print_help();
+    exit 2;
+    }
+    
+# Catching some signals
+sub catch_alarm
+    {
+    print "UNKNOWN: Script timed out.\n";
+    exit 3;
+    }
+
+sub catch_intterm
+    {
+    print "UNKNOWN: Script killed by monitor.\n";
+    unlink $sessionlockfile;
+    exit 3;
+    }
+ 
 #=====================================================================| Cluster |============================================================================#
 
 sub cluster_cpu_info
@@ -2482,7 +2567,7 @@ sub cluster_runtime_info
                 get_me_out("Unknown CLUSTER RUNTIME subselect");
                 }
         }
-        else
+     else
         {
                 my %cluster_maintenance_state = (0 => "no", 1 => "yes");
                 my $vm_views = Vim::find_entity_views(view_type => 'VirtualMachine', begin_entity => $cluster_view, properties => ['name', 'runtime.powerState']);
@@ -2537,13 +2622,3 @@ sub cluster_list_vm_volumes_info
         return datastore_volumes_info($cluster_view->datastore, $subselect, $blacklist);
 }
 
-# The "ejection seat". Display error message and leaves the program.
-sub get_me_out
-    {
-    my ($msg) = @_;
-    print "$msg\n";
-    print "\n";
-    print_help();
-    exit 2;
-    }
-    

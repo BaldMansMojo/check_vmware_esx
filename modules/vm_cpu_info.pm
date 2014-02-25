@@ -19,12 +19,6 @@ sub vm_cpu_info
        # Therefore with all set no threshold check can be performed
        $subselect = "all";
        $true_sub_sel = 0;
-       if ($perf_thresholds ne ';')
-          {
-          print_help();
-          print "\nERROR! Thresholds only allowed with subselects!\n\n";
-          exit 2;
-          }
        }
 
     if (($subselect eq "wait") || ($subselect eq "all"))
@@ -40,10 +34,8 @@ sub vm_cpu_info
              }
           else
              {
-             $actual_state = check_against_threshold($value);
              $output = "CPU wait=" . $value . " ms";
              $perfdata = "\'cpu_wait\'=" . $value . "ms;" . $perf_thresholds . ";;";
-             $state = check_state($state, $actual_state);
              }
           }
        else
@@ -67,10 +59,8 @@ sub vm_cpu_info
              }
           else
              {
-             $actual_state = check_against_threshold($value);
              $output = "CPU ready=" . $value . " ms";
              $perfdata = "\'cpu_ready\'=" . $value . "ms;" . $perf_thresholds . ";;";
-             $state = check_state($state, $actual_state);
              }
           }
        else

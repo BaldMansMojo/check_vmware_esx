@@ -127,7 +127,7 @@ sub print_help
        print "                                     using only one session can cause timeouts. In this case you should enhence the\n";
        print "                                     number of sessions by using --sessionfile in the command definition and define\n";
        print "                                     the value in the service definition command as an extra argument so it can be used\n";
-       print "                                     in the command definition as $ARGn$.\n"
+       print "                                     in the command definition as $ARGn$.\n";
        print "     --sessionfile=<sessionfile>     (Optional).Session file name enhencement.\n";
        print "     --sessionfiledir=<directory>    If this option is set a path different from the path stored in \$nagios_plugin_cache\n";
        print "                                     will be used.\n";
@@ -304,6 +304,8 @@ sub print_help
        print "----\n";
        print "\n";
        print "-S, --select=cpu                    CPU usage in percentage\n";
+       print "-w, --warning=<threshold>           Warning threshold in percent.\n";
+       print "-c, --critical=<threshold>          Critical threshold in percent.\n";
        print "or with\n";
        print "-s, --subselect=ready               Percentage of time that the virtual machine was\n";
        print "                                    ready, but could not get scheduled to run on the\n";
@@ -328,6 +330,8 @@ sub print_help
        print "                                    if a four-CPU host is running a virtual machine with\n";
        print "                                    two CPUs, and the usage is 50%, the host is using two\n";
        print "                                    CPUs completely.\n";
+       print "-w, --warning=<threshold>           Warning threshold in percent.\n";
+       print "-c, --critical=<threshold>          Critical threshold in percent.\n";
        print "\n";
        print "Memory:\n";
        print "-------\n";
@@ -620,6 +624,8 @@ sub print_help
        print "----\n";
        print "\n";
        print "-S, --select=cpu                    CPU usage in percentage\n";
+       print "-w, --warning=<threshold>           Warning threshold in percent.\n";
+       print "-c, --critical=<threshold>          Critical threshold in percent.\n";
        print "or with\n";
        print "-s, --subselect=ready               Percentage of time that the virtual machine was\n";
        print "                                    ready, but could not get scheduled to run on the\n";
@@ -642,6 +648,8 @@ sub print_help
        print "                                    a host that has four physical CPUs and the CPU usage\n";
        print "                                    is 100%, the virtual machine is using one physical CPU\n";
        print "                                    completely. \n";
+       print "-w, --warning=<threshold>           Warning threshold in percent.\n";
+       print "-c, --critical=<threshold>          Critical threshold in percent.\n";
        print "\n";
        print "Memory:\n";
        print "-------\n";
