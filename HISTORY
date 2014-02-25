@@ -919,3 +919,6 @@ History:
       for the process. If there is no process anymore it will remove the lock file and create a new one.
   - Removed "die" for opening the authfile or the session lock file with an unless construct. The plugin will
     report an "understandable" message to the monitor instead of causing an internal error code.
+  - vm_cpu_info() and host_cpu_info()
+    - Removed threshold for ready and wait. Therefore thresholds are no possible 
+      without subselect.
