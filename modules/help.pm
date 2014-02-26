@@ -99,7 +99,7 @@ sub print_help
        print "--ignore_warning                     Sometimes 2 (warning) is returned from a component.\n";
        print "                                     But the check itself is ok (from an operator view).\n";
        print "                                     With this option the plugin will return OK (0) instead of WARNING (1).\n";
-       print "-t, --timeout=INTEGER                Seconds before plugin times out (default: 30)\n";
+       print "-t, --timeout=INTEGER                Seconds before plugin times out (default: 90)\n";
        print "    --trace=<level>                  Set verbosity level of vSphere API request/respond trace.\n";
        print "\n";
 

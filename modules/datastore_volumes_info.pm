@@ -132,8 +132,11 @@ sub datastore_volumes_info
                      {
                      if (defined($warning) && defined($critical))
                         {
-                        print "On multiple volumes setting warning or critical threshold is only allowed in percent and not in absolute values!\n";
-                        exit 2;
+                        if ($isregexp && (!defined($subselect)) && ($name ne $subselect))
+                           {
+                           print "On multiple volumes setting warning or critical threshold is only allowed in percent and not in absolute values!\n";
+                           exit 2;
+                           }
                         }
                      }
 

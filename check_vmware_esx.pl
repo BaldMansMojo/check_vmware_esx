@@ -988,9 +988,12 @@
 #   - Bugfixes.
 #     - Corrected typo in dc_runtime_info() line 660.
 #     - Corrected typo in help().
+#     - Corrected bug in datastore_volumes_info(). Giving absolute thresholds
+#       for a single volume was not possible. Fixed.
 #   - Removed print_usage(). Due to mass of parameters it is not possible to display
 #     a short usage message. Instead of that the output of the help is included
 #     in the package as a file.
+#   - Updated default timeout to 90 secs. to avoid timeouts.
 
 use strict;
 use warnings;
@@ -1131,7 +1134,7 @@ our $listall;                                  # used for host. Lists all availa
 
 
 my  $trace;
-my  $timeout = 40;
+my  $timeout = 90;
 
 
 # 2. Define arrays and hashes  

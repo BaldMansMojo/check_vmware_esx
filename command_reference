@@ -20,7 +20,7 @@ General options:
 --ignore_warning                     Sometimes 2 (warning) is returned from a component.
                                      But the check itself is ok (from an operator view).
                                      With this option the plugin will return OK (0) instead of WARNING (1).
--t, --timeout=INTEGER                Seconds before plugin times out (default: 30)
+-t, --timeout=INTEGER                Seconds before plugin times out (default: 90)
     --trace=<level>                  Set verbosity level of vSphere API request/respond trace.
 
 Options for authentication:
