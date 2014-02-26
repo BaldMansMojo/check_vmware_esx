@@ -657,7 +657,7 @@ sub dc_runtime_info
           {
           $output = $output . " - " . $vc_green_cnt . "/" . @$dc_views . " Vcenters green - ";
           $output = $output . $vc_red_cnt . "/" . @$dc_views . " Vcenters red - ";
-          $output = $output . $vc_yellow_out . "/" . @$dc_views . " Vcenters yellow - ";
+          $output = $output . $vc_yellow_cnt . "/" . @$dc_views . " Vcenters yellow - ";
           $output = $output . $vc_gray_cnt . "/" . @$dc_views . " Vcenters gray";
           }
        else

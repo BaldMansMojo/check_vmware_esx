@@ -977,9 +977,20 @@
 #       process into the lock file. If a session crashes for some reason an a lock file is left we are in a 
 #       situation where signal processing won't help. But here the next run of the plugin reads the PID and checks
 #       for the process. If there is no process anymore it will remove the lock file and create a new one.
+#       Thanks to Simon Meggle, Consol, for the idea.
 #   - Removed "die" for opening the authfile or the session lock file with an unless construct. The plugin will
 #     report an "understandable" message to the monitor instead of causing an internal error code.
-
+#   - vm_cpu_info() and host_cpu_info()
+#     - Removed threshold for ready and wait. Therefore thresholds are no possible 
+#       without subselect.
+#
+# - 26 Feb 2014 M.Fuerstenau version 0.9.10
+#   - Bugfixes.
+#     - Corrected typo in dc_runtime_info() line 660.
+#     - Corrected typo in help().
+#   - Removed print_usage(). Due to mass of parameters it is not possible to display
+#     a short usage message. Instead of that the output of the help is included
+#     in the package as a file.
 
 use strict;
 use warnings;
@@ -991,6 +1002,7 @@ use Time::Duration;
 
 # Own modules
 use lib "modules";
+#use lib "/usr/lib/nagios/vmware/modules";
 use help;
 use process_perfdata;
 use datastore_volumes_info;
@@ -998,6 +1010,11 @@ use datastore_volumes_info;
 # Prevent SSL certificate validation
 
 $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0; 
+
+# Only for debugging
+use Data::Dumper;
+$Data::Dumper::Indent = 1;
+#print "------------------------------------------\n" . Dumper ($store) . "\n" . "------------------------------------------\n";
 
 if ( $@ )
    {
@@ -1019,7 +1036,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.9';                   # Contains the program version number
+our $prog_version = '0.9.10';                  # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
@@ -1200,7 +1217,7 @@ else
 
 if ( $NoA == -1 )
    {
-   print_usage();
+   print_help($help);
    exit 1;
    }
 

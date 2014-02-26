@@ -1,0 +1,750 @@
+
+check_vmware_esx.pl,Version 0.9.10
+
+This vmware Infrastructure monitoring plugin is free software, and comes with ABSOLUTELY NO WARRANTY.
+It may be used, redistributed and/or modified under the terms of the GNU General Public Licence 
+(see http://www.fsf.org/licensing/licenses/gpl.txt).
+
+Copyright (c) 2013 all modifications starting from check_vmware_api.pl Martin Fuerstenau - Oce Printing Systems <martin.fuerstenau@oce.com>
+Copyright (c) 2008 op5 AB Kostyantyn Hushchyn <dev@op5.com>
+
+General options:
+================
+
+-?, --usage                          Print usage information
+-h, --help                           Print detailed help screen
+-V, --version                        Print version information
+--ignore_unknown                     Sometimes 3 (unknown) is returned from a component.
+                                     But the check itself is ok.
+                                     With this option the plugin will return OK (0) instead of UNKNOWN (3).
+--ignore_warning                     Sometimes 2 (warning) is returned from a component.
+                                     But the check itself is ok (from an operator view).
+                                     With this option the plugin will return OK (0) instead of WARNING (1).
+-t, --timeout=INTEGER                Seconds before plugin times out (default: 30)
+    --trace=<level>                  Set verbosity level of vSphere API request/respond trace.
+
+Options for authentication:
+===========================
+
+                                     To reduce amounts of login/logout events in the vShpere logfiles or a lot of
+                                     open sessions using sessionfiles the login part has been rewritten. Using session
+                                     files is now the default. Only one session file per host or vCenter is used as
+                                     default.
+
+                                     The sessionfile name is automatically set to the vSphere host or the vCenter
+                                     (IP or name - whatever is used in the check).
+
+                                     Multiple sessions are possible using different session file names. To form different
+                                     session file names the default name is enhenced by the value you set with
+                                     --sessionfile.
+
+                                     NOTICE! All checks using the same session are serialized. So a lot of checks
+                                     using only one session can cause timeouts. In this case you should enhence the
+                                     number of sessions by using --sessionfile in the command definition and define
+                                     the value in the service definition command as an extra argument so it can be used
+                                     in the command definition as $ARGn$.
+     --sessionfile=<sessionfile>     (Optional).Session file name enhencement.
+     --sessionfiledir=<directory>    If this option is set a path different from the path stored in $nagios_plugin_cache
+                                     will be used.
+-u, --username=<username>            Username to connect with.
+-p, --password=<password>            Password to use with the username.
+-f, --authfile=<path>                Authentication file with login and password.
+                                     File syntax :
+                                     username=<login>
+                                     password=<password>
+
+Monitoring the vmware datacenter:
+=================================
+
+-D, --datacenter=<DCname>           Datacenter/Vcenter hostname.
+    --sslport=<port>                If a SSL port different from 443 is used.
+
+Volumes:
+--------
+
+-S, --select=volumes                Shows all datastore volumes info
+or with
+-s, --subselect=<name>              free space info for volume with name <name>
+
+    --usedspace                     Output used space instead of free
+    --alertonly                     List only alerting volumes
+-B, --exclude=<black_list>          Blacklist volumes.
+-W, --include=<white_list>          Whitelist volumes.
+    --isregexp                      Whether to treat name, blacklist and whitelist as regexp
+-w, --warning=<threshold>           Warning threshold.
+-c, --critical=<threshold>          Critical threshold.
+                                    Thresholds should be either a simple counter or a percentage
+                                    value in the nn% (i.e. 90%). If checking more than a single
+                                    volume only percent is alloed as threshold.
+
+Runtime Info:
+-------------
+
+-S, --select=runtime                Shows all runtime info for the datacenter/Vcenter.
+                                    No thresholds are allowed here
+or with
+-s, --subselect=listvms             List of vmware machines and their power state..
+
+                                    BEWARE!! In larger environments systems can cause trouble displaying
+                                    the informations needed due to the mass of data.
+                                  . Use --alertonly to avoid this.
+
+-B, --exclude=<black_list>          Blacklist VMs.
+-W, --include=<white_list>          Whitelist VMs.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+    --alertonly                     List only alerting VMs. Important here to avoid masses of data.
+or
+-s, --subselect=listhost            List of VMware ESX hosts and their power state..
+                                    Power state can be (from the docs):
+                                    - poweredOff  The host was specifically powered off by the user
+                                                  through VirtualCenter. This state is not a cetain state,
+                                                  because after VirtualCenter issues the command to power
+                                                  off the host, the host might crash, or kill all the
+                                                  processes but fail to power off.
+                                    - poweredOn   The host is powered on
+                                    - standBy     The host was specifically put in standby mode, either
+                                                  explicitly by the user, or automatically by DPM. This
+                                                  state is not a cetain state, because after VirtualCenter
+                                                  issues the command to put the host in stand-by state,
+                                                  the host might crash, or kill all the processes but fail
+                                                  to power off.
+                                    - unknown     If the host is disconnected, or notResponding, we can not
+                                                  possibly have knowledge of its power state. Hence, the
+                                                  host is marked as unknown.
+
+                                    BEWARE!! In larger environments systems can cause trouble displaying
+                                    the informations needed due to the mass of data.
+                                  . Use --alertonly to avoid this.
+
+-B, --exclude=<black_list>          Blacklist VMware ESX hosts.
+-W, --include=<white_list>          Whitelist VMware ESX hosts.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+    --alertonly                     List only alerting hosts. Important here to avoid masses of data.
+or
+-s, --subselect=listcluster         List of vmware clusters and their states.
+                                    States can be (from the docs):
+                                    - gray    The status is unknown.
+                                    - green   The entity is OK.
+                                    - red     The entity definitely has a problem.
+                                    - yellow  The entity might have a problem.
+-B, --exclude=<black_list>          Blacklist VMware cluster.
+-W, --include=<white_list>          Whitelist VMware cluster.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+    --alertonly                     List only alerting hosts. Important here to avoid masses of data.
+or
+-s, --subselect=issues              All issues for the host.
+-B, --exclude=<black_list>          Blacklist issues.
+-W, --include=<white_list>          Whitelist issues.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+or
+-s, --subselect=status              Overall object status (gray/green/red/yellow).
+                                    State can be (from the docs):
+                                    - gray    The status is unknown.
+                                    - green   The entity is OK.
+                                    - red     The entity definitely has a problem.
+                                    - yellow  The entity might have a problem.
+or
+-s, --subselect=tools               Vmware Tools status. Tool status can be:
+                                    - Installed,running and current.                                    - Installed,running,but the installed version is known to
+                                      have a grave bug and should be immediately upgraded.
+                                    - Installed,running,version is not current
+                                    - Installed,running,supported and newer than the
+                                      version available on the host
+                                    - Installed,running,supported, but a newer version is available
+                                    - Installed,running,but the version is known to be too new
+                                      too new to work correctly with this virtual machine
+                                    - Installed,running,but the version is too old
+                                    - Installed,running,but not managed by VMWare-B, --exclude=<black_list>          Blacklist VMs.
+-W, --include=<white_list>          Whitelist VMs.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+    --alertonly                     List only alerting VMs. Important here to avoid masses of data.
+
+SOAP API:
+---------
+
+-S, --select=soap                   simple check to verify a successfull connection
+                                    to VMWare SOAP API.
+
+Monitoring the vmware host:
+===========================
+
+-H, --host=<hostname>               ESX or ESXi hostname.
+    --sslport=<port>                If a SSL port different from 443 is used.
+
+Uptime:
+-------
+
+-S, --select=uptime                 Displays uptime of the vmware host.
+or with
+
+CPU:
+----
+
+-S, --select=cpu                    CPU usage in percentage
+-w, --warning=<threshold>           Warning threshold in percent.
+-c, --critical=<threshold>          Critical threshold in percent.
+or with
+-s, --subselect=ready               Percentage of time that the virtual machine was
+                                    ready, but could not get scheduled to run on the
+                                    physical CPU. CPU ready time is dependent on the
+                                    number of virtual machines on the host and their
+                                    CPU loads. High or growing ready time can be a
+                                    hint CPU bottlenecks
+or
+-s, --subselect=wait                CPU time spent in wait state. The wait total includes
+                                    time spent the CPU idle, CPU swap wait, and CPU I/O
+                                    wait states. High or growing wait time can be a
+                                    hint I/O bottlenecks.
+or
+-s, --subselect=usage               Actively used CPU of the host, as a percentage of
+                                    the total available CPU. Active CPU is approximately
+                                    equal to the ratio of the used CPU to the available
+                                    CPU.
+
+                                    Available CPU = # of physical CPUs x clock rate
+
+                                    100% represents all CPUs on the host. For example,
+                                    if a four-CPU host is running a virtual machine with
+                                    two CPUs, and the usage is 50%, the host is using two
+                                    CPUs completely.
+-w, --warning=<threshold>           Warning threshold in percent.
+-c, --critical=<threshold>          Critical threshold in percent.
+
+Memory:
+-------
+
+-S, --select=mem                    All mem info(except overall and no thresholds)
+or with
+-s, --subselect=usage               Average mem usage in percentage
+or
+-s, --subselect=consumed            Amount of machine memory used on the host. Consumed
+                                    memory includes Includes memory used by the Service
+                                    Console, the VMkernel vSphere services, plus the
+                                    total consumed metrics for all running virtual
+                                    machines in MB
+or
+-s, --subselect=swapused            Amount of memory that is used by swap. Sum of memory
+                                    swapped of all powered on VMs and vSphere services
+                                    on the host in MB. In case of an error all VMs with their
+                                    swap used will be displayed. Use --multiline to have
+                                    a better formatted output.
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+or
+-s, --subselect=overhead            Additional mem used by VM Server in MB
+or
+-s, --subselect=memctl              The sum of all vmmemctl values in MB for all powered-on
+                                    virtual machines, plus vSphere services on the host.
+                                    If the balloon target value is greater than the balloon
+                                    value, the VMkernel inflates the balloon, causing more
+                                    virtual machine memory to be reclaimed. If the balloon
+                                    target value is less than the balloon value, the VMkernel
+                                    deflates the balloon, which allows the virtual machine to
+                                    consume additional memory if needed.used by VM memory
+                                    control driver. In case of an error all VMs with their
+                                    vmmemctl values will be displayed. Use --multiline to have
+                                    a better formatted output.
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+
+Network:
+-------
+
+-S, --select=net                    Shows net info
+or with
+-s, --subselect=usage               Overall network usage in KBps(Kilobytes per Second).
+or
+-s, --subselect=receive             Receive in KBps(Kilobytes per Second).
+or
+-s, --subselect=send                Send in KBps(Kilobytes per Second).
+or
+-s, --subselect=nic                 Check all active NICs.
+
+Volumes:
+--------
+
+-S, --select=volumes                Shows all datastore volumes info
+or with
+-s, --subselect=<name>              Free space info for volume with name <name>
+
+    --gigabyte                      Output in GB instead of MB
+    --usedspace                     Output used space instead of free
+    --alertonly                     List only alerting volumes
+-B, --exclude=<black_list>          Blacklist volumes.
+-W, --include=<white_list>          Whitelist volumes.
+    --isregexp                      Whether to treat name, blacklist and whitelist as regexp
+-w, --warning=<threshold>           Warning threshold.
+-c, --critical=<threshold>          Critical threshold.
+                                    Thresholds should be either a simple counter or a percentage value in the nn% (i.e. 90%).
+                                    If checking more than a single volume only percent is alloed as threshold.
+
+Disk I/O:
+---------
+
+-S, --select=io                     Shows all disk io info. Without subselect no thresholds
+                                    can be given. All I/O values are aggregated from historical
+                                    intervals over the past 24 hours with a 5 minute sample rate
+or with
+-s, --subselect=aborted             Number of aborted SCSI commands
+or
+-s, --subselect=resets              Number of SCSI bus resets
+or
+-s, --subselect=read                Average number of kilobytes read from the disk each second
+                                    Rate at which data is read from each LUN on the host.
+                                    read rate = # blocksRead per second x blockSize
+                                    issued from the Guest OS to the virtual machine.
+or
+-s, --subselect=read_latency        Average amount of time (ms) to process a SCSI read command
+                                    issued from the Guest OS to the virtual machine.
+or
+-s, --subselect=write               Average number of kilobytes written to disk each second.
+                                    Rate at which data is written to each LUN on the host.
+                                    write rate = # blocksRead per second x blockSize
+or
+-s, --subselect=write_latency       Average amount of time (ms) taken to process a SCSI write
+                                    command issued by the Guest OS to the virtual machine.
+or
+-s, --subselect=usage               Aggregated disk I/O rate. For hosts, this metric includes
+                                    the rates for all virtual machines running on the host
+or
+-s, --subselect=kernel_latency      Average amount of time (ms) spent by VMkernel processing
+                                    each SCSI command.
+or
+-s, --subselect=device_latency      Average amount of time (ms) to complete a SCSI command
+                                    from the physical device
+or
+-s, --subselect=queue_latency       Average amount of time (ms) spent in the VMkernel queue,
+or
+-s, --subselect=total_latency       Average amount of time (ms) taken during the collection interval
+                                    to process a SCSI command issued by the guest OS to the virtual
+                                    machine. The sum of kernelWriteLatency and deviceWriteLatency.
+
+Host mounted media:
+-------------------
+
+-S, --select=hostmedia              List vm's with attached host mounted media like cd,dvd or
+                                    floppy drives. This is important for monitoring because a
+                                    virtual machine with a mount cd or dvd drive can not be
+                                    moved to another host.
+-B, --exclude=<black_list>          Blacklist VMs.
+-W, --include=<white_list>          Whitelist VMs.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --listall                       List all VMs with all mounted media.
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+
+Service info:
+-------------
+-S, --select=service                Shows host service info.
+-B, --exclude=<black_list>          Blacklist services.
+-W, --include=<white_list>          Whitelist services.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+
+Runtime info:
+-------------
+-S, --select=runtime                Shows runtime info. Used without -s show all runtime info:
+                                    VMs, overall status, connection state, health, storagehealth, temperature
+                                    and sensor are represented as one value and without thresholds.
+or with
+-s, --subselect=con                 Shows connection state.
+or
+-s, --subselect=listvms             List of vmware machines and their statuses.
+-B, --exclude=<black_list>          Blacklist VMs.
+-W, --include=<white_list>          Whitelist VMs.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+or
+-s, --subselect=status              Overall object status (gray/green/red/yellow).
+                                    State can be (from the docs):
+                                    - gray    The status is unknown.
+                                    - green   The entity is OK.
+                                    - red     The entity definitely has a problem.
+                                    - yellow  The entity might have a problem.
+or
+-s, --subselect=health              Checks cpu/storage/memory/sensor status.
+    --listsensors                   List all available sensors(use for listing purpose only)
+-B, --exclude=<black_list>          Blacklist storage, memory and sensors.
+-W, --include=<white_list>          Whitelist storage, memory and sensors.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+or
+-s, --subselect=storagehealth       Local(!) storage status check.
+-B, --exclude=<black_list>          Blacklist storage.
+-W, --include=<white_list>          Whitelist storage.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+or
+-s, --subselect=temp                Lists all temperature sensors.
+-B, --exclude=<black_list>          Blacklist sensors.
+-W, --include=<white_list>          Whitelist sensors.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+or
+-s, --subselect=issues              Lists all configuration issues for the host.
+-B, --exclude=<black_list>          Blacklist configuration issues.
+-W, --include=<white_list>          Whitelist configuration issues.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+
+Storage info:
+-------------
+
+-S, --select=storage                Shows Host storage info.
+
+                                    BEWARE!! Without a subselect only a summary will be listed.
+                                    Larger environments in SAN systems can cause trouble displaying the
+                                    informations needed due to the mass of data even when used with subselects
+                                  . Use --alertonly to avoid this.
+
+-B, --exclude=<black_list>          Blacklist adapters, luns (use blacklist on canonical names for it)
+                                    and paths. All items can be in one blacklist. Beware of regexp.
+                                    A given regexp must give a destinct result.
+-W, --include=<white_list>          Whitelist adapters, luns (use whitelist on canonical names for it)
+                                    and paths. All items can be in one whitelist. Beware of regexp.
+                                    A given regexp must give a destinct result.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+or with
+-s, --subselect=adapter             List host bus adapters.
+-B, --exclude=<black_list>          Blacklist adapters. Blacklisted adapters will not be displayed.
+-W, --include=<white_list>          Whitelist adapters.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+or with
+-s, --subselect=lun                 List SCSI logical units. The listing will include:
+                                    - LUN
+                                    - canonical name of the disc
+                                    - all of displayed name which is not part of the canonical name
+                                    - the status
+-B, --exclude=<black_list>          Blacklist luns (use blacklist on canonical names for it).
+                                    Blacklisted luns will not be displayed.
+-W, --include=<white_list>          Whitelist luns (use whitelist on canonical names for it).
+                                    Only whitelisted adapters will be displayed.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --alertonly                     List only alerting units. Important here to avoid masses of data.
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+or with
+-s, --subselect=path                List multipaths and the associated paths.
+    --standbyok                     For storage systems where a standby multipath
+                                    is ok and not a warning.
+-B, --exclude=<black_list>          Blacklist paths.
+-W, --include=<white_list>          Whitelist paths.
+                                    A multipath SCSI ID is in the form:
+                                    02003c000060a98000375274315a244276694e67684c554e202020
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --alertonly                     List only alerting units. Important here to avoid masses of data.
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+
+SOAP API:
+---------
+
+-S, --select=soap                   Simple check to verify a successfull connection
+                                    to VMWare SOAP API.
+
+Monitoring a virtual machine via vmware datacenter or vmware host:
+==================================================================
+
+-D, --datacenter=<DCname>           Datacenter hostname.
+  or 
+-H, --host=<hostname>               ESX or ESXi hostname.
+
+-N, --name=<vmname>                 Virtual machine name.
+    --sslport=<port>                If a SSL port different from 443 is used.
+
+CPU:
+----
+
+-S, --select=cpu                    CPU usage in percentage
+-w, --warning=<threshold>           Warning threshold in percent.
+-c, --critical=<threshold>          Critical threshold in percent.
+or with
+-s, --subselect=ready               Percentage of time that the virtual machine was
+                                    ready, but could not get scheduled to run on the
+                                    physical CPU. CPU ready time is dependent on the
+                                    number of virtual machines on the host and their
+                                    CPU loads. High or growing ready time can be a
+                                    hint CPU bottlenecks
+or
+-s, --subselect=wait                CPU time spent in wait state. The wait total includes
+                                    time spent the CPU idle, CPU swap wait, and CPU I/O
+                                    wait states. High or growing wait time can be a
+                                    hint I/O bottlenecks.
+or
+-s, --subselect=usage               Amount of actively used virtual CPU, as a percentage
+                                    of total available CPU. This is the host's view of
+                                    the CPU usage, not the guest operating system view.
+                                    It is the average CPU utilization over all available
+                                    virtual CPUs in the virtual machine. For example, if
+                                    a virtual machine with one virtual CPU is running on
+                                    a host that has four physical CPUs and the CPU usage
+                                    is 100%, the virtual machine is using one physical CPU
+                                    completely. 
+-w, --warning=<threshold>           Warning threshold in percent.
+-c, --critical=<threshold>          Critical threshold in percent.
+
+Memory:
+-------
+
+-S, --select=mem                    all mem info(except overall and no thresholds)
+or with
+-s, --subselect=usage               Average mem usage in percentage of configured virtual
+                                    machine "physical" memory.
+or
+-s, --subselect=consumed            Amount of guest physical memory in MB consumed by the
+                                    virtual machine for guest memory. Consumed memory does
+                                    not include overhead memory. It includes shared memory
+                                    and memory that might be reserved, but not actually
+                                    used. Use this metric for charge-back purposes.
+                                    vm consumed memory = memory granted - memory saved
+or
+-s, --subselect=memctl              Amount of guest physical memory that is currently
+                                    reclaimed from the virtual machine through ballooning.
+                                    This is the amount of guest physical memory that has been
+                                    allocated and pinned by the balloon driver.
+
+Network:
+-------
+
+-S, --select=net                    Shows net info
+or with
+-s, --subselect=usage               Overall network usage in KBps(Kilobytes per Second).
+or
+-s, --subselect=receive             Receive in KBps(Kilobytes per Second).
+or
+-s, --subselect=send                Send in KBps(Kilobytes per Second).
+
+Disk I/O:
+---------
+
+-S, --select=io                     Shows all disk io info. Without subselect no thresholds
+                                    can be given. All I/O values are aggregated from historical
+                                    intervals over the past 24 hours with a 5 minute sample rate.
+or with
+-s, --subselect=read                Average number of kilobytes read from the disk each second.
+or
+-s, --subselect=write               Average number of kilobytes written to disk each second.
+or
+-s, --subselect=usage               Aggregated disk I/O rate.
+or
+
+Runtime Info:
+-------------
+
+-S, --select=runtime                Shows runtime info, When used without subselect
+                                    no thresholds can be given.
+or with
+-s, --subselect=con                 Shows the connection state. Connection state can be:
+                                    connected	The server has access to the virtual machine.
+                                    disconnected	When checked directly by a VMware host, then
+                                                  the disconnected state is not possible. However,
+                                                  when accessed through VirtualCenter, the state
+                                                  of a virtual machine is set to disconnected if
+                                                  the hosts that manage the virtual machine becomes
+                                                  unavailable.
+                                    inaccessible	One or more of the virtual machine configuration
+                                                  files are inaccessible. For example, this can be
+                                                  due to transient disk failures. In this case, no
+                                                  configuration can be returned for a virtual machine.
+                                    invalid	The virtual machine configuration format is invalid.
+                                                  Thus, it is accessible on disk, but corrupted in a
+                                                  way that does not allow the server to read the content
+                                                . In this case, no configuration can be returned for
+                                                  a virtual machine.
+                                    orphaned	The virtual machine is no longer registered on the
+                                                  host it is associated with. For example, a virtual
+                                                  machine that is unregistered or deleted directly on
+                                                  a host managed by VirtualCenter shows up in this state.
+or with
+-s, --subselect=powerstate          Virtual machine power state poweredOn, poweredOff, suspended)
+or with
+-s, --subselect=status              Overall object status (gray/green/red/yellow)
+                                    State can be (from the docs):
+                                    - gray    The status is unknown.
+                                    - green   The entity is OK.
+                                    - red     The entity definitely has a problem.
+                                    - yellow  The entity might have a problem.
+or with
+-s, --subselect=consoleconnections  Console connections to VM.
+-w, --warning=<threshold>           Warning threshold.
+-c, --critical=<threshold>          Critical threshold.
+or with
+ -s, --subselect=gueststate         Guest OS status. Needs VMware Tools installed and running.
+                                    The status can be:
+                                    running      -> Guest is running normally. (Ok)
+                                    shuttingdown -> Guest has a pending shutdown command. (Warning)
+                                    resetting    -> Guest has a pending reset command. (Warning)
+                                    standby      -> Guest has a pending standby command. (Warning)
+                                    notrunning   -> Guest is not running. (Warning)
+                                    unknown      -> Guest information is not available. (Unknown)
+
+                                    Due to the fact that it depends on running VMware tools some of
+                                    the tools stats are checked here either:
+                                    - VMware tools are starting. (Warning)
+                                    - VMware tools are not running.
+                                      (Warning) if VM up and running.
+                                      (Ok) if VM powerd off or suspended.
+or with
+ -s, --subselect=tools              Vmware tools  status. The status can be:
+                                    - VMware tools are starting. (Warning)
+                                    - VMware tools are not running.
+                                      (Warning) if VM up and running.
+                                      (Ok) if VM powerd off or suspended.
+                                    - VMware tools are running. (Ok) 
+                                    - VMware tools are installed, but the installed version is known
+                                      to have a grave bug and should be immediately upgraded. (Critical)
+                                    - VMware tools are installed, but the version is not current. (Warning)
+                                    - VMware tools were never been installed. (Warning)
+                                    - VMware tools are installed, supported, and newer than the version
+                                      available on the host. (Warning)
+                                    - No information about VMware tools available. (Warning)
+
+                                    New since vSphere API 5.0:
+                                    - VMware tools are installed, and the version is current. (Ok)
+                                    - VMware tools are installed, supported, but a newer version is
+                                      available. (Warning)
+                                    - VMware tools are installed, and the version is known to be too new to
+                                      work correctly with this virtual machine. (Critical)
+                                    - VMware tools are installed, but the version is too old. (Warning)
+                                    - VMware tools are installed, but it is not managed by VMWare. (Critical)
+or with
+ -s, --subselect=issues             All issues for the host
+     --multiline                    Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+
+Monitoring a vmware cluster via vmware datacenter or vmware host:
+=================================================================
+
+-D, --datacenter=<DCname>           Datacenter hostname.
+  or 
+-H, --host=<hostname>               ESX or ESXi hostname.
+
+-C, --cluster=<clustername>         ESX or ESXi clustername.
+    --sslport=<port>                If a SSL port different from 443 is used.
+-S, --select=COMMAND
+   Specify command type (cpu,mem,net,io,volumes,runtime, ...)
+-s, --subselect=SUBCOMMAND
+   Specify subselect
+
+-B, --exclude=<black_list>
+   Specify black list
+
+    Cluster specific :
+
+CPU:
+----
+
+        * cpu - shows cpu info
+            + usage - CPU usage in percentage
+            + usagemhz - CPU usage in MHz
+            ^ all cpu info
+
+Memory:
+-------
+
+        * mem - shows mem info
+            + usage - mem usage in percentage
+            + usagemb - mem usage in MB
+            + swap - swap mem usage in MB
+            + memctl - mem used by VM memory control driver(vmmemctl) that controls ballooning
+            ^ all mem info(plus overhead and no thresholds)
+        * cluster - shows cluster services info
+            + effectivecpu - total available cpu resources of all hosts within cluster
+            + effectivemem - total amount of machine memory of all hosts in the cluster
+            + failover - vmware HA number of failures that can be tolerated
+            + cpufainess - fairness of distributed cpu resource allocation
+            + memfainess - fairness of distributed mem resource allocation
+            ^ only effectivecpu and effectivemem values for cluster services
+        * runtime - shows runtime info
+            + listvms - list of vmware machines in cluster and their statuses
+            + listhost - list of vmware esx host servers in cluster and their statuses
+            + status - overall cluster status (gray/green/red/yellow)
+                                    States can be (from the docs):
+                                    - gray    The status is unknown.
+                                    - green   The entity is OK.
+                                    - red     The entity definitely has a problem.
+                                    - yellow  The entity might have a problem.
+            + issues - all issues for the cluster
+                b - blacklist issues
+            ^ all cluster runtime info
+
+Volumes:
+--------
+
+-S, --select=volumes                Shows all datastore volumes info
+or with
+-s, --subselect=<name>              free space info for volume with name <name>)
+
+    --usedspace                     output used space instead of free
+    --alertonly                     list only alerting volumes
+-B, --exclude=<black_list>          blacklist volumes.
+-W, --include=<white_list>          whitelist volumes.
+    --isregexp                      whether to treat name, blacklist and whitelist as regexp
+
