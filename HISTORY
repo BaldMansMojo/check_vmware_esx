@@ -934,3 +934,9 @@ History:
     a short usage message. Instead of that the output of the help is included
     in the package as a file.
   - Updated default timeout to 90 secs. to avoid timeouts.
+  - Before accessing the session file (and lock file) we have a random sleep up
+    7 secs.. This is to avoid a concurrent access in case of a monitor restart
+    or a "Schedule a check of all services on this host"
+  - In case of a locked session file the wait loop is not fix to 1 sec any more.
+    Instead of this it uses a random period up to 5 sec.. So we minimize the risc
+    of concurrent access.

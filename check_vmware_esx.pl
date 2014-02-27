@@ -994,6 +994,12 @@
 #     a short usage message. Instead of that the output of the help is included
 #     in the package as a file.
 #   - Updated default timeout to 90 secs. to avoid timeouts.
+#   - Before accessing the session file (and lock file) we have a random sleep up
+#     7 secs.. This is to avoid a concurrent access in case of a monitor restart
+#     or a "Schedule a check of all services on this host"
+#   - In case of a locked session file the wait loop is not fix to 1 sec any more.
+#     Instead of this it uses a random period up to 5 sec.. So we minimize the risc
+#     of concurrent access.
 
 use strict;
 use warnings;
@@ -1436,6 +1442,7 @@ $sessionlockfile = $sessionfile_name . "_locked";
 
 if ( -e $sessionfile_name )
    {
+   sleep(int(rand(7)));
    if ( -e $sessionlockfile )
       {
       # Session locked? First open the lock file for reading
@@ -1464,7 +1471,7 @@ if ( -e $sessionfile_name )
    # Now we are sure that we have no dead lock file and we will wait for free session
    while ( -e $sessionlockfile )
          {
-         sleep(1);
+         sleep(int(rand(5)));
          }
 
    unless(open SESSION_LOCK_FILE, '>', $sessionlockfile)
