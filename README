@@ -95,8 +95,8 @@ Some people prefer a single file instead of modules. Use this makefile for Sven 
 bit slower than the modularized version. Test it.If you open issues in GitHub be careful with line numbers and so on.
 
 
-HTML in output caused by --multiline
-====================================
+HTML in output
+==============
 
 HTML in output is caused by the option --multiline or in some situtations where you need a multiline output in the service overview window. 
 So here a <br> tag is used to have a line break. Using --multiline will always cause a <br> instead of \n. (Remember - having a standard multiline
