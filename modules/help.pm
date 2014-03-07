@@ -375,6 +375,8 @@ sub print_help
        print "-------\n";
        print "\n";
        print "-S, --select=net                    Shows net info\n";
+       print "-B, --exclude=<black_list>          Blacklist NICs.\n";
+       print "    --isregexp                      Whether to treat blacklist as regexp\n";
        print "or with\n";
        print "-s, --subselect=usage               Overall network usage in KBps(Kilobytes per Second).\n";
        print "or\n";
@@ -383,6 +385,8 @@ sub print_help
        print "-s, --subselect=send                Send in KBps(Kilobytes per Second).\n";
        print "or\n";
        print "-s, --subselect=nic                 Check all active NICs.\n";
+       print "-B, --exclude=<black_list>          Blacklist NICs.\n";
+       print "    --isregexp                      Whether to treat blacklist as regexp\n";
        print "\n";
        print "Volumes:\n";
        print "--------\n";

@@ -11,6 +11,7 @@ sub host_net_info
     my $host_view;
     my $network_system;
     my $network_config;
+    my $ignored = 0;             # Counter for blacklisted items
     my $OKCount = 0;
     my $BadCount = 0;
     my $TotalCount = 0;
@@ -195,6 +196,15 @@ sub host_net_info
                           {
                           foreach $nic_key (@{$_->pnic})
                                   {
+                                  if (defined($blacklist))
+                                     {
+                                     if (isblacklisted(\$blacklist, $isregexp, $NIC{$nic_key}->device))
+                                        {
+                                        $ignored++;
+                                        next;
+                                        }
+                                     }
+                   
                                   if (!defined($NIC{$nic_key}->linkSpeed))
                                      {
                                      if ($output_nic)
@@ -217,11 +227,11 @@ sub host_net_info
 
         if ($subselect ne "all")
            {
-           $output = "NICs total:" . $TotalCount . " NICs attached to switch:" . ($OKCount + $BadCount) . " NICs connected:" . $OKCount . " NICs disconnected:" . $BadCount . $output_nic;
+           $output = "NICs total:" . $TotalCount . " NICs attached to switch:" . ($OKCount + $BadCount) . " NICs connected:" . $OKCount . " NICs disconnected:" . $BadCount . " NICs ignored:" . $ignored . $output_nic;
            }
         else
            {
-           $output = $output . " NICs total:" . $TotalCount . " NICs attached to switch:" . ($OKCount + $BadCount) . " NICs connected:" . $OKCount . " NICs disconnected:" . $BadCount;
+           $output = $output . " NICs total:" . $TotalCount . " NICs attached to switch:" . ($OKCount + $BadCount) . " NICs connected:" . $OKCount . " NICs disconnected:" . $BadCount . " NICs ignored:" . $ignored;
            }
        }
 

@@ -282,6 +282,8 @@ Network:
 -------
 
 -S, --select=net                    Shows net info
+-B, --exclude=<black_list>          Blacklist NICs.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
 or with
 -s, --subselect=usage               Overall network usage in KBps(Kilobytes per Second).
 or
@@ -290,6 +292,8 @@ or
 -s, --subselect=send                Send in KBps(Kilobytes per Second).
 or
 -s, --subselect=nic                 Check all active NICs.
+-B, --exclude=<black_list>          Blacklist NICs.
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
 
 Volumes:
 --------

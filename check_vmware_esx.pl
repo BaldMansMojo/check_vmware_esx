@@ -1000,6 +1000,12 @@
 #   - In case of a locked session file the wait loop is not fix to 1 sec any more.
 #     Instead of this it uses a random period up to 5 sec.. So we minimize the risc
 #     of concurrent access.
+#
+# - 7 Mar 2014 M.Fuerstenau version 0.9.11
+#   - Updated README
+#     - Section for removing HTML tags was reworked
+#   - Added blacklist to host_net_info() so that interfaces with -S net can
+#     be blacklisted.
 
 use strict;
 use warnings;
@@ -1011,7 +1017,6 @@ use Time::Duration;
 
 # Own modules
 use lib "modules";
-#use lib "/usr/lib/nagios/vmware/modules";
 use help;
 use process_perfdata;
 use datastore_volumes_info;
@@ -1019,11 +1024,6 @@ use datastore_volumes_info;
 # Prevent SSL certificate validation
 
 $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0; 
-
-# Only for debugging
-use Data::Dumper;
-$Data::Dumper::Indent = 1;
-#print "------------------------------------------\n" . Dumper ($store) . "\n" . "------------------------------------------\n";
 
 if ( $@ )
    {
