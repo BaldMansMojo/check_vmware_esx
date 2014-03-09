@@ -196,6 +196,15 @@ sub host_net_info
                           {
                           foreach $nic_key (@{$_->pnic})
                                   {
+                                  if (defined($isregexp))
+                                     {
+                                     $isregexp = 1;
+                                     }
+                                  else
+                                     {
+                                     $isregexp = 0;
+                                     }
+                                     
                                   if (defined($blacklist))
                                      {
                                      if (isblacklisted(\$blacklist, $isregexp, $NIC{$nic_key}->device))
