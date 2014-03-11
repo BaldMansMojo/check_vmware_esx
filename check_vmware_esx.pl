@@ -1006,6 +1006,16 @@
 #     - Section for removing HTML tags was reworked
 #   - Added blacklist to host_net_info() so that interfaces with -S net can
 #     be blacklisted.
+#
+# - 11 Mar 2014 M.Fuerstenau version 0.9.12
+#   - Changed sleep() to usleep() and using now microseconds instead of seconds
+#   - So before accessing the session file (and lock file) we now have a random sleep
+#     up to 1500 milliseconds (default - see $ms_ts). This is to avoid a concurrent access
+#     in case of a monitor restart or a "Schedule a check of all services on this host"
+#     but takes much less time while having much more alternatives.
+#   - In case of a locked session file the wait loop is not fix to a random period up to
+#     5 sec. any more. Instead of this it uses also $ms_ts which means a max of 1.5 secs.
+#     instead of 5.
 
 use strict;
 use warnings;
@@ -1014,6 +1024,7 @@ use HTTP::Date;
 use Getopt::Long;
 use VMware::VIRuntime;
 use Time::Duration;
+use Time::HiRes qw(usleep);
 
 # Own modules
 use lib "modules";
@@ -1123,6 +1134,9 @@ my  $mday;                                     # Day of month - used for some da
 my  $mon;                                      # Month        - used for some date functions
 my  $year;                                     # Year         - used for some date functions
 
+my  $timeout = 90;                             # Time in seconds befor the plugin kills itself when it' not ready
+my  $ms_ts = 1500;                             # Milliseconds to sleep for waiting for accessing the lockfile.
+
 # Output options
 our $multiline;                                # Multiline output in overview. This mean technically that
                                                # a multiline output uses a HTML <br> for the GUI instead of
@@ -1140,7 +1154,6 @@ our $listall;                                  # used for host. Lists all availa
 
 
 my  $trace;
-my  $timeout = 90;
 
 
 # 2. Define arrays and hashes  
@@ -1442,7 +1455,8 @@ $sessionlockfile = $sessionfile_name . "_locked";
 
 if ( -e $sessionfile_name )
    {
-   sleep(int(rand(7)));
+   usleep(int(rand($ms_ts)) * 1000);
+   
    if ( -e $sessionlockfile )
       {
       # Session locked? First open the lock file for reading
@@ -1471,7 +1485,7 @@ if ( -e $sessionfile_name )
    # Now we are sure that we have no dead lock file and we will wait for free session
    while ( -e $sessionlockfile )
          {
-         sleep(int(rand(5)));
+         usleep(int(rand($ms_ts)) * 1000);
          }
 
    unless(open SESSION_LOCK_FILE, '>', $sessionlockfile)
