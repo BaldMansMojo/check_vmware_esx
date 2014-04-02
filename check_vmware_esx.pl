@@ -1018,6 +1018,7 @@
 #     instead of 5.
 #
 # - 3 Apr 2014 M.Fuerstenau version 0.9.13
+#   - --trace=<tracelevel> was not working. Fixed. Small typo.
 #   - datastore_volumes_info(). Some bugs corrected.
 #     - Wrong percent calculation
 #     - Wrong processing of thresholds for usedspace
@@ -1036,6 +1037,7 @@ use Time::HiRes qw(usleep);
 
 # Own modules
 use lib "modules";
+#use lib "/usr/lib/nagios/vmware/modules";
 use help;
 use process_perfdata;
 use datastore_volumes_info;
@@ -1204,7 +1206,7 @@ GetOptions
          "t=s" => \$timeout,             "timeout=s"        => \$timeout,
 	                                 "ignore_unknown"   => \$ignoreunknown,
 	                                 "ignore_warning"   => \$ignorewarning,
-	                                 "trace"            => \$trace,
+	                                 "trace=s"          => \$trace,
                                          "listsensors"      => \$listsensors,
                                          "usedspace"        => \$usedspace,
                                          "alertonly"        => \$alertonly,
