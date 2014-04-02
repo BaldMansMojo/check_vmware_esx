@@ -9,6 +9,8 @@ sub datastore_volumes_info
     my $capacity;
     my $used_capacity;
     my $capacity_percent;
+    my $warn_out;
+    my $crit_out;
     my $ref_store;
     my $store;
     my $name;
@@ -82,7 +84,7 @@ sub datastore_volumes_info
 
                   $capacity = convert_number($store->summary->capacity);
                   $capacity_percent = simplify_number(convert_number($store->summary->freeSpace) / $capacity * 100);
-                  $capacity_percent =  sprintf "%.0f", $capacity_percent;
+                  $capacity_percent =  sprintf "%.2f", $capacity_percent;
 
                   if ($gigabyte)
                      {
@@ -105,6 +107,7 @@ sub datastore_volumes_info
                         $freespace = simplify_number(convert_number($store->summary->capacity) / 1024 / 1024) - $freespace;
                         }
                      $capacity_percent = 100 - $capacity_percent;
+                     $capacity_percent =  sprintf "%.2f", $capacity_percent;
                      }
   
                   $freespace =  sprintf "%.2f", $freespace;
@@ -121,8 +124,19 @@ sub datastore_volumes_info
                      
                   if (($warn_is_percent) || ($crit_is_percent))
                      {
-                     $actual_state = check_against_threshold($capacity_percent);
-                     $state = check_state($state, $actual_state);
+                     if ($usedspace)
+                        {
+                        $capacity_percent =  sprintf "%.2f", $capacity_percent;
+                        $actual_state = check_against_threshold($capacity_percent);
+                        $state = check_state($state, $actual_state);
+                        }
+                     else
+                        {
+                        $capacity_percent = 100 - $capacity_percent;
+                        $capacity_percent =  sprintf "%.2f", $capacity_percent;
+                        $actual_state = check_against_threshold($capacity_percent);
+                        $state = check_state($state, $actual_state);
+                        }
                      if ( $state >= 0 )
                         {
                         $alertcnt++;
@@ -140,11 +154,20 @@ sub datastore_volumes_info
                         }
                      }
 
+                  if (($warn_is_percent) || ($crit_is_percent))
+                     {
+                     $warn_out =  $capacity / 100 * $warning;
+                     $warn_out =  sprintf "%.2f", $warn_out;
+                     $crit_out =  $capacity / 100 * $critical;
+                     $crit_out =  sprintf "%.2f", $crit_out;
+                     $perf_thresholds = $warn_out . ";" . $crit_out;
+                     }
+                     
                   $perfdata = $perfdata . " \'" . $name . "\'=" . $freespace . "$uom;" . $perf_thresholds . ";;" . $capacity;
 
                   if (!$alertonly || $actual_state != 0)
                      {
-                     $output = $output . "$name" . " (" . $volume_type . ")" . ($usedspace ? " used" : " free") . ": ". $freespace . " / " . $capacity . " $uom (" . $capacity_percent . "%)". $multiline;
+                     $output = $output . "$name ($volume_type)" . ($usedspace ? " used" : " free") . ": $freespace ($capacity_percent%) / $capacity $uom (100%)". $multiline;
                      }
                   }
                else
@@ -172,11 +195,25 @@ sub datastore_volumes_info
           {
           if ($alertonly)
              {
-             $output = $alertcnt . " alerts for the selected volumes (warn:" . $warning . "%,crit:" . $critical . "%)." . $multiline . $output;
-             }
+             if (($warn_is_percent) || ($crit_is_percent))
+                {
+                $output = $alertcnt . " alerts for the selected volumes (warn:" . $warning . "%,crit:" . $critical . "%)." . $multiline . $output;
+                }
              else
+                {
+                $output = $alertcnt . " alerts for the selected volumes (warn:" . $warning . ",crit:" . $critical . ")." . $multiline . $output;
+                }
+             }
+          else
              {
-             $output = $alertcnt . " alerts found for some for the selected volumes (warn:" . $warning . "%,crit:" . $critical . "%)." . $multiline . $output;
+             if (($warn_is_percent) || ($crit_is_percent))
+                {
+                $output = $alertcnt . " alerts found for some for the selected volumes (warn:" . $warning . "%,crit:" . $critical . "%)." . $multiline . $output;
+                }
+             else
+                {
+                $output = $alertcnt . " alerts found for some for the selected volumes (warn:" . $warning . ",crit:" . $critical . ")." . $multiline . $output;
+                }
              }
           }
        }

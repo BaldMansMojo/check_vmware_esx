@@ -957,3 +957,11 @@ History:
     5 sec. any more. Instead of this it uses also $ms_ts which means a max of 1.5 secs.
     instead of 5.
 
+- 3 Apr 2014 M.Fuerstenau version 0.9.13
+  - datastore_volumes_info(). Some bugs corrected.
+    - Wrong percent calculation
+    - Wrong processing of thresholds for usedspace
+    - Wrong processing for thresholds which are not percent
+    - If threshold is in percent it is calculated in MB/GB for perfdata
+      because mixing percent and MB/GB doesn't make sense.
+

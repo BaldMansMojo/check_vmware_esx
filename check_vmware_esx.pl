@@ -1016,6 +1016,14 @@
 #   - In case of a locked session file the wait loop is not fix to a random period up to
 #     5 sec. any more. Instead of this it uses also $ms_ts which means a max of 1.5 secs.
 #     instead of 5.
+#
+# - 3 Apr 2014 M.Fuerstenau version 0.9.13
+#   - datastore_volumes_info(). Some bugs corrected.
+#     - Wrong percent calculation
+#     - Wrong processing of thresholds for usedspace
+#     - Wrong processing for thresholds which are not percent
+#     - If threshold is in percent it is calculated in MB/GB for perfdata
+#       because mixing percent and MB/GB doesn't make sense.
 
 use strict;
 use warnings;
@@ -1056,7 +1064,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.10';                  # Contains the program version number
+our $prog_version = '0.9.13';                  # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
