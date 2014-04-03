@@ -959,6 +959,8 @@ History:
 
 - 3 Apr 2014 M.Fuerstenau version 0.9.13
   - --trace=<tracelevel> was not working. Fixed. Small typo.
+  - Removed comment sign in front of unlink around. It was there due to some
+    some tests and I had forgotten to remove it.
   - datastore_volumes_info(). Some bugs corrected.
     - Wrong percent calculation
     - Wrong processing of thresholds for usedspace
