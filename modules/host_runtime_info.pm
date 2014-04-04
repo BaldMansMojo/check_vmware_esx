@@ -27,6 +27,8 @@ sub host_runtime_info
     my $issue_out = '';
     my $issue_cnt = 0;
     my $issues_ignored_cnt = 0;
+    my $issues_whitelisted_cnt = 0;
+    my $issues_alarm_cnt = 0;
     my $itemref;
     my $item_ref;
     my $memoryStatusInfo;
@@ -713,7 +715,6 @@ sub host_runtime_info
           {
           foreach (@$issues)
                   {
-                  $actual_state = 2;
                   $issue_cnt++;
                   if (defined($isregexp))
                       {
@@ -734,7 +735,7 @@ sub host_runtime_info
                      }
                   if (defined($whitelist))
                      {
-                     $issues_ignored_cnt++;
+                     $issues_whitelisted_cnt++;
                      if (isnotwhitelisted(\$whitelist, $isregexp, $_->fullFormattedMessage))
                         {
                         next;
@@ -744,6 +745,24 @@ sub host_runtime_info
                   }
           }
 
+       if (defined($whitelist))
+          {
+          $issues_ignored_cnt = $issue_cnt - $issues_whitelisted_cnt;
+          }
+
+       $issues_alarm_cnt = $issue_cnt - $issues_ignored_cnt;
+
+       if ($issues_alarm_cnt > 1)
+          {
+          $actual_state = 2;
+          }
+       else
+          {
+          $actual_state = 0;
+          }
+       
+       $state = check_state($state, $actual_state);
+          
        if ($subselect eq "all")
           {
           $output = $output . " - " . $issue_cnt . " config issues  - " . $issues_ignored_cnt  . " config issues ignored";
@@ -754,7 +773,6 @@ sub host_runtime_info
           # Remove the last multiline regardless whether it is \n or <br>
           $output =~ s/$multiline$//;
           }
-       $state = check_state($state, $actual_state);
        }
 
     if ($true_sub_sel == 1)

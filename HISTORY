@@ -968,3 +968,8 @@ History:
     - If threshold is in percent it is calculated in MB/GB for perfdata
       because mixing percent and MB/GB doesn't make sense.
 
+- 5 Apr 2014 M.Fuerstenau version 0.9.14
+  - host_runtime_info()
+    - Fixed some bugs with issues ignored and whitelist. Some counters were calculated
+      wrong
+  - New plausibility check to ensured that blacklist and whitelist can not be used together.

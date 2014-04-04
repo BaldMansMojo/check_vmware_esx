@@ -1,5 +1,5 @@
 
-check_vmware_esx.pl,Version 0.9.10
+check_vmware_esx.pl,Version 0.9.14
 
 This vmware Infrastructure monitoring plugin is free software, and comes with ABSOLUTELY NO WARRANTY.
 It may be used, redistributed and/or modified under the terms of the GNU General Public Licence 
@@ -70,6 +70,10 @@ or with
     --alertonly                     List only alerting volumes
 -B, --exclude=<black_list>          Blacklist volumes.
 -W, --include=<white_list>          Whitelist volumes.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat name, blacklist and whitelist as regexp
 -w, --warning=<threshold>           Warning threshold.
 -c, --critical=<threshold>          Critical threshold.
@@ -91,6 +95,10 @@ or with
 
 -B, --exclude=<black_list>          Blacklist VMs.
 -W, --include=<white_list>          Whitelist VMs.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -123,6 +131,10 @@ or
 
 -B, --exclude=<black_list>          Blacklist VMware ESX hosts.
 -W, --include=<white_list>          Whitelist VMware ESX hosts.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -139,6 +151,10 @@ or
                                     - yellow  The entity might have a problem.
 -B, --exclude=<black_list>          Blacklist VMware cluster.
 -W, --include=<white_list>          Whitelist VMware cluster.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -150,6 +166,10 @@ or
 -s, --subselect=issues              All issues for the host.
 -B, --exclude=<black_list>          Blacklist issues.
 -W, --include=<white_list>          Whitelist issues.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -176,6 +196,10 @@ or
                                     - Installed,running,but the version is too old
                                     - Installed,running,but not managed by VMWare-B, --exclude=<black_list>          Blacklist VMs.
 -W, --include=<white_list>          Whitelist VMs.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -283,7 +307,7 @@ Network:
 
 -S, --select=net                    Shows net info
 -B, --exclude=<black_list>          Blacklist NICs.
-    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --isregexp                      Whether to treat blacklist as regexp
 or with
 -s, --subselect=usage               Overall network usage in KBps(Kilobytes per Second).
 or
@@ -293,7 +317,7 @@ or
 or
 -s, --subselect=nic                 Check all active NICs.
 -B, --exclude=<black_list>          Blacklist NICs.
-    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --isregexp                      Whether to treat blacklist as regexp
 
 Volumes:
 --------
@@ -307,6 +331,10 @@ or with
     --alertonly                     List only alerting volumes
 -B, --exclude=<black_list>          Blacklist volumes.
 -W, --include=<white_list>          Whitelist volumes.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat name, blacklist and whitelist as regexp
 -w, --warning=<threshold>           Warning threshold.
 -c, --critical=<threshold>          Critical threshold.
@@ -363,6 +391,10 @@ Host mounted media:
                                     moved to another host.
 -B, --exclude=<black_list>          Blacklist VMs.
 -W, --include=<white_list>          Whitelist VMs.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --listall                       List all VMs with all mounted media.
     --multiline                     Multiline output in overview. This mean technically that
@@ -376,6 +408,10 @@ Service info:
 -S, --select=service                Shows host service info.
 -B, --exclude=<black_list>          Blacklist services.
 -W, --include=<white_list>          Whitelist services.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -394,6 +430,10 @@ or
 -s, --subselect=listvms             List of vmware machines and their statuses.
 -B, --exclude=<black_list>          Blacklist VMs.
 -W, --include=<white_list>          Whitelist VMs.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -412,11 +452,19 @@ or
     --listsensors                   List all available sensors(use for listing purpose only)
 -B, --exclude=<black_list>          Blacklist storage, memory and sensors.
 -W, --include=<white_list>          Whitelist storage, memory and sensors.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat blacklist and whitelist as regexp
 or
 -s, --subselect=storagehealth       Local(!) storage status check.
 -B, --exclude=<black_list>          Blacklist storage.
 -W, --include=<white_list>          Whitelist storage.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -427,6 +475,10 @@ or
 -s, --subselect=temp                Lists all temperature sensors.
 -B, --exclude=<black_list>          Blacklist sensors.
 -W, --include=<white_list>          Whitelist sensors.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -437,6 +489,10 @@ or
 -s, --subselect=issues              Lists all configuration issues for the host.
 -B, --exclude=<black_list>          Blacklist configuration issues.
 -W, --include=<white_list>          Whitelist configuration issues.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -460,11 +516,19 @@ Storage info:
 -W, --include=<white_list>          Whitelist adapters, luns (use whitelist on canonical names for it)
                                     and paths. All items can be in one whitelist. Beware of regexp.
                                     A given regexp must give a destinct result.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat blacklist and whitelist as regexp
 or with
 -s, --subselect=adapter             List host bus adapters.
 -B, --exclude=<black_list>          Blacklist adapters. Blacklisted adapters will not be displayed.
 -W, --include=<white_list>          Whitelist adapters.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -481,6 +545,10 @@ or with
                                     Blacklisted luns will not be displayed.
 -W, --include=<white_list>          Whitelist luns (use whitelist on canonical names for it).
                                     Only whitelisted adapters will be displayed.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --alertonly                     List only alerting units. Important here to avoid masses of data.
     --multiline                     Multiline output in overview. This mean technically that
@@ -496,6 +564,10 @@ or with
 -W, --include=<white_list>          Whitelist paths.
                                     A multipath SCSI ID is in the form:
                                     02003c000060a98000375274315a244276694e67684c554e202020
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --alertonly                     List only alerting units. Important here to avoid masses of data.
     --multiline                     Multiline output in overview. This mean technically that
@@ -750,5 +822,9 @@ or with
     --alertonly                     list only alerting volumes
 -B, --exclude=<black_list>          blacklist volumes.
 -W, --include=<white_list>          whitelist volumes.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
     --isregexp                      whether to treat name, blacklist and whitelist as regexp
 

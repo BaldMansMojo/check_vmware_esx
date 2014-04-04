@@ -1027,6 +1027,12 @@
 #     - Wrong processing for thresholds which are not percent
 #     - If threshold is in percent it is calculated in MB/GB for perfdata
 #       because mixing percent and MB/GB doesn't make sense.
+#
+# - 5 Apr 2014 M.Fuerstenau version 0.9.14
+#   - host_runtime_info()
+#     - Fixed some bugs with issues ignored and whitelist. Some counters were calculated
+#       wrong
+#   - New plausibility check to ensured that blacklist and whitelist can not be used together.
 
 use strict;
 use warnings;
@@ -1068,7 +1074,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.13';                  # Contains the program version number
+our $prog_version = '0.9.14';                  # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
@@ -1235,6 +1241,13 @@ if (defined($help))
    {
    print_help($help);
    exit 0;
+   }
+
+if (defined($blacklist) && defined($whitelist))
+   {
+   print "Error: -B|--exclude and -W|--include should not be used together.\n\n";
+   print_help($help);
+   exit 1;
    }
 
 # Multiline output in GUI overview?
