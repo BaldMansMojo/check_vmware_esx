@@ -973,3 +973,11 @@ History:
     - Fixed some bugs with issues ignored and whitelist. Some counters were calculated
       wrong
   - New plausibility check to ensured that blacklist and whitelist can not be used together.
+
+- 29 Apr 2014 M.Fuerstenau version 0.9.15
+  - host_mem_info(), vm_mem_info(), host_cpu_info() and vm_cpu_info().
+    - Sometimes it may happen on Vmware 5.5 (not seen when testing with Update 1) that getting
+      the perfdata for cpu and/or memory will result in an empty construct because one
+      or more values are not delivered. In this case we have a fallback and and every value
+  - dc_runtime_info()
+    - New option --poweredonly to list only machines which are powered on

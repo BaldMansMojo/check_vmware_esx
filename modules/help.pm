@@ -280,7 +280,8 @@ sub print_help
        print "                                    - Installed,running,but the version is known to be too new\n";
        print "                                      too new to work correctly with this virtual machine\n";
        print "                                    - Installed,running,but the version is too old\n";
-       print "                                    - Installed,running,but not managed by VMWare";
+       print "                                    - Installed,running,but not managed by VMWare\n";
+       print "    --poweredonly                   List only VMs which are powered on.\n";
        print "-B, --exclude=<black_list>          Blacklist VMs.\n";
        print "-W, --include=<white_list>          Whitelist VMs.\n";
        print "\n";

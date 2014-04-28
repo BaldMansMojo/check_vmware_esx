@@ -1,5 +1,5 @@
 
-check_vmware_esx.pl,Version 0.9.14
+check_vmware_esx.pl,Version 0.9.15
 
 This vmware Infrastructure monitoring plugin is free software, and comes with ABSOLUTELY NO WARRANTY.
 It may be used, redistributed and/or modified under the terms of the GNU General Public Licence 
@@ -194,7 +194,9 @@ or
                                     - Installed,running,but the version is known to be too new
                                       too new to work correctly with this virtual machine
                                     - Installed,running,but the version is too old
-                                    - Installed,running,but not managed by VMWare-B, --exclude=<black_list>          Blacklist VMs.
+                                    - Installed,running,but not managed by VMWare
+    --poweredonly                   List only VMs which are powered on.
+-B, --exclude=<black_list>          Blacklist VMs.
 -W, --include=<white_list>          Whitelist VMs.
 
                                     Use blacklist OR(!) whitelist. Using both in one statement

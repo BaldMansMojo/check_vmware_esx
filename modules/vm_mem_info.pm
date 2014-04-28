@@ -4,6 +4,8 @@ sub vm_mem_info
     my $state = 0;
     my $output;
     my $value;
+    my $perf_val_error = 1;      # Used as a flag when getting all the values 
+                                 # with one call won't work.
     my $actual_state;            # Hold the actual state for to be compared
     my $true_sub_sel=1;          # Just a flag. To have only one return at the en
                                  # we must ensure that we had a valid subselect. If
@@ -13,6 +15,20 @@ sub vm_mem_info
 
     $values = return_host_vmware_performance_values($vmname, 'mem', ('usage.average', 'consumed.average', 'overhead.average', 'active.average', 'vmmemctl.average'));
         
+    if (defined($values))
+       {
+       $perf_val_error = 0;
+       }
+       
+    if (defined($values))
+       {
+       $perf_val_error = 0;
+       }
+    else
+       {
+       $perf_val_error = 1;
+       }
+       
     if (!defined($subselect))
        {
        # This means no given subselect. So all checks must be performemed
@@ -30,6 +46,12 @@ sub vm_mem_info
     if (($subselect eq "usage") || ($subselect eq "all"))
        {
        $true_sub_sel = 0;
+
+       if ($perf_val_error == 1)
+          {
+          $values = return_host_vmware_performance_values($vmname, 'mem', ('usage.average'));
+          }
+
        if (defined($values))
           {
           $value = simplify_number(convert_number($$values[0][0]->value) * 0.01);
@@ -57,9 +79,23 @@ sub vm_mem_info
     if (($subselect eq "consumed") || ($subselect eq "all"))
        {
        $true_sub_sel = 0;
+
+       if ($perf_val_error == 1)
+          {
+          $values = return_host_vmware_performance_values($vmname, 'mem', ('consumed.average'));
+          }
+
        if (defined($values))
           {
-          $value = simplify_number(convert_number($$values[0][1]->value) / 1024);
+          if ($perf_val_error == 1)
+             {
+             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
+             }
+          else
+             {
+             $value = simplify_number(convert_number($$values[0][1]->value) / 1024);
+             }
+
           if ($subselect eq "all")
              {
              $output = $output . " - consumed memory=" . $value . " MB";
@@ -93,9 +129,23 @@ sub vm_mem_info
     if (($subselect eq "overhead") || ($subselect eq "all"))
        {
        $true_sub_sel = 0;
+
+       if ($perf_val_error == 1)
+          {
+          $values = return_host_vmware_performance_values($vmname, 'mem', ('overhead.average'));
+          }
+
        if (defined($values))
           {
-          $value = simplify_number(convert_number($$values[0][2]->value) / 1024);
+          if ($perf_val_error == 1)
+             {
+             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
+             }
+          else
+             {
+             $value = simplify_number(convert_number($$values[0][2]->value) / 1024);
+             }
+
           if ($subselect eq "all")
              {
              $output = $output . " - mem overhead=" . $value . " MB";
@@ -129,9 +179,23 @@ sub vm_mem_info
     if (($subselect eq "active") || ($subselect eq "all"))
        {
        $true_sub_sel = 0;
+
+       if ($perf_val_error == 1)
+          {
+          $values = return_host_vmware_performance_values($vmname, 'mem', ('active.average'));
+          }
+
        if (defined($values))
           {
-          $value = simplify_number(convert_number($$values[0][3]->value) / 1024);
+          if ($perf_val_error == 1)
+             {
+             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
+             }
+          else
+             {
+             $value = simplify_number(convert_number($$values[0][3]->value) / 1024);
+             }
+
           if ($subselect eq "all")
              {
              $output = $output . " - mem active=" . $value . " MB";
@@ -165,9 +229,23 @@ sub vm_mem_info
     if (($subselect eq "memctl") || ($subselect eq "all"))
        {
        $true_sub_sel = 0;
+
+       if ($perf_val_error == 1)
+          {
+          $values = return_host_vmware_performance_values($vmname, 'mem', ('vmmemctl.average'));
+          }
+
        if (defined($values))
           {
-          $value = simplify_number(convert_number($$values[0][4]->value) / 1024);
+          if ($perf_val_error == 1)
+             {
+             $value = simplify_number(convert_number($$values[0][0]->value) / 1024);
+             }
+          else
+             {
+             $value = simplify_number(convert_number($$values[0][4]->value) / 1024);
+             }
+
           if ($subselect eq "all")
              {
              $output = $output . " - memctl=" . $value . " MB";

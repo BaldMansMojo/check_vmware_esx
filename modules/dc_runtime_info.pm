@@ -545,19 +545,22 @@ sub dc_runtime_info
                   }
                else
                   {
-                  if ($vm->get_property('runtime.powerState')->val eq "poweredOff")
+                  if (!defined($vm_tools_poweredon_only))
                      {
-                     $guestToolsPOF_cnt++;
-                     $tools_out = $tools_out . $vm->name . " powered off. Tools not running." . $multiline;
-                     $actual_state = 0;
-                     $state = check_state($state, $actual_state);
-                     }
-                  if ($vm->get_property('runtime.powerState')->val eq "suspended")
-                     {
-                     $guestToolsSuspendePOF_cnt++;
-                     $tools_out = $tools_out . $vm->name . " suspended. Tools not running." . $multiline;
-                     $actual_state = 0;
-                     $state = check_state($state, $actual_state);
+                     if ($vm->get_property('runtime.powerState')->val eq "poweredOff")
+                        {
+                        $guestToolsPOF_cnt++;
+                        $tools_out = $tools_out . $vm->name . " powered off. Tools not running." . $multiline;
+                        $actual_state = 0;
+                        $state = check_state($state, $actual_state);
+                        }
+                     if ($vm->get_property('runtime.powerState')->val eq "suspended")
+                        {
+                        $guestToolsSuspendePOF_cnt++;
+                        $tools_out = $tools_out . $vm->name . " suspended. Tools not running." . $multiline;
+                        $actual_state = 0;
+                        $state = check_state($state, $actual_state);
+                        }
                      }
                   }
                }

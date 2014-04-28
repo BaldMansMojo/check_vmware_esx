@@ -1032,7 +1032,15 @@
 #   - host_runtime_info()
 #     - Fixed some bugs with issues ignored and whitelist. Some counters were calculated
 #       wrong
-#   - New plausibility check to ensured that blacklist and whitelist can not be used together.
+#
+# - 29 Apr 2014 M.Fuerstenau version 0.9.15
+#   - host_mem_info(), vm_mem_info(), host_cpu_info() and vm_cpu_info().
+#     - Sometimes it may happen on Vmware 5.5 (not seen when testing with Update 1) that getting
+#       the perfdata for cpu and/or memory will result in an empty construct because one
+#       or more values are not delivered. In this case we have a fallback and and every value
+#   - dc_runtime_info()
+#     - New option --poweredonly to list only machines which are powered on
+
 
 use strict;
 use warnings;
@@ -1074,7 +1082,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.14';                  # Contains the program version number
+our $prog_version = '0.9.15';                  # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
@@ -1164,6 +1172,8 @@ our $multiline;                                # Multiline output in overview. T
                                                # sed 's/<[^<>]*>//g'
 my  $multiline_def="\n";                       # Default for $multiline;
 
+our $vm_tools_poweredon_only;                  # Used with Vcenter runtime check to list only powered on VMs when
+                                               # checking the tools
 our $ignoreunknown;                            # Maps unknown to ok
 our $ignorewarning;                            # Maps warning to ok
 our $standbyok;                                # For multipathing if a standby multipath is ok
@@ -1221,6 +1231,7 @@ GetOptions
                                          "multiline"        => \$multiline,
                                          "isregexp"         => \$isregexp,
                                          "listall"          => \$listall,
+                                         "poweredonly"      => \$vm_tools_poweredon_only,
                                          "standbyok"        => \$standbyok,
                                          "sslport=s"        => \$sslport,
                                          "gigabyte"         => \$gigabyte,
