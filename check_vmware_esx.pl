@@ -1040,7 +1040,32 @@
 #       or more values are not delivered. In this case we have a fallback and and every value
 #   - dc_runtime_info()
 #     - New option --poweredonly to list only machines which are powered on
-
+#
+# - 20 May 2014 M.Fuerstenau version 0.9.16
+#   - New option --nosession.
+#     - This was implemented for 2 reasons.
+#       - First when testing from the commandline using this switch to avoid
+#         waiting and timeouts while the monitor system is checking the the same host.
+#         This is the important reason.
+#       - Second is that some people don't like sessionfiles and prefer full logs as
+#         it was in the past. Good ol' times.
+#   - host_runtime_info()
+#     - added --nostoragestatus to -S runtime -s health to avoid a double alarm
+#       when also doing a check with -S runtime -s storagehealth for the same
+#       host.
+#   - dc_runtime_info()
+#     - changed 
+#       if (($subselect eq "listcluster") || ($subselect eq "all"))
+#       to
+#       if (($subselect =~ m/listcluster.*$/) || ($subselect eq "all"))
+#       This is to avoid unnecessary typos because it covers listcluster and listclusters ;-)
+#   - datastore_volumes_info()
+#     -  Heavily reworked lot of the logical structure. There were too much changes
+#        changes after changes which lead to bugs. Now it is cleaned up.
+#   - cluster_list_vm_volumes_info()
+#     - Seperate module now
+#   - cluster_cpu_info()
+#     - Seperate module now but still not working.
 
 use strict;
 use warnings;
@@ -1053,7 +1078,6 @@ use Time::HiRes qw(usleep);
 
 # Own modules
 use lib "modules";
-#use lib "/usr/lib/nagios/vmware/modules";
 use help;
 use process_perfdata;
 use datastore_volumes_info;
@@ -1082,7 +1106,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.15';                  # Contains the program version number
+our $prog_version = '0.9.16';                  # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
@@ -1102,7 +1126,8 @@ my  $sessionfile_name;                         # Contains the name of the sessio
 my  $sessionlockfile;                          # Lockfile to protect the session
 my  $sessionfile_dir;                          # Optinal. Contains the path to the sessionfile. Used in conjunction
                                                # with sessionfile
-my $vim;                                       # Needed to stroe results ov Vim.
+my  $nosession;                                # Just a flag to avoid using a sessionfile
+my  $vim;                                       # Needed to stroe results ov Vim.
 
 our $host;                                     # Name of the vmware server
 my  $cluster;                                  # Name of the monitored cluster
@@ -1178,6 +1203,8 @@ our $ignoreunknown;                            # Maps unknown to ok
 our $ignorewarning;                            # Maps warning to ok
 our $standbyok;                                # For multipathing if a standby multipath is ok
 our $listall;                                  # used for host. Lists all available devices(use for listing purpose only)
+our $nostoragestatus;                          # To avoid a double alarm when also doing a check with -S runtime -s health
+                                               # and -S runtime -s storagehealth for the same host.
 
 
 
@@ -1219,6 +1246,7 @@ GetOptions
 	 "s=s" => \$subselect,           "subselect=s"      => \$subselect,
 	                                 "sessionfile=s"    => \$sessionfile_name,
 	                                 "sessionfiledir=s" => \$sessionfile_dir,
+	                                 "nosession"        => \$nosession,
 	 "B=s" => \$blacklist,           "exclude=s"        => \$blacklist,
 	 "W=s" => \$whitelist,           "include=s"        => \$whitelist,
          "t=s" => \$timeout,             "timeout=s"        => \$timeout,
@@ -1235,6 +1263,7 @@ GetOptions
                                          "standbyok"        => \$standbyok,
                                          "sslport=s"        => \$sslport,
                                          "gigabyte"         => \$gigabyte,
+                                         "nostoragestatus"  => \$nostoragestatus,
 	 "V"   => \$version,             "version"          => \$version);
 
 # Show version
@@ -1450,112 +1479,119 @@ $url2connect = "https://" . $url2connect . "/sdk/webService";
 
 # Now let's do the login stuff
 
-if (defined($datacenter))
+if (!defined($nosession))
    {
-   if (defined($sessionfile_name))
+   if (defined($datacenter))
       {
-      $sessionfile_name =~ s/ +//g;
-      $sessionfile_name = $datacenter . "_" . $sessionfile_name . "_session";
+      if (defined($sessionfile_name))
+         {
+         $sessionfile_name =~ s/ +//g;
+         $sessionfile_name = $datacenter . "_" . $sessionfile_name . "_session";
+         }
+      else
+         {
+         $sessionfile_name = $datacenter . "_session";
+         }
       }
    else
       {
-      $sessionfile_name = $datacenter . "_session";
+      if (defined($sessionfile_name))
+         {
+         $sessionfile_name =~ s/ +//g;
+         $sessionfile_name = $host . "_" . $sessionfile_name . "_session";
+         }
+      else
+         {
+         $sessionfile_name = $host . "_session";
+         }
       }
-   }
-else
-   {
-   if (defined($sessionfile_name))
+      
+   
+   if (defined($sessionfile_dir))
       {
-      $sessionfile_name =~ s/ +//g;
-      $sessionfile_name = $host . "_" . $sessionfile_name . "_session";
+      # If path contains trailing slash remove it
+      $sessionfile_dir =~ s/\/$//;
+      $sessionfile_name = $sessionfile_dir . "/" . $sessionfile_name;
       }
    else
       {
-      $sessionfile_name = $host . "_session";
+      $sessionfile_name = $plugin_cache . $sessionfile_name;
       }
-   }
    
-
-if (defined($sessionfile_dir))
-   {
-   # If path contains trailing slash remove it
-   $sessionfile_dir =~ s/\/$//;
-   $sessionfile_name = $sessionfile_dir . "/" . $sessionfile_name;
-   }
-else
-   {
-   $sessionfile_name = $plugin_cache . $sessionfile_name;
-   }
-
-$sessionlockfile = $sessionfile_name . "_locked";
-
-if ( -e $sessionfile_name )
-   {
-   usleep(int(rand($ms_ts)) * 1000);
+   $sessionlockfile = $sessionfile_name . "_locked";
    
-   if ( -e $sessionlockfile )
+   if ( -e $sessionfile_name )
       {
-      # Session locked? First open the lock file for reading
-      unless(open SESSION_LOCK_FILE, '<', $sessionlockfile)
+      usleep(int(rand($ms_ts)) * 1000);
+      
+      if ( -e $sessionlockfile )
+         {
+         # Session locked? First open the lock file for reading
+         unless(open SESSION_LOCK_FILE, '<', $sessionlockfile)
+               {
+               print "Unable to open session lock file \"$sessionlockfile\"\n";
+               exit 3;
+               }
+         # Second get the old PID
+         while(<SESSION_LOCK_FILE>)
+              {
+              $PID_old = $_;
+              }
+         close (SESSION_LOCK_FILE);    
+      
+         # Third - check for the process which wrote the lock file the last time
+         $PID_exists = kill 0, $PID_old;
+         
+         # Fourth - if the process is not available any more remove the lock file
+         if ( !$PID_exists )
             {
-            print "Unable to open session lock file \"$sessionlockfile\"\n";
+            unlink $sessionlockfile;
+            }
+         }
+   
+      # Now we are sure that we have no dead lock file and we will wait for free session
+      while ( -e $sessionlockfile )
+            {
+            usleep(int(rand($ms_ts)) * 1000);
+            }
+   
+      unless(open SESSION_LOCK_FILE, '>', $sessionlockfile)
+            {
+            print "Unable to create session lock file \"$sessionlockfile\"\n";
             exit 3;
             }
-      # Second get the old PID
-      while(<SESSION_LOCK_FILE>)
-           {
-           $PID_old = $_;
-           }
+      print SESSION_LOCK_FILE "$PID\n"; 
       close (SESSION_LOCK_FILE);    
    
-      # Third - check for the process which wrote the lock file the last time
-      $PID_exists = kill 0, $PID_old;
-      
-      # Fourth - if the process is not available any more remove the lock file
-      if ( !$PID_exists )
+      eval {Vim::load_session(session_file => $sessionfile_name)};
+      if (($@ =~ /The session is not authenticated/gi) || (Opts::get_option("url") ne $url2connect))
          {
-         unlink $sessionlockfile;
+         unlink $sessionfile_name;
+         Util::connect($url2connect, $username, $password);
+         Vim::save_session(session_file => $sessionfile_name);
+         }
+      else
+         {
+         Vim::load_session(session_file => $sessionfile_name);
          }
       }
-
-   # Now we are sure that we have no dead lock file and we will wait for free session
-   while ( -e $sessionlockfile )
-         {
-         usleep(int(rand($ms_ts)) * 1000);
-         }
-
-   unless(open SESSION_LOCK_FILE, '>', $sessionlockfile)
-         {
-         print "Unable to create session lock file \"$sessionlockfile\"\n";
-         exit 3;
-         }
-   print SESSION_LOCK_FILE "$PID\n"; 
-   close (SESSION_LOCK_FILE);    
-
-   eval {Vim::load_session(session_file => $sessionfile_name)};
-   if (($@ =~ /The session is not authenticated/gi) || (Opts::get_option("url") ne $url2connect))
+   else
       {
-      unlink $sessionfile_name;
+      unless(open SESSION_LOCK_FILE, '>', $sessionlockfile)
+            {
+            print "Unable to create session lock file \"$sessionlockfile\"\n";
+            exit 3;
+            }
+      print SESSION_LOCK_FILE "$PID\n"; 
+      close (SESSION_LOCK_FILE);    
+   
       Util::connect($url2connect, $username, $password);
       Vim::save_session(session_file => $sessionfile_name);
       }
-   else
-      {
-      Vim::load_session(session_file => $sessionfile_name);
-      }
    }
 else
    {
-   unless(open SESSION_LOCK_FILE, '>', $sessionlockfile)
-         {
-         print "Unable to create session lock file \"$sessionlockfile\"\n";
-         exit 3;
-         }
-   print SESSION_LOCK_FILE "$PID\n"; 
-   close (SESSION_LOCK_FILE);    
-
    Util::connect($url2connect, $username, $password);
-   Vim::save_session(session_file => $sessionfile_name);
    }
 
 # Tracemode?
@@ -1823,6 +1859,8 @@ sub main_select
        {
        if ($select eq "cpu")
           {
+          require cluster_cpu_info;
+          import cluster_cpu_info;
           ($result, $output) = cluster_cpu_info($cluster);
           return($result, $output);
           }
@@ -1838,6 +1876,8 @@ sub main_select
           }
        if ($select eq "volumes")
           {
+          require cluster_list_vm_volumes_info;
+          import cluster_list_vm_volumes_info;
           ($result, $output) = cluster_list_vm_volumes_info($cluster);
           return($result, $output);
           }
@@ -2200,58 +2240,6 @@ sub catch_intterm
  
 #=====================================================================| Cluster |============================================================================#
 
-sub cluster_cpu_info
-{
-        my ($cluster) = @_;
-
-        my $state = 2;
-        my $output = 'CLUSTER CPU Unknown error';
-
-        if (defined($subselect))
-        {
-                if ($subselect eq "usage")
-                {
-                        $values = return_cluster_performance_values($cluster, 'cpu', ('usage.average'));
-                        if (defined($values))
-                        {
-                                my $value = simplify_number(convert_number($$values[0][0]->value) * 0.01);
-                                $perfdata = $perfdata . " cpu_usage=" . $value . "%;" . $perf_thresholds . ";;";
-                                $output = "cpu usage=" . $value . "%"; 
-                                $state = check_against_threshold($value);
-                        }
-                }
-                elsif ($subselect eq "usagemhz")
-                {
-                        $values = return_cluster_performance_values($cluster, 'cpu', ('usagemhz.average'));
-                        if (defined($values))
-                        {
-                                my $value = simplify_number(convert_number($$values[0][0]->value));
-                                $perfdata = $perfdata . " cpu_usagemhz=" . $value . "Mhz;" . $perf_thresholds . ";;";
-                                $output = "cpu usagemhz=" . $value . " MHz";
-                                $state = check_against_threshold($value);
-                        }
-                }
-                else
-                {
-                get_me_out("Unknown CLUSTER CPU subselect");
-                }
-        }
-        else
-        {
-                $values = return_cluster_performance_values($cluster, 'cpu', ('usagemhz.average', 'usage.average'));
-                if (defined($values))
-                {
-                        my $value1 = simplify_number(convert_number($$values[0][0]->value));
-                        my $value2 = simplify_number(convert_number($$values[0][1]->value) * 0.01);
-                        $perfdata = $perfdata . " cpu_usagemhz=" . $value1 . "Mhz;" . $perf_thresholds . ";;";
-                        $perfdata = $perfdata . " cpu_usage=" . $value2 . "%;" . $perf_thresholds . ";;";
-                        $state = 0;
-                        $output = "cpu usage=" . $value1 . " MHz (" . $value2 . "%)";
-                }
-        }
-
-        return ($state, $output);
-}
 
 sub cluster_mem_info
 {
@@ -2684,18 +2672,4 @@ sub cluster_runtime_info
         return ($state, $output);
 }
 
-sub cluster_list_vm_volumes_info
-{
-        my ($cluster, $blacklist) = @_;
-
-        my $cluster_view = Vim::find_entity_view(view_type => 'ClusterComputeResource', filter => {name => "$cluster"}, properties => ['name', 'datastore']);
-
-        if (!defined($cluster_view->datastore))
-           {
-           print "Insufficient rights to access Datastores on the Host\n";
-           exit 2;
-           }
-
-        return datastore_volumes_info($cluster_view->datastore, $subselect, $blacklist);
-}
 

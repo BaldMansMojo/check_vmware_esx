@@ -259,7 +259,8 @@ sub dc_runtime_info
           }
        }
   
-    if (($subselect eq "listcluster") || ($subselect eq "all"))
+#    if (($subselect eq "listcluster") || ($subselect eq "all"))
+    if (($subselect =~ m/listcluster.*$/) || ($subselect eq "all"))
        {
        $true_sub_sel = 0;
        $cluster_views = Vim::find_entity_views(view_type => 'ClusterComputeResource', properties => ['name', 'overallStatus']);

@@ -981,3 +981,29 @@ History:
       or more values are not delivered. In this case we have a fallback and and every value
   - dc_runtime_info()
     - New option --poweredonly to list only machines which are powered on
+
+- 20 May 2014 M.Fuerstenau version 0.9.16
+  - New option --nosession.
+    - This was implemented for 2 reasons.
+      - First when testing from the commandline using this switch to avoid
+        waiting and timeouts while the monitor system is checking the the same host.
+        This is the important reason.
+      - Second is that some people don't like sessionfiles and prefer full logs as
+        it was in the past. Good ol' times.
+  - host_runtime_info()
+    - added --nostoragestatus to -S runtime -s health to avoid a double alarm
+      when also doing a check with -S runtime -s storagehealth for the same
+      host.
+  - dc_runtime_info()
+    - changed 
+      if (($subselect eq "listcluster") || ($subselect eq "all"))
+      to
+      if (($subselect =~ m/listcluster.*$/) || ($subselect eq "all"))
+      This is to avoid unnecessary typos because it covers listcluster and listclusters ;-)
+  - datastore_volumes_info()
+    -  Heavily reworked lot of the logical structure. There were too much changes
+       changes after changes which lead to bugs. Now it is cleaned up.
+  - cluster_list_vm_volumes_info()
+    - Seperate module now
+  - cluster_cpu_info()
+    - Seperate module now but still not working.

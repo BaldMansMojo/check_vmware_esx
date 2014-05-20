@@ -4,11 +4,18 @@ sub datastore_volumes_info
     my $state = 0;
     my $actual_state = 0;
     my $output = '';
-    my $freespace;
-    my $freespace_percent;
-    my $capacity;
-    my $used_capacity;
-    my $capacity_percent;
+    my $space_total;
+    my $space_total_MB;
+    my $space_total_GB;
+    my $space_total_percent;
+    my $space_free;
+    my $space_free_MB;
+    my $space_free_GB;
+    my $space_free_percent;
+    my $space_used;
+    my $space_used_MB;
+    my $space_used_GB;
+    my $space_used_percent;
     my $warn_out;
     my $crit_out;
     my $ref_store;
@@ -72,45 +79,25 @@ sub datastore_volumes_info
 
                if ($store->summary->accessible)
                   {
+                  $space_total = $store->summary->capacity;
+                  $space_free = $store->summary->freeSpace;
+                  $space_used = $space_total - $space_free;
+                  $space_used_percent = simplify_number(100 * $space_used/ $space_total);
+                  $space_free_percent = 100 - $space_used_percent;
+
                   if ($gigabyte)
                      {
-                     $freespace = simplify_number(convert_number($store->summary->freeSpace) / 1024 / 1024 / 1024);
+                     $space_total_GB = simplify_number($space_total / 1024 / 1024 / 1024);
+                     $space_free_GB = simplify_number($space_free / 1024 / 1024 / 1024);
+                     $space_used_GB = simplify_number($space_used / 1024 / 1024 / 1024);
                      $uom = "GB";
                      }
                   else
                      {
-                     $freespace = simplify_number(convert_number($store->summary->freeSpace) / 1024 / 1024);
+                     $space_total_MB = simplify_number($space_total / 1024 / 1024);
+                     $space_free_MB = simplify_number($space_free / 1024 / 1024);
+                     $space_used_MB = simplify_number($space_used / 1024 / 1024);
                      }
-
-                  $capacity = convert_number($store->summary->capacity);
-                  $capacity_percent = simplify_number(convert_number($store->summary->freeSpace) / $capacity * 100);
-                  $capacity_percent =  sprintf "%.2f", $capacity_percent;
-
-                  if ($gigabyte)
-                     {
-                     $capacity = simplify_number(convert_number($store->summary->capacity) / 1024 / 1024 / 1024);
-                     }
-                  else
-                     {
-                     $capacity = simplify_number(convert_number($store->summary->capacity) / 1024 / 1024);
-                     }
-
-                  if ($usedspace)
-                     {
-                     if ($gigabyte)
-                        {
-                        $freespace = simplify_number(convert_number($store->summary->capacity) / 1024 / 1024 / 1024) - $freespace;
-                        $uom = "GB";
-                        }
-                     else
-                        {
-                        $freespace = simplify_number(convert_number($store->summary->capacity) / 1024 / 1024) - $freespace;
-                        }
-                     $capacity_percent = 100 - $capacity_percent;
-                     $capacity_percent =  sprintf "%.2f", $capacity_percent;
-                     }
-  
-                  $freespace =  sprintf "%.2f", $freespace;
 
                   if (defined($warning) || defined($critical))
                      {
@@ -121,20 +108,32 @@ sub datastore_volumes_info
                         exit 2;
                         }
                      }
+                  if (defined($warning) && defined($critical))
+                     {
+                     if ($usedspace)
+                        {
+                        if (!defined($subselect))
+                           {
+                           if ((!($warn_is_percent)) && (!($crit_is_percent)))
+                              {
+                              print "On multiple volumes setting warning or critical threshold is only allowed";
+                              print " in percent for used space\n";
+                              exit 2;
+                              }
+                           }
+                        }
+                     }
                      
                   if (($warn_is_percent) || ($crit_is_percent))
                      {
                      if ($usedspace)
                         {
-                        $capacity_percent =  sprintf "%.2f", $capacity_percent;
-                        $actual_state = check_against_threshold($capacity_percent);
+                        $actual_state = check_against_threshold($space_used_percent);
                         $state = check_state($state, $actual_state);
                         }
                      else
                         {
-                        $capacity_percent = 100 - $capacity_percent;
-                        $capacity_percent =  sprintf "%.2f", $capacity_percent;
-                        $actual_state = check_against_threshold($capacity_percent);
+                        $actual_state = check_against_threshold($space_free_percent);
                         $state = check_state($state, $actual_state);
                         }
                      if ( $state >= 0 )
@@ -144,30 +143,68 @@ sub datastore_volumes_info
                      }
                   else
                      {
-                     if (defined($warning) && defined($critical))
+                     if ($usedspace)
                         {
-                        if ($isregexp && (!defined($subselect)) && ($name ne $subselect))
+                        if ($gigabyte)
                            {
-                           print "On multiple volumes setting warning or critical threshold is only allowed in percent and not in absolute values!\n";
-                           exit 2;
+                           $actual_state = check_against_threshold($space_used_GB);
+                           $state = check_state($state, $actual_state);
                            }
+                        else
+                           {
+                           $actual_state = check_against_threshold($space_used_MB);
+                           $state = check_state($state, $actual_state);
+                           }
+                        }
+                     else
+                        {
+                        if ($gigabyte)
+                           {
+                           $actual_state = check_against_threshold($space_free_GB);
+                           $state = check_state($state, $actual_state);
+                           }
+                        else
+                           {
+                           $actual_state = check_against_threshold($space_free_MB);
+                           $state = check_state($state, $actual_state);
+                           }
+                        }
+                     if ( $state >= 0 )
+                        {
+                        $alertcnt++;
                         }
                      }
 
+                  if ($gigabyte)
+                     {
+                     $space_total = $space_total_GB;
+                     $space_free = $space_free_GB;
+                     $space_used = $space_used_GB;
+                     }
+                  else
+                     {
+                     $space_total = $space_total_MB;
+                     $space_free = $space_free_MB;
+                     $space_used = $space_used_MB;
+                     }
+                     
                   if (($warn_is_percent) || ($crit_is_percent))
                      {
-                     $warn_out =  $capacity / 100 * $warning;
+                     $warn_out =  $space_total / 100 * $warning;
                      $warn_out =  sprintf "%.2f", $warn_out;
-                     $crit_out =  $capacity / 100 * $critical;
+                     $crit_out =  $space_total / 100 * $critical;
                      $crit_out =  sprintf "%.2f", $crit_out;
                      $perf_thresholds = $warn_out . ";" . $crit_out;
                      }
                      
-                  $perfdata = $perfdata . " \'" . $name . "\'=" . $freespace . "$uom;" . $perf_thresholds . ";;" . $capacity;
+                  $perfdata = $perfdata . " \'" . $name . "\'=" . $space_free . "$uom;" . $perf_thresholds . ";;" . $space_total;
 
                   if (!$alertonly || $actual_state != 0)
                      {
-                     $output = $output . "$name ($volume_type)" . ($usedspace ? " used" : " free") . ": $freespace ($capacity_percent%) / $capacity $uom (100%)". $multiline;
+                     $output = $output . "$name ($volume_type)" . ($usedspace ? " used" : " free");
+                     $output = $output . ": ". ($usedspace ? $space_used : $space_free);
+                     $output = $output . " (" . ($usedspace ? $space_used_percent : $space_free_percent) . "%) / $space_total $uom (100%)";
+                     $output = $output . $multiline;
                      }
                   }
                else

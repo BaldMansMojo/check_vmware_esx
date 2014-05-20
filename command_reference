@@ -1,5 +1,5 @@
 
-check_vmware_esx.pl,Version 0.9.15
+check_vmware_esx.pl,Version 0.9.16
 
 This vmware Infrastructure monitoring plugin is free software, and comes with ABSOLUTELY NO WARRANTY.
 It may be used, redistributed and/or modified under the terms of the GNU General Public Licence 
@@ -43,9 +43,13 @@ Options for authentication:
                                      number of sessions by using --sessionfile in the command definition and define
                                      the value in the service definition command as an extra argument so it can be used
                                      in the command definition as $ARGn$.
-     --sessionfile=<sessionfile>     (Optional).Session file name enhencement.
-     --sessionfiledir=<directory>    If this option is set a path different from the path stored in $nagios_plugin_cache
-                                     will be used.
+     --sessionfile=<sessionfile>     (Optional).Session file name enhancement.
+     --sessionfiledir=<directory>    (Optional).If this option is set a path different from the path stored in
+                                     $nagios_plugin_cache will be used.
+     --nosession                     (Optional). Don't use a session file. This is the old behaviour. It should
+     --nosession                     be used for production use because it can cause a lot of entries in the log
+                                     files an therefore can cause abnormal growing of the log.
+                                     IT SHOULD BE USED FOR TESTING PURPOSES ONLY!
 -u, --username=<username>            Username to connect with.
 -p, --password=<password>            Password to use with the username.
 -f, --authfile=<path>                Authentication file with login and password.
@@ -79,7 +83,7 @@ or with
 -c, --critical=<threshold>          Critical threshold.
                                     Thresholds should be either a simple counter or a percentage
                                     value in the nn% (i.e. 90%). If checking more than a single
-                                    volume only percent is alloed as threshold.
+                                    with --usedspace volume only percent is allowed as threshold.
 
 Runtime Info:
 -------------
@@ -185,7 +189,8 @@ or
                                     - yellow  The entity might have a problem.
 or
 -s, --subselect=tools               Vmware Tools status. Tool status can be:
-                                    - Installed,running and current.                                    - Installed,running,but the installed version is known to
+                                    - Installed,running and current.
+                                    - Installed,running,but the installed version is known to
                                       have a grave bug and should be immediately upgraded.
                                     - Installed,running,version is not current
                                     - Installed,running,supported and newer than the
@@ -340,8 +345,9 @@ or with
     --isregexp                      Whether to treat name, blacklist and whitelist as regexp
 -w, --warning=<threshold>           Warning threshold.
 -c, --critical=<threshold>          Critical threshold.
-                                    Thresholds should be either a simple counter or a percentage value in the nn% (i.e. 90%).
-                                    If checking more than a single volume only percent is alloed as threshold.
+                                    Thresholds should be either a simple counter or a percentage
+                                    value in the nn% (i.e. 90%). If checking more than a single
+                                    with --usedspace volume only percent is allowed as threshold.
 
 Disk I/O:
 ---------
@@ -452,6 +458,10 @@ or
 or
 -s, --subselect=health              Checks cpu/storage/memory/sensor status.
     --listsensors                   List all available sensors(use for listing purpose only)
+
+    --nostoragestatus               This is to avoid a double alarm if you use -s health and
+                                    -s storagehealth.
+
 -B, --exclude=<black_list>          Blacklist storage, memory and sensors.
 -W, --include=<white_list>          Whitelist storage, memory and sensors.
 
@@ -814,19 +824,25 @@ Memory:
             ^ all cluster runtime info
 
 Volumes:
+Volumes:
 --------
 
 -S, --select=volumes                Shows all datastore volumes info
 or with
--s, --subselect=<name>              free space info for volume with name <name>)
+-s, --subselect=<name>              free space info for volume with name <name>
 
-    --usedspace                     output used space instead of free
-    --alertonly                     list only alerting volumes
--B, --exclude=<black_list>          blacklist volumes.
--W, --include=<white_list>          whitelist volumes.
+    --usedspace                     Output used space instead of free
+    --alertonly                     List only alerting volumes
+-B, --exclude=<black_list>          Blacklist volumes.
+-W, --include=<white_list>          Whitelist volumes.
 
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
-    --isregexp                      whether to treat name, blacklist and whitelist as regexp
+    --isregexp                      Whether to treat name, blacklist and whitelist as regexp
+-w, --warning=<threshold>           Warning threshold.
+-c, --critical=<threshold>          Critical threshold.
+                                    Thresholds should be either a simple counter or a percentage
+                                    value in the nn% (i.e. 90%). If checking more than a single
+                                    with --usedspace volume only percent is allowed as threshold.
 

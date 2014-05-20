@@ -257,53 +257,56 @@ sub host_runtime_info
                      }
              }
 
-          if (defined($storageStatusInfo))
+          if (!defined($nostoragestatus))
              {
-             foreach (@$storageStatusInfo)
-                     {
-                     # print "Storage Name = ". $_->name .", Label = ". $_->status->label . ", Summary = ". $_->status->summary . ", Key = ". $_->status->key . "\n";
-                     if (defined($isregexp))
+             if (defined($storageStatusInfo))
+                {
+                foreach (@$storageStatusInfo)
                         {
-                        $isregexp = 1;
-                        }
-                     else
-                        {
-                        $isregexp = 0;
-                        }
-               
-                     if (defined($blacklist))
-                        {
-                        if (isblacklisted(\$blacklist, $isregexp, $_->name, "Storage"))
+                        # print "Storage Name = ". $_->name .", Label = ". $_->status->label . ", Summary = ". $_->status->summary . ", Key = ". $_->status->key . "\n";
+                        if (defined($isregexp))
                            {
-                           next;
+                           $isregexp = 1;
+                           }
+                        else
+                           {
+                           $isregexp = 0;
+                           }
+                  
+                        if (defined($blacklist))
+                           {
+                           if (isblacklisted(\$blacklist, $isregexp, $_->name, "Storage"))
+                              {
+                              next;
+                              }
+                           }
+     
+                        if (defined($whitelist))
+                           {
+                           if (isnotwhitelisted(\$whitelist, $isregexp, $_->name, "Storage"))
+                              {
+                              next;
+                              }
+                           }
+   
+                        $actual_state = check_health_state($_->status->key);
+                        $itemref = {
+                                   name => $_->name,
+                                   summary => $_->status->summary
+                                   };
+                        push(@{$components->{$actual_state}{Storage}}, $itemref);
+                        
+                        if ($actual_state != 0)
+                           {
+                           $state = check_state($state, $actual_state);
+                           $AlertCount++;
+                           }
+                        else
+                           {
+                           $OKCount++;
                            }
                         }
-  
-                     if (defined($whitelist))
-                        {
-                        if (isnotwhitelisted(\$whitelist, $isregexp, $_->name, "Storage"))
-                           {
-                           next;
-                           }
-                        }
-
-                     $actual_state = check_health_state($_->status->key);
-                     $itemref = {
-                                name => $_->name,
-                                summary => $_->status->summary
-                                };
-                     push(@{$components->{$actual_state}{Storage}}, $itemref);
-                     
-                     if ($actual_state != 0)
-                        {
-                        $state = check_state($state, $actual_state);
-                        $AlertCount++;
-                        }
-                     else
-                        {
-                        $OKCount++;
-                        }
-                     }
+                }
              }
 
           if (defined($memoryStatusInfo))

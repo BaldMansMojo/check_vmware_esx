@@ -1,3 +1,16 @@
+#    my $space_total;
+#    my $space_total_MB;
+#    my $space_total_GB;
+#    my $space_total_percent;
+#    my $space_free;
+#    my $space_free_MB;
+#    my $space_free_GB;
+#    my $space_free_percent;
+#    my $space_used;
+#    my $space_used_MB;
+#    my $space_used_GB;
+#    my $space_used_percent;
+ 
 sub version_lic
     {
     print "\n";
@@ -123,9 +136,13 @@ sub print_help
        print "                                     number of sessions by using --sessionfile in the command definition and define\n";
        print "                                     the value in the service definition command as an extra argument so it can be used\n";
        print "                                     in the command definition as \$ARGn\$.\n";
-       print "     --sessionfile=<sessionfile>     (Optional).Session file name enhencement.\n";
-       print "     --sessionfiledir=<directory>    If this option is set a path different from the path stored in \$nagios_plugin_cache\n";
-       print "                                     will be used.\n";
+       print "     --sessionfile=<sessionfile>     (Optional).Session file name enhancement.\n";
+       print "     --sessionfiledir=<directory>    (Optional).If this option is set a path different from the path stored in\n";
+       print "                                     \$nagios_plugin_cache will be used.\n";
+       print "     --nosession                     (Optional). Don't use a session file. This is the old behaviour. It should\n";
+       print "     --nosession                     be used for production use because it can cause a lot of entries in the log\n";
+       print "                                     files an therefore can cause abnormal growing of the log.\n";
+       print "                                     IT SHOULD BE USED FOR TESTING PURPOSES ONLY!\n";
        print "-u, --username=<username>            Username to connect with.\n";
        print "-p, --password=<password>            Password to use with the username.\n";
        print "-f, --authfile=<path>                Authentication file with login and password.\n";
@@ -164,7 +181,7 @@ sub print_help
        print "-c, --critical=<threshold>          Critical threshold.\n";
        print "                                    Thresholds should be either a simple counter or a percentage\n";
        print "                                    value in the nn% (i.e. 90%). If checking more than a single\n";
-       print "                                    volume only percent is alloed as threshold.\n";
+       print "                                    with --usedspace volume only percent is allowed as threshold.\n";
        print "\n";
        print "Runtime Info:\n";
        print "-------------\n";
@@ -270,7 +287,7 @@ sub print_help
        print "                                    - yellow  The entity might have a problem.\n";
        print "or\n";
        print "-s, --subselect=tools               Vmware Tools status. Tool status can be:\n";
-       print "                                    - Installed,running and current.";
+       print "                                    - Installed,running and current.\n";
        print "                                    - Installed,running,but the installed version is known to\n";
        print "                                      have a grave bug and should be immediately upgraded.\n";
        print "                                    - Installed,running,version is not current\n";
@@ -431,8 +448,9 @@ sub print_help
        print "    --isregexp                      Whether to treat name, blacklist and whitelist as regexp\n";
        print "-w, --warning=<threshold>           Warning threshold.\n";
        print "-c, --critical=<threshold>          Critical threshold.\n";
-       print "                                    Thresholds should be either a simple counter or a percentage value in the nn% (i.e. 90%).\n";
-       print "                                    If checking more than a single volume only percent is alloed as threshold.\n";
+       print "                                    Thresholds should be either a simple counter or a percentage\n";
+       print "                                    value in the nn% (i.e. 90%). If checking more than a single\n";
+       print "                                    with --usedspace volume only percent is allowed as threshold.\n";
        print "\n";
        print "Disk I/O:\n";
        print "---------\n";
@@ -543,6 +561,10 @@ sub print_help
        print "or\n";
        print "-s, --subselect=health              Checks cpu/storage/memory/sensor status.\n";
        print "    --listsensors                   List all available sensors(use for listing purpose only)\n";
+       print "\n";
+       print "    --nostoragestatus               This is to avoid a double alarm if you use -s health and\n";
+       print "                                    -s storagehealth.\n";
+       print "\n";
        print "-B, --exclude=<black_list>          Blacklist storage, memory and sensors.\n";
        print "-W, --include=<white_list>          Whitelist storage, memory and sensors.\n";
        print "\n";
@@ -919,20 +941,26 @@ sub print_help
        print "            ^ all cluster runtime info\n";
        print "\n";
        print "Volumes:\n";
+       print "Volumes:\n";
        print "--------\n";
        print "\n";
        print "-S, --select=volumes                Shows all datastore volumes info\n";
        print "or with\n";
-       print "-s, --subselect=<name>              free space info for volume with name <name>)\n\n";
-       print "    --usedspace                     output used space instead of free\n";
-       print "    --alertonly                     list only alerting volumes\n";
-       print "-B, --exclude=<black_list>          blacklist volumes.\n";
-       print "-W, --include=<white_list>          whitelist volumes.\n";
+       print "-s, --subselect=<name>              free space info for volume with name <name>\n\n";
+       print "    --usedspace                     Output used space instead of free\n";
+       print "    --alertonly                     List only alerting volumes\n";
+       print "-B, --exclude=<black_list>          Blacklist volumes.\n";
+       print "-W, --include=<white_list>          Whitelist volumes.\n";
        print "\n";
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
-       print "    --isregexp                      whether to treat name, blacklist and whitelist as regexp\n";
+       print "    --isregexp                      Whether to treat name, blacklist and whitelist as regexp\n";
+       print "-w, --warning=<threshold>           Warning threshold.\n";
+       print "-c, --critical=<threshold>          Critical threshold.\n";
+       print "                                    Thresholds should be either a simple counter or a percentage\n";
+       print "                                    value in the nn% (i.e. 90%). If checking more than a single\n";
+       print "                                    with --usedspace volume only percent is allowed as threshold.\n";
        print "\n";
        }
     }
