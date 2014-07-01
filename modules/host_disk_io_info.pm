@@ -21,7 +21,6 @@ sub host_disk_io_info
        $true_sub_sel = 0;
        if ($perf_thresholds ne ';')
           {
-          print "hier\n";
           print_help();
           print "\nERROR! Thresholds only allowed with subselects!\n\n";
           exit 2;

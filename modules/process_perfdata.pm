@@ -63,9 +63,7 @@ sub generic_performance_values
                {
                push(@perf_query_spec, PerfQuerySpec->new(entity => $_, metricId => $metrices, format => 'csv', intervalId => 20, maxSample => 1));
                }
-print "------------------------------------------\n" . Dumper (@perf_query_spec) . "\n" . "------------------------------------------\n";
 
-        print "hier\n";
         $perf_data = $perfMgr->QueryPerf(querySpec => \@perf_query_spec);
         $amount *= @$perf_data;
 

@@ -1066,6 +1066,13 @@
 #     - Seperate module now
 #   - cluster_cpu_info()
 #     - Seperate module now but still not working.
+#
+# - 1 Jul 2014 M.Fuerstenau version 0.9.16a
+#   - Unfortunately published some modules containing debugging outpu. Fixed.
+#     - host_disk_io_info.pm
+#     - process_perfdata.pm
+#     - vm_disk_io_info.pm
+
 
 use strict;
 use warnings;
@@ -1106,7 +1113,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.16';                  # Contains the program version number
+our $prog_version = '0.9.16a';                 # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
