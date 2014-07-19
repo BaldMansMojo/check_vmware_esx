@@ -101,7 +101,14 @@ sub host_runtime_info
     if (($subselect eq "listvms") || ($subselect eq "all"))
        {
        $true_sub_sel = 0;
-       $vm_views = Vim::find_entity_views(view_type => 'VirtualMachine', begin_entity => $host_view, properties => ['name', 'runtime']);
+       if (!defined($vm_tools_poweredon_only))
+          {
+          $vm_views = Vim::find_entity_views(view_type => 'VirtualMachine', begin_entity => $host_view, properties => ['name', 'runtime']);
+          }
+       else
+          {
+          $vm_views = Vim::find_entity_views(view_type => 'VirtualMachine', filter => {'runtime.powerState' => 'poweredOn'}, begin_entity => $host_view, properties => ['name', 'runtime']);
+          }
 
        if (!defined($vm_views))
           {
@@ -773,8 +780,6 @@ sub host_runtime_info
        else
           {
           $output = $issue_cnt . " config issues - " . $issues_ignored_cnt  . " config issues ignored" . $multiline . $issue_out;
-          # Remove the last multiline regardless whether it is \n or <br>
-          $output =~ s/$multiline$//;
           }
        }
 

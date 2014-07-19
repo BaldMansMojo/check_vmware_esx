@@ -333,8 +333,6 @@ sub vm_runtime_info
        else
           {
           $output = $issue_cnt . " config issues" . $multiline . $issue_out;
-          # Remove the last multiline regardless whether it is \n or <br>
-          $output =~ s/$multiline$//;
           }
        $state = check_state($state, $actual_state);
        }

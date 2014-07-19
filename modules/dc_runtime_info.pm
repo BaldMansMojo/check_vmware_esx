@@ -164,8 +164,6 @@ sub dc_runtime_info
              $output = $output . $suspended_out . $poweredoff_out . $poweredon_out;
              $perfdata = "\'vms_total\'=" .  @$vm_views . ";;;; \'vms_poweredon\'=" . $poweredon . ";;;; \'vms_poweredoff\'=" . $poweredoff . ";;;; \'vms_suspended\'=" . $suspended . ";;;;";
              }
-          # Remove the last multiline regardless whether it is \n or <br>
-          $output =~ s/$multiline$//;
           }
        }
 
@@ -254,12 +252,9 @@ sub dc_runtime_info
              $output = $output . $hpoweredoff . "/" . @$host_views . " Hosts powered off/standby/unknown" . $multiline;
              $output = $output . $hpoweredoff_out . $hpoweredon_out;
              }
-          # Remove the last multiline regardless whether it is \n or <br>
-          $output =~ s/$multiline$//;
           }
        }
   
-#    if (($subselect eq "listcluster") || ($subselect eq "all"))
     if (($subselect =~ m/listcluster.*$/) || ($subselect eq "all"))
        {
        $true_sub_sel = 0;
@@ -362,8 +357,6 @@ sub dc_runtime_info
              $output = $output . $cluster_gray_cnt . "/" . @$cluster_views . " Clusters gray" . $multiline;
              $output = $output . $cluster_red_out . $cluster_yellow_out . $cluster_gray_out . $cluster_green_out;
              }
-          # Remove the last multiline regardless whether it is \n or <br>
-          $output =~ s/$multiline$//;
           }
        }
     
@@ -597,8 +590,6 @@ sub dc_runtime_info
           $output = $output . $guestToolsSuspendePOF_cnt . " Suspended. Tools not running";
           $output = $output . $multiline . $tools_out;
           }
-       # Remove the last multiline regardless whether it is \n or <br>
-       $output =~ s/$multiline$//;
        }
     
 
@@ -671,8 +662,6 @@ sub dc_runtime_info
           $output = $output . $vc_yellow_cnt . "/" . @$dc_views . " Vcenters yellow - ";
           $output = $output . $vc_gray_cnt . "/" . @$dc_views . " Vcenters gray" . $multiline . $tmp_output;
           }
-       # Remove the last multiline regardless whether it is \n or <br>
-       $output =~ s/$multiline$//;
        }
     
     
@@ -734,8 +723,6 @@ sub dc_runtime_info
        else
           {
           $output = $issue_cnt . " config issues - " . $issues_ignored_cnt  . " config issues ignored" . $multiline . $issue_out;
-          # Remove the last multiline regardless whether it is \n or <br>
-          $output =~ s/$multiline$//;
           }
        $state = check_state($state, $actual_state);
        }

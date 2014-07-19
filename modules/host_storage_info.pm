@@ -203,9 +203,6 @@ sub host_storage_info
           {
           $output = "Adapters:" . $count++ . " Ignored:" . $ignored++ . " Online:" . $no_online . " Offline:" . $no_offline . " Unbound:" . $no_unbound . " Unknown:" . $no_unknown . $multiline . $output;
           }
-       
-       # Remove the last \n or <br>
-       $output =~ s/$multiline$//;
        }
 
 

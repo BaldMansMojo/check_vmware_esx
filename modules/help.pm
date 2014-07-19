@@ -1,16 +1,3 @@
-#    my $space_total;
-#    my $space_total_MB;
-#    my $space_total_GB;
-#    my $space_total_percent;
-#    my $space_free;
-#    my $space_free_MB;
-#    my $space_free_GB;
-#    my $space_free_percent;
-#    my $space_used;
-#    my $space_used_MB;
-#    my $space_used_GB;
-#    my $space_used_percent;
- 
 sub version_lic
     {
     print "\n";

@@ -1072,7 +1072,35 @@
 #     - host_disk_io_info.pm
 #     - process_perfdata.pm
 #     - vm_disk_io_info.pm
-
+#
+# - 20 Jul 2014 M.Fuerstenau version 0.9.17
+#   - Removing the last multiline character (\n or <br>) was moved
+#     from several subroutines to the main exit in check_vmware_esx.pl. 
+#     This was based this was implemented based on a proposal of Dietmar Eberth
+#     Affected subroutines:
+#     - vm_runtime_info()
+#     - host_storage_info()
+#     - host_runtime_info()
+#     - dc_runtime_info()
+#     -datastore_volumes_info()
+#   - Fixed a bug on line 139 and 172. Thanks for fixing it to Dietmar Eberth.
+#     - Instead of 
+#     
+#       if ( $state >= 0 )
+#          {
+#          $alertcnt++;
+#          }
+#         
+#       it must be:
+#
+#       if ( $alertcnt > 0 )
+#          {
+#          $alertcnt++;
+#          }
+#
+#   - Fixed a bug on line 139 and 172. Thanks for fixing it to Dietmar Eberth.
+#   - If only one volume is selected we have a better output now. Also thanks
+#     to Dietmar Eberth.
 
 use strict;
 use warnings;
@@ -1113,7 +1141,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.16a';                 # Contains the program version number
+our $prog_version = '0.9.17';                  # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
@@ -1679,6 +1707,9 @@ if ( $result == 0 )
       print "\n";
       }
    }
+
+# Remove the last multiline regardless whether it is \n or <br>
+$output =~ s/$multiline$//;
 
 if ( $result == 1 )
    {

@@ -1013,3 +1013,32 @@ History:
     - host_disk_io_info.pm
     - process_perfdata.pm
     - vm_disk_io_info.pm
+
+- 20 Jul 2014 M.Fuerstenau version 0.9.17
+  - Removing the last multiline character (\n or <br>) was moved
+    from several subroutines to the main exit in check_vmware_esx.pl. 
+    This was based this was implemented based on a proposal of Dietmar Eberth
+    Affected subroutines:
+    - vm_runtime_info()
+    - host_storage_info()
+    - host_runtime_info()
+    - dc_runtime_info()
+    -datastore_volumes_info()
+  - Fixed a bug on line 139 and 172. Thanks for fixing it to Dietmar Eberth.
+    - Instead of 
+    
+      if ( $state >= 0 )
+         {
+         $alertcnt++;
+         }
+        
+      it must be:
+
+      if ( $alertcnt > 0 )
+         {
+         $alertcnt++;
+         }
+
+  - Fixed a bug on line 139 and 172. Thanks for fixing it to Dietmar Eberth.
+  - If only one volume is selected we have a better output now. Also thanks
+    to Dietmar Eberth.

@@ -24,7 +24,8 @@ sub datastore_volumes_info
     my $volume_type;
     my $uom = "MB";
     my $alertcnt = 0;
-        
+    my $volumescnt = 0;
+       
     if (defined($subselect) && defined($blacklist) && !defined($isregexp))
        {
        print "Blacklist is supported only in overall check (no subselect) or regexp subcheck\n";
@@ -136,7 +137,7 @@ sub datastore_volumes_info
                         $actual_state = check_against_threshold($space_free_percent);
                         $state = check_state($state, $actual_state);
                         }
-                     if ( $state >= 0 )
+                     if ( $alertcnt > 0 )
                         {
                         $alertcnt++;
                         }
@@ -169,7 +170,7 @@ sub datastore_volumes_info
                            $state = check_state($state, $actual_state);
                            }
                         }
-                     if ( $state >= 0 )
+                     if ( $alertcnt > 0 )
                         {
                         $alertcnt++;
                         }
@@ -202,9 +203,10 @@ sub datastore_volumes_info
                   if (!$alertonly || $actual_state != 0)
                      {
                      $output = $output . "$name ($volume_type)" . ($usedspace ? " used" : " free");
-                     $output = $output . ": ". ($usedspace ? $space_used : $space_free);
+                     $output = $output . ": ". ($usedspace ? $space_used : $space_free) . " " . $uom;
                      $output = $output . " (" . ($usedspace ? $space_used_percent : $space_free_percent) . "%) / $space_total $uom (100%)";
                      $output = $output . $multiline;
+                     $volumescnt++;
                      }
                   }
                else
@@ -223,10 +225,16 @@ sub datastore_volumes_info
 
     if ($output)
        {
-       chop($output);
        if ( $state == 0 )
           {
-          $output = "OK for all selected volumes." . $multiline . $output;
+          if ($volumescnt eq 1)
+             {
+             $output = "OK: " . $output;
+             }
+          else
+             {
+             $output = "OK for all selected volumes." . $multiline . $output;
+             }
           }
        else
           {
