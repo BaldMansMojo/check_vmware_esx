@@ -1101,6 +1101,15 @@
 #   - Fixed a bug on line 139 and 172. Thanks for fixing it to Dietmar Eberth.
 #   - If only one volume is selected we have a better output now. Also thanks
 #     to Dietmar Eberth.
+#
+# - 21 Jul 2014 M.Fuerstenau version 0.9.17a
+#   - Bugfix line 139 and 172 (now 140 and 173. It must be 
+#
+#     if ( $actual_state > 0 )
+#
+#     instead of
+#
+#     if ( $alertcnt > 0
 
 use strict;
 use warnings;
@@ -1141,7 +1150,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.17';                  # Contains the program version number
+our $prog_version = '0.9.17a';                 # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be

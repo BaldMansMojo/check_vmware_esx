@@ -137,7 +137,7 @@ sub datastore_volumes_info
                         $actual_state = check_against_threshold($space_free_percent);
                         $state = check_state($state, $actual_state);
                         }
-                     if ( $alertcnt > 0 )
+                     if ( $actual_state > 0 )
                         {
                         $alertcnt++;
                         }
@@ -170,7 +170,7 @@ sub datastore_volumes_info
                            $state = check_state($state, $actual_state);
                            }
                         }
-                     if ( $alertcnt > 0 )
+                     if ( $actual_state > 0 )
                         {
                         $alertcnt++;
                         }

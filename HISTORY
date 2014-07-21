@@ -1042,3 +1042,12 @@ History:
   - Fixed a bug on line 139 and 172. Thanks for fixing it to Dietmar Eberth.
   - If only one volume is selected we have a better output now. Also thanks
     to Dietmar Eberth.
+
+- 21 Jul 2014 M.Fuerstenau version 0.9.17a
+  - Bugfix line 139 and 172 (now 140 and 173. It must be 
+
+    if ( $actual_state > 0 )
+
+    instead of
+
+    if ( $alertcnt > 0 )
