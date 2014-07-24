@@ -28,13 +28,19 @@ sub datastore_volumes_info
        
     if (defined($subselect) && defined($blacklist) && !defined($isregexp))
        {
-       print "Blacklist is supported only in overall check (no subselect) or regexp subcheck\n";
+       print "Error! Blacklist is supported only in overall check (no subselect) or regexp subcheck!\n";
        exit 2;
        }
 
     if (defined($subselect) && defined($whitelist) && !defined($isregexp))
        {
-       print "Whitelist is supported only in overall check (no subselect) or regexp subcheck\n";
+       print "Error! Whitelist is supported only in overall check (no subselect) or regexp subcheck!\n";
+       exit 2;
+       }
+    
+    if (!defined($usedspace) && defined($perf_free_space))
+       {
+       print "Error! --perf_free_space only allowed in conjuction with --usedspace!\n";
        exit 2;
        }
 
@@ -188,17 +194,32 @@ sub datastore_volumes_info
                      $space_free = $space_free_MB;
                      $space_used = $space_used_MB;
                      }
-                     
+
                   if (($warn_is_percent) || ($crit_is_percent))
                      {
-                     $warn_out =  $space_total / 100 * $warning;
+                     if (defined($perf_free_space))
+                        {
+                        $warn_out =  $space_total / 100 * (100 - $warning);
+                        $crit_out =  $space_total / 100 * (100 - $critical);
+                        }
+                        else
+                        {
+                        $warn_out =  $space_total / 100 * $warning;
+                        $crit_out =  $space_total / 100 * $critical;
+                        }
                      $warn_out =  sprintf "%.2f", $warn_out;
-                     $crit_out =  $space_total / 100 * $critical;
                      $crit_out =  sprintf "%.2f", $crit_out;
                      $perf_thresholds = $warn_out . ";" . $crit_out;
                      }
-                     
-                  $perfdata = $perfdata . " \'" . $name . "\'=" . $space_free . "$uom;" . $perf_thresholds . ";;" . $space_total;
+
+                  if (defined($usedspace) && (!defined($perf_free_space)))
+                     {
+                     $perfdata = $perfdata . " \'" . $name . "\'=" . $space_used . "$uom;" . $perf_thresholds . ";;" . $space_total;
+                     }
+                  else
+                     {
+                     $perfdata = $perfdata . " \'" . $name . "\'=" . $space_free . "$uom;" . $perf_thresholds . ";;" . $space_total;
+                     }
 
                   if (!$alertonly || $actual_state != 0)
                      {
@@ -242,22 +263,22 @@ sub datastore_volumes_info
              {
              if (($warn_is_percent) || ($crit_is_percent))
                 {
-                $output = $alertcnt . " alerts for the selected volumes (warn:" . $warning . "%,crit:" . $critical . "%)." . $multiline . $output;
+                $output = $alertcnt . " alert(s) for the selected volume(s) (warn:" . $warning . "%,crit:" . $critical . "%)" . $multiline . $output;
                 }
              else
                 {
-                $output = $alertcnt . " alerts for the selected volumes (warn:" . $warning . ",crit:" . $critical . ")." . $multiline . $output;
+                $output = $alertcnt . " alert(s) for the selected volume(s) (warn:" . $warning . ",crit:" . $critical . ")" . $multiline . $output;
                 }
              }
           else
              {
              if (($warn_is_percent) || ($crit_is_percent))
                 {
-                $output = $alertcnt . " alerts found for some for the selected volumes (warn:" . $warning . "%,crit:" . $critical . "%)." . $multiline . $output;
+                $output = $alertcnt . " alert(s) found for some for the selected volume(s) (warn:" . $warning . "%,crit:" . $critical . "%)" . $multiline . $output;
                 }
              else
                 {
-                $output = $alertcnt . " alerts found for some for the selected volumes (warn:" . $warning . ",crit:" . $critical . ")." . $multiline . $output;
+                $output = $alertcnt . " alert(s) found for some for the selected volume(s) (warn:" . $warning . ",crit:" . $critical . ")" . $multiline . $output;
                 }
              }
           }

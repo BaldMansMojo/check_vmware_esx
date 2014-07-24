@@ -1044,10 +1044,27 @@ History:
     to Dietmar Eberth.
 
 - 21 Jul 2014 M.Fuerstenau version 0.9.17a
-  - Bugfix line 139 and 172 (now 140 and 173. It must be 
+  - Bugfix line 139 and 172 (now 140 and 173). It must be 
 
     if ( $actual_state > 0 )
 
     instead of
 
     if ( $alertcnt > 0 )
+
+- 25 Jul 2014 M.Fuerstenau version 0.9.18
+  - New option --perf_free_space for checking volumes. It must be used 
+    with --usedspace. In versions prior to 0.9.18 perfdata was always 
+    deliverd as free space even if --usedspace was selected. From 0.9.18
+    on when using --usedspace perfdata is recorded as used space. To prevent
+    old perfdata use this option.
+  - Cluster - removed checks for CPU and MEM
+    - Both checks were senseless for alarming because there are no thresholds.
+      A cluster or resource group is a group of Vmware hosts. Not a logical 
+      construct taking parts of the hosts in a resource group in a manner
+      that several clusters are using the same hosts. So the amount of CPU
+      and memory of all hosts is the CPU and memory of the cluster. Monitoring
+      this makes no sense because there are no thresholds for alerting. For
+      example 50% CPU usage of a cluster can be one host with 90%, and two
+      with 30% each. With an average of 50% everything seems to be ok but one
+      machine has definetely a problem. Same for memory. 
