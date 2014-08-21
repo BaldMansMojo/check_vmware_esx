@@ -1127,6 +1127,23 @@
 #       example 50% CPU usage of a cluster can be one host with 90%, and two
 #       with 30% each. With an average of 50% everything seems to be ok but one
 #       machine has definetely a problem. Same for memory. 
+#
+# - 21 Aug 2014 M.Fuerstenau version 0.9.19
+#   - host_runtime_info()
+#     - Some minor corrections in output.
+#   - host_storage_info()
+#     - Some corrections in output for LUNs. Using <code> in output was a
+#       really stupid idea because the code (like ok,error-lostCommunication or
+#       whatever is valid there) was interpreted as non existing HTML code.
+#     - Some corrections in output for multipath/paths.
+#     - Bugfix. Due to a wrong placed curly bracked the output was doubled. Fixed.
+#   - host_runtime_info()
+#     - Small bugfix. It may happen within the heath check that some values are not set
+#       by VMware/hardware. In this case we have an
+#       "[Use of uninitialized value in concatenation (.) or string ..."
+#       To avoid this we check the values of the hash with each loop an in case a value
+#       is not set we replace it whit the string "Unknown".
+#
 
 use strict;
 use warnings;
@@ -1139,6 +1156,7 @@ use Time::HiRes qw(usleep);
 
 # Own modules
 use lib "modules";
+#use lib "/usr/lib/nagios/vmware/modules";
 use help;
 use process_perfdata;
 use datastore_volumes_info;
@@ -1146,6 +1164,11 @@ use datastore_volumes_info;
 # Prevent SSL certificate validation
 
 $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0; 
+
+# Only for debugging
+use Data::Dumper;
+$Data::Dumper::Indent = 1;
+#print "------------------------------------------\n" . Dumper ($store) . "\n" . "------------------------------------------\n";
 
 if ( $@ )
    {
@@ -1167,7 +1190,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.18';                  # Contains the program version number
+our $prog_version = '0.9.19';                  # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
@@ -1828,7 +1851,7 @@ sub main_select
           return($result, $output);
           }
 
-          get_me_out("Unknown HOST-VM select");
+          get_me_out("Unknown host-vm select");
         }
 
     if (defined($host))
@@ -1919,7 +1942,7 @@ sub main_select
           return($result, $output);
           }
 
-          get_me_out("Unknown HOST select");
+          get_me_out("Unknown host select");
         }
 
     if (defined($cluster))
@@ -1947,7 +1970,7 @@ sub main_select
           return($result, $output);
           }
 
-          get_me_out("Unknown CLUSTER select");
+          get_me_out("Unknown cluster select");
         }
 
     if (defined($datacenter))
@@ -1972,7 +1995,7 @@ sub main_select
           return($result, $output);
           }
 
-       get_me_out("Unknown DATACENTER select");
+       get_me_out("Unknown datacenter select");
        }
     get_me_out("You should never end here. Totally unknown anything.");
     }
@@ -2381,6 +2404,7 @@ sub cluster_cluster_info
         return ($state, $output);
 }
 
+
 sub cluster_runtime_info
 {
         my ($cluster, $blacklist) = @_;
@@ -2578,5 +2602,7 @@ sub cluster_runtime_info
 
         return ($state, $output);
 }
+
+
 
 

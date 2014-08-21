@@ -289,7 +289,6 @@ sub host_storage_info
 
                foreach (@{$scsi->operationalState})
                        {
-                       $count++;
                        #       degraded             One or more paths to the LUN are down, but I/O is still possible. Further
                        #                            path failures may result in lost connectivity.
                        #       error                The LUN is dead and/or not reachable.
@@ -302,20 +301,23 @@ sub host_storage_info
                        #       unknownState         The LUN state is unknown.
                        if (($_) eq "ok")
                           {
+                          $count++;
                           $actual_state = 0;
-                          $lun_ok_output = $lun_ok_output . "LUN:" . $lun2disc_key{$disc_key} . " Name: " . $canonicalName . " <" . $operationState . ">" . $multiline;
+                          $lun_ok_output = $lun_ok_output . "LUN:" . $lun2disc_key{$disc_key} . " - State: " . $operationState . " - Name: " . $canonicalName . $multiline;
                           }
                        if ((($_) eq "degraded") || (($_) eq "unknownState"))
                           {
+                          $count++;
                           $actual_state = 1;
                           $warn_count++;
-                          $lun_warn_output = $lun_warn_output . "LUN:" . $lun2disc_key{$disc_key} . " Name: " . $canonicalName . " <" . $operationState . ">" . $multiline;
+                          $lun_warn_output = $lun_warn_output . "LUN:" . $lun2disc_key{$disc_key} . " - State: " . $operationState . " - Name: " . $canonicalName . $multiline;
                           }
                        if ((($_) eq "error") || (($_) eq "off") || (($_) eq "quiesced") || (($_) eq "timeout"))
                           {
+                          $count++;
                           $actual_state = 2;
                           $err_count++;
-                          $lun_error_output = $lun_error_output . "LUN:" . $lun2disc_key{$disc_key} . " Name: " . $canonicalName . " <" . $operationState . ">" . $multiline;
+                          $lun_error_output = $lun_error_output . "LUN:" . $lun2disc_key{$disc_key} . " - State: " . $operationState . " - Name: " . $canonicalName . $multiline;
                           }
                        $state = check_state($state, $actual_state);
                        }
@@ -328,11 +330,11 @@ sub host_storage_info
 
        if ($subselect eq "all")
           {
-          $output = $output . " LUNs:" . $count . " LUNs(ignored):" . $ignored . " LUNs(warn):" . $warn_count . " LUNSs(crit):" . $err_count;
+          $output = $output . " LUNs:" . $count . " - LUNs(ignored):" . $ignored . " - LUNs(warn):" . $warn_count . " - LUNSs(crit):" . $err_count;
           }
        else
           {
-          $output = "LUNs:" . $count . " LUNs(ignored):" . $ignored . " LUNs(warn):" . $warn_count . " LUNSs(crit):" . $err_count;
+          $output = "LUNs:" . $count . " - LUNs(ignored):" . $ignored . " - LUNs(warn):" . $warn_count . " - LUNSs(crit):" . $err_count;
           if (defined($alertonly))
              {
              $output = $output . $multiline . $lun_error_output . $lun_warn_output;
@@ -403,20 +405,20 @@ sub host_storage_info
                                 # Processing the results of the previous loop
                                 if ($this_mpath_error != 0)
                                    {
-                                   $mpath_error_output = $mpath_error_output . $mpath_tmp_output;
+                                   $mpath_error_output = $mpath_error_output . $mpath_tmp_output . $multiline;
                                    $mpath_error_output =~ s/^ //;
                                    }
                                 else
                                    {
-                                   $mpath_ok_output = $mpath_ok_output . $mpath_tmp_output;
+                                   $mpath_ok_output = $mpath_ok_output . $mpath_tmp_output . $multiline;
                                    $mpath_ok_output =~ s/^ //;
                                    }
                                 }
                              $this_mpath_error = 0;
                              $scsi_id_old = $scsi_id;
                              $mpath_cnt++;
-                             $mpath_tmp_output = "LUN:" . $lun2disc_key{$scsi_id};
-                             $mpath_tmp_output = $mpath_tmp_output . " SCSI-ID:" . $scsi_id . $multiline;
+                             $mpath_tmp_output = "LUN:" . $lun2disc_key{$scsi_id} . $multiline;
+                             $mpath_tmp_output = $mpath_tmp_output . "SCSI-ID:" . $scsi_id . $multiline;
 
                              if (exists($path->{state}))
                                 {
@@ -490,13 +492,13 @@ sub host_storage_info
 
                              if (($pathState eq "active") || ($pathState eq "standby") || ($pathState eq "disabled"))
                                 {
-                                $mpath_tmp_output = $mpath_tmp_output . " State: " . $pathState . $multiline; 
+                                $mpath_tmp_output = $mpath_tmp_output . $multiline . "State: " . $pathState . $multiline; 
                                 $actual_state = 0;
                                 $state = check_state($state, $actual_state);
                                 }
                              if ($pathState eq "dead")
                                 {
-                                $mpath_tmp_output = $mpath_tmp_output . " State: " . $pathState . $multiline; 
+                                $mpath_tmp_output = $mpath_tmp_output . $multiline . "State: " . $pathState . $multiline; 
                                 $actual_state = 2;
                                 $state = check_state($state, $actual_state);
                                 $this_mpath_error = 1;
@@ -504,7 +506,7 @@ sub host_storage_info
                                 }
                              if ($pathState eq "unknown")
                                 {
-                                $mpath_tmp_output = $mpath_tmp_output . " State: " . $pathState . $multiline; 
+                                $mpath_tmp_output = $mpath_tmp_output . $multiline . "State: " . $pathState . $multiline; 
                                 $actual_state = 1;
                                 $state = check_state($state, $actual_state);
                                 $this_mpath_error = 1;
@@ -512,25 +514,26 @@ sub host_storage_info
                                 }
                              }
                           }
-                  if ($this_mpath_error != 0)
-                     {
-                     $mpath_error_output = $mpath_error_output . $mpath_tmp_output;
-                     $mpath_error_output =~ s/^ //;
-                     }
-                  else
-                     {
-                     $mpath_ok_output = $mpath_ok_output . $mpath_tmp_output;
-                     $mpath_ok_output =~ s/^ //;
-                     }
+                  }
+
+               if ($this_mpath_error != 0)
+                  {
+                  $mpath_error_output = $mpath_error_output . $mpath_tmp_output;
+                  $mpath_error_output =~ s/^ //;
+                  }
+               else
+                  {
+                  $mpath_ok_output = $mpath_ok_output . $mpath_tmp_output;
+                  $mpath_ok_output =~ s/^ //;
                   }
 
             if ($subselect eq "all")
                {
-               $output = $output . " Multipaths:" . $mpath_cnt . " Multipaths(ignored):" . $ignored . " Multipaths(warn):" . $mpath_warn_cnt . " Multipaths(error):" . $mpath_err_cnt . " Paths:" . $path_cnt . " Paths(warn):" . $path_warn_cnt . " Paths(error):" . $path_err_cnt;
+               $output = $output . " Multipaths:" . $mpath_cnt . " - Multipaths(ignored):" . $ignored . " - Multipaths(warn):" . $mpath_warn_cnt . " - Multipaths(error):" . $mpath_err_cnt . " - Paths:" . $path_cnt . " - Paths(warn):" . $path_warn_cnt . " - Paths(error):" . $path_err_cnt;
                }
             else
                {
-               $output = "Multipaths:" . $mpath_cnt . " Multipaths(ignored):" . $ignored . " Multipaths(warn):" . $mpath_warn_cnt . " Multipaths(error):" . $mpath_err_cnt . " Paths:" . $path_cnt . " Paths(warn):" . $path_warn_cnt . " Paths(error):" . $path_err_cnt;
+               $output = "Multipaths:" . $mpath_cnt . " - Multipaths(ignored):" . $ignored . " - Multipaths(warn):" . $mpath_warn_cnt . " - Multipaths(error):" . $mpath_err_cnt . " - Paths:" . $path_cnt . " - Paths(warn):" . $path_warn_cnt . " - Paths(error):" . $path_err_cnt;
                if (defined($alertonly))
                   {
                   $output = $output . $multiline . $mpath_error_output;
@@ -554,6 +557,7 @@ sub host_storage_info
        }
     else
        {
+#       $output = "miist";
        return ($state, $output);
        }
     }

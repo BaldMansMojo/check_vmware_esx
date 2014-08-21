@@ -185,7 +185,7 @@ sub host_runtime_info
              $output = $output . $poweredoff . "/" . @$vm_views . " VMs powered off - ";
              $output = $output . $poweredon . "/" . @$vm_views . " VMs powered on." . $multiline;
              $output = $output . $suspended_out . $poweredoff_out . $poweredon_out;
-             $perfdata = "\'vms_total\'=" .  @$vm_views . ";;;; \'vms_poweredon\'=" . $poweredon . ";;;; \'vms_poweredoff\'=" . $poweredoff . ";;;; \'vms_suspended\'=" . $suspended . ";;;;";
+             $perfdata = "vms_total=" .  @$vm_views . ";;;; vms_poweredon=" . $poweredon . ";;;; vms_poweredoff=" . $poweredoff . ";;;; vms_suspended=" . $suspended . ";;;;";
              }
           }
        }
@@ -245,7 +245,6 @@ sub host_runtime_info
              {
              foreach (@$cpuStatusInfo)
                      {
-                     # print "CPU Name = ". $_->name .", Label = ". $_->status->label . ", Summary = ". $_->status->summary . ", Key = ". $_->status->key . "\n";
                      $actual_state = check_health_state($_->status->key);
                      $itemref = {
                                 name => $_->name,
@@ -270,7 +269,6 @@ sub host_runtime_info
                 {
                 foreach (@$storageStatusInfo)
                         {
-                        # print "Storage Name = ". $_->name .", Label = ". $_->status->label . ", Summary = ". $_->status->summary . ", Key = ". $_->status->key . "\n";
                         if (defined($isregexp))
                            {
                            $isregexp = 1;
@@ -320,7 +318,6 @@ sub host_runtime_info
              {
              foreach (@$memoryStatusInfo)
                      {
-                     # print "Memory Name = ". $_->name .", Label = ". $_->status->label . ", Summary = ". $_->status->summary . ", Key = ". $_->status->key . "\n";
                      if (defined($isregexp))
                         {
                         $isregexp = 1;
@@ -488,6 +485,18 @@ sub host_runtime_info
                                            {
                                            foreach $item_ref (@{$actual_state_ref->{$type}})
                                                    {
+                                                   if (!$item_ref->{name})
+                                                      {
+                                                      $item_ref->{name} = "Unknown";
+                                                      }
+                                                   if (!$item_ref->{label})
+                                                      {
+                                                      $item_ref->{label} = "Unknown";
+                                                      }
+                                                   if (!$item_ref->{summary})
+                                                      {
+                                                      $item_ref->{summary} = "Unknown";
+                                                      }
                                                    $output = $output . ++$AlertIndex . ") [$status2text{$fstate}] [Type: $type] [Name: $item_ref->{name}] [Label: $item_ref->{label}] [Summary: $item_ref->{summary}]$multiline";
                                                    }
                                            }
@@ -621,7 +630,6 @@ sub host_runtime_info
              {
              foreach (@$numericSensorInfo)
                      {
-                     # print "Sensor Name = ". $_->name .", Type = ". $_->sensorType . ", Label = ". $_->healthState->label . ", Summary = ". $_->healthState->summary . ", Key = " . $_->healthState->key . "\n";
                      if (lc($_->sensorType) ne 'temperature')
                         {
                         next;

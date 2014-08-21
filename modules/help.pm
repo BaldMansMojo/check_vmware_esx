@@ -431,6 +431,12 @@ sub print_help
        print "-s, --subselect=<name>              Free space info for volume with name <name>\n\n";
        print "    --gigabyte                      Output in GB instead of MB\n";
        print "    --usedspace                     Output used space instead of free\n";
+       print "\n";
+       print "    --perf_free_space               Perfdata for free space instead of used space. In versions prior to 0.9.18\n";
+       print "                                    performance data was always as freespace even if you selected --usedspace.\n";
+       print "                                    Now with --usedspace perf data will be also in used space.\n";
+       print "                                    This option is mainly to preserve existing performce data.\n";
+       print "\n";
        print "    --alertonly                     List only alerting volumes\n";
        print "-B, --exclude=<black_list>          Blacklist volumes.\n";
        print "-W, --include=<white_list>          Whitelist volumes.\n";
@@ -926,6 +932,12 @@ sub print_help
        print "or with\n";
        print "-s, --subselect=<name>              free space info for volume with name <name>\n\n";
        print "    --usedspace                     Output used space instead of free\n";
+       print "\n";
+       print "    --perf_free_space               Perfdata for free space instead of used space. In versions prior to 0.9.18\n";
+       print "                                    performance data was always as freespace even if you selected --usedspace.\n";
+       print "                                    Now with --usedspace perf data will be also in used space.\n";
+       print "                                    This option is mainly to preserve existing performce data.\n";
+       print "\n";
        print "    --alertonly                     List only alerting volumes\n";
        print "-B, --exclude=<black_list>          Blacklist volumes.\n";
        print "-W, --include=<white_list>          Whitelist volumes.\n";

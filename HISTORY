@@ -1068,3 +1068,19 @@ History:
       example 50% CPU usage of a cluster can be one host with 90%, and two
       with 30% each. With an average of 50% everything seems to be ok but one
       machine has definetely a problem. Same for memory. 
+
+- 21 Aug 2014 M.Fuerstenau version 0.9.19
+  - host_runtime_info()
+    - Some minor corrections in output.
+  - host_storage_info()
+    - Some corrections in output for LUNs. Using <code> in output was a
+      really stupid idea because the code (like ok,error-lostCommunication or
+      whatever is valid there) was interpreted as non existing HTML code.
+    - Some corrections in output for multipath/paths.
+    - Bugfix. Due to a wrong placed curly bracked the output was doubled. Fixed.
+  - host_runtime_info()
+    - Small bugfix. It may happen within the heath check that some values are not set
+      by VMware/hardware. In this case we have an
+      "[Use of uninitialized value in concatenation (.) or string ..."
+      To avoid this we check the values of the hash with each loop an in case a value
+      is not set we replace it whit the string "Unknown".

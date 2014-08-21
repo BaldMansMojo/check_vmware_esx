@@ -1,5 +1,5 @@
 
-check_vmware_esx.pl,Version 0.9.16
+check_vmware_esx.pl,Version 0.9.19
 
 This vmware Infrastructure monitoring plugin is free software, and comes with ABSOLUTELY NO WARRANTY.
 It may be used, redistributed and/or modified under the terms of the GNU General Public Licence 
@@ -71,6 +71,12 @@ or with
 -s, --subselect=<name>              free space info for volume with name <name>
 
     --usedspace                     Output used space instead of free
+
+    --perf_free_space               Perfdata for free space instead of used space. In versions prior to 0.9.18
+                                    performance data was always as freespace even if you selected --usedspace.
+                                    Now with --usedspace perf data will be also in used space.
+                                    This option is mainly to preserve existing performce data.
+
     --alertonly                     List only alerting volumes
 -B, --exclude=<black_list>          Blacklist volumes.
 -W, --include=<white_list>          Whitelist volumes.
@@ -335,6 +341,12 @@ or with
 
     --gigabyte                      Output in GB instead of MB
     --usedspace                     Output used space instead of free
+
+    --perf_free_space               Perfdata for free space instead of used space. In versions prior to 0.9.18
+                                    performance data was always as freespace even if you selected --usedspace.
+                                    Now with --usedspace perf data will be also in used space.
+                                    This option is mainly to preserve existing performce data.
+
     --alertonly                     List only alerting volumes
 -B, --exclude=<black_list>          Blacklist volumes.
 -W, --include=<white_list>          Whitelist volumes.
@@ -786,23 +798,9 @@ Monitoring a vmware cluster via vmware datacenter or vmware host:
 
     Cluster specific :
 
-CPU:
-----
-
-        * cpu - shows cpu info
-            + usage - CPU usage in percentage
-            + usagemhz - CPU usage in MHz
-            ^ all cpu info
-
 Memory:
 -------
 
-        * mem - shows mem info
-            + usage - mem usage in percentage
-            + usagemb - mem usage in MB
-            + swap - swap mem usage in MB
-            + memctl - mem used by VM memory control driver(vmmemctl) that controls ballooning
-            ^ all mem info(plus overhead and no thresholds)
         * cluster - shows cluster services info
             + effectivecpu - total available cpu resources of all hosts within cluster
             + effectivemem - total amount of machine memory of all hosts in the cluster
@@ -824,7 +822,6 @@ Memory:
             ^ all cluster runtime info
 
 Volumes:
-Volumes:
 --------
 
 -S, --select=volumes                Shows all datastore volumes info
@@ -832,6 +829,12 @@ or with
 -s, --subselect=<name>              free space info for volume with name <name>
 
     --usedspace                     Output used space instead of free
+
+    --perf_free_space               Perfdata for free space instead of used space. In versions prior to 0.9.18
+                                    performance data was always as freespace even if you selected --usedspace.
+                                    Now with --usedspace perf data will be also in used space.
+                                    This option is mainly to preserve existing performce data.
+
     --alertonly                     List only alerting volumes
 -B, --exclude=<black_list>          Blacklist volumes.
 -W, --include=<white_list>          Whitelist volumes.
