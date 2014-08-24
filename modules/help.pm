@@ -155,6 +155,7 @@ sub print_help
        print "-S, --select=volumes                Shows all datastore volumes info\n";
        print "or with\n";
        print "-s, --subselect=<name>              free space info for volume with name <name>\n\n";
+       print "    --gigabyte                      Output in GB instead of MB\n";
        print "    --usedspace                     Output used space instead of free\n";
        print "\n";
        print "    --perf_free_space               Perfdata for free space instead of used space. In versions prior to 0.9.18\n";
@@ -173,8 +174,12 @@ sub print_help
        print "-w, --warning=<threshold>           Warning threshold.\n";
        print "-c, --critical=<threshold>          Critical threshold.\n";
        print "                                    Thresholds should be either a simple counter or a percentage\n";
-       print "                                    value in the nn% (i.e. 90%). If checking more than a single\n";
-       print "                                    with --usedspace volume only percent is allowed as threshold.\n";
+       print "                                    value in the n% (i.e. 90%). If checking more than a single\n";
+       print "                                    with --usedspace volume only percent is allowed as threshold or\n";
+       print "                                    --spaceleft must be used.\n";
+       print "    --spaceleft                     This has to be used in conjunction with thresholds as mentioned above.\n";
+       print "                                    The thresholds must be specified as the space left on device and with the\n";
+       print "                                    same unit (MB or GB).\n";
        print "\n";
        print "Runtime Info:\n";
        print "-------------\n";
@@ -448,8 +453,12 @@ sub print_help
        print "-w, --warning=<threshold>           Warning threshold.\n";
        print "-c, --critical=<threshold>          Critical threshold.\n";
        print "                                    Thresholds should be either a simple counter or a percentage\n";
-       print "                                    value in the nn% (i.e. 90%). If checking more than a single\n";
-       print "                                    with --usedspace volume only percent is allowed as threshold.\n";
+       print "                                    value in the n% (i.e. 90%). If checking more than a single\n";
+       print "                                    with --usedspace volume only percent is allowed as threshold or\n";
+       print "                                    --spaceleft must be used.\n";
+       print "    --spaceleft                     This has to be used in conjunction with thresholds as mentioned above.\n";
+       print "                                    The thresholds must be specified as the space left on device and with the\n";
+       print "                                    same unit (MB or GB).\n";
        print "\n";
        print "Disk I/O:\n";
        print "---------\n";
@@ -931,6 +940,7 @@ sub print_help
        print "-S, --select=volumes                Shows all datastore volumes info\n";
        print "or with\n";
        print "-s, --subselect=<name>              free space info for volume with name <name>\n\n";
+       print "    --gigabyte                      Output in GB instead of MB\n";
        print "    --usedspace                     Output used space instead of free\n";
        print "\n";
        print "    --perf_free_space               Perfdata for free space instead of used space. In versions prior to 0.9.18\n";
@@ -949,8 +959,12 @@ sub print_help
        print "-w, --warning=<threshold>           Warning threshold.\n";
        print "-c, --critical=<threshold>          Critical threshold.\n";
        print "                                    Thresholds should be either a simple counter or a percentage\n";
-       print "                                    value in the nn% (i.e. 90%). If checking more than a single\n";
-       print "                                    with --usedspace volume only percent is allowed as threshold.\n";
+       print "                                    value in the n% (i.e. 90%). If checking more than a single\n";
+       print "                                    with --usedspace volume only percent is allowed as threshold or\n";
+       print "                                    --spaceleft must be used.\n";
+       print "    --spaceleft                     This has to be used in conjunction with thresholds as mentioned above.\n";
+       print "                                    The thresholds must be specified as the space left on device and with the\n";
+       print "                                    same unit (MB or GB).\n";
        print "\n";
        }
     }

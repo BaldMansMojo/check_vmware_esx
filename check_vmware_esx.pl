@@ -1144,6 +1144,14 @@
 #       To avoid this we check the values of the hash with each loop an in case a value
 #       is not set we replace it whit the string "Unknown".
 #
+# - 24 Aug 2014 M.Fuerstenau version 0.9.20
+#   - datastore_volumes_info(). Some improvements.
+#     - Output. Because it was hard to see an alerting volume within the mass of others
+#       the output is now grouped so that all alerting volumes are listed on top with 
+#       a leading comment. Second are the volumes with no errors. Theses volumes are
+#       seperated by a line and also introduced by a comment.
+#     - New commandline switch --spaceleft.  When checking multiple volumes the threshold
+#       must be given in either percent (old) OR space left on device.(New)
 
 use strict;
 use warnings;
@@ -1165,11 +1173,6 @@ use datastore_volumes_info;
 
 $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0; 
 
-# Only for debugging
-use Data::Dumper;
-$Data::Dumper::Indent = 1;
-#print "------------------------------------------\n" . Dumper ($store) . "\n" . "------------------------------------------\n";
-
 if ( $@ )
    {
    print "No VMware::VIRuntime found. Please download ";
@@ -1190,7 +1193,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.19';                  # Contains the program version number
+our $prog_version = '0.9.20';                  # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
@@ -1248,6 +1251,8 @@ our $warn_is_percent;                          # Flag. If it is set to one warni
 my  $thresholds_given = 0;                     # During checking the threshold it will be set to one. Only if
                                                # it is set we will check the threshold against warning or critical
                                         
+our $spaceleft;                                # This is used for datastore volumes. When checking multiple volumes
+                                               # the threshol must be given in either percent or space left on device.
 my  $plugin_cache="/var/nagios_plugin_cache/"; # Directory for caching plaugin data. Good idea to use a tmpfs
                                                # because it speeds up operation    
 our $listsensors;                              # This flag set in conjunction with -l runtime -s health or -s sensors
@@ -1351,6 +1356,7 @@ GetOptions
                                          "sslport=s"        => \$sslport,
                                          "gigabyte"         => \$gigabyte,
                                          "nostoragestatus"  => \$nostoragestatus,
+                                         "spaceleft"        => \$spaceleft,
 	 "V"   => \$version,             "version"          => \$version);
 
 # Show version

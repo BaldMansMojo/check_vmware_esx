@@ -1084,3 +1084,12 @@ History:
       "[Use of uninitialized value in concatenation (.) or string ..."
       To avoid this we check the values of the hash with each loop an in case a value
       is not set we replace it whit the string "Unknown".
+
+- 24 Aug 2014 M.Fuerstenau version 0.9.20
+  - datastore_volumes_info(). Some improvements.
+    - Output. Because it was hard to see an alerting volume within the mass of others
+      the output is now grouped so that all alerting volumes are listed on top with 
+      a leading comment. Second are the volumes with no errors. Theses volumes are
+      seperated by a line and also introduced by a comment.
+    - New commandline switch --spaceleft.  When checking multiple volumes the threshold
+      must be given in either percent (old) OR space left on device.(New)

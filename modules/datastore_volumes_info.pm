@@ -4,6 +4,8 @@ sub datastore_volumes_info
     my $state = 0;
     my $actual_state = 0;
     my $output = '';
+    my $tmp_output = '';
+    my $tmp_output_error = '';
     my $space_total;
     my $space_total_MB;
     my $space_total_GB;
@@ -16,6 +18,8 @@ sub datastore_volumes_info
     my $space_used_MB;
     my $space_used_GB;
     my $space_used_percent;
+    my $tmp_warning = $warning;
+    my $tmp_critical = $critical;
     my $warn_out;
     my $crit_out;
     my $ref_store;
@@ -123,9 +127,25 @@ sub datastore_volumes_info
                            {
                            if ((!($warn_is_percent)) && (!($crit_is_percent)))
                               {
-                              print "On multiple volumes setting warning or critical threshold is only allowed";
-                              print " in percent for used space\n";
-                              exit 2;
+                              if (!(defined($spaceleft)))
+                                 {
+                                 print "On multiple volumes setting warning or critical threshold is only allowed";
+                                 print " in percent for used space or --spaceleft must be used.\n";
+                                 exit 2;
+                                 }
+                              else
+                                 {
+                                 if ($gigabyte)
+                                    {
+                                    $warning = $space_total_GB - $tmp_warning;
+                                    $critical = $space_total_GB - $tmp_critical;
+                                    }
+                                 else
+                                    {
+                                    $warning = $space_total_MB - $tmp_warning;
+                                    $critical = $space_total_MB - $tmp_critical;
+                                    }
+                                 }
                               }
                            }
                         }
@@ -202,7 +222,7 @@ sub datastore_volumes_info
                         $warn_out =  $space_total / 100 * (100 - $warning);
                         $crit_out =  $space_total / 100 * (100 - $critical);
                         }
-                        else
+                     else
                         {
                         $warn_out =  $space_total / 100 * $warning;
                         $crit_out =  $space_total / 100 * $critical;
@@ -221,19 +241,27 @@ sub datastore_volumes_info
                      $perfdata = $perfdata . " \'" . $name . "\'=" . $space_free . "$uom;" . $perf_thresholds . ";;" . $space_total;
                      }
 
-                  if (!$alertonly || $actual_state != 0)
+                  if ($actual_state != 0)
                      {
-                     $output = $output . "$name ($volume_type)" . ($usedspace ? " used" : " free");
-                     $output = $output . ": ". ($usedspace ? $space_used : $space_free) . " " . $uom;
-                     $output = $output . " (" . ($usedspace ? $space_used_percent : $space_free_percent) . "%) / $space_total $uom (100%)";
-                     $output = $output . $multiline;
+                     $tmp_output_error = $tmp_output_error . "$name ($volume_type)" . ($usedspace ? " used" : " free");
+                     $tmp_output_error = $tmp_output_error . ": ". ($usedspace ? $space_used : $space_free) . " " . $uom;
+                     $tmp_output_error = $tmp_output_error . " (" . ($usedspace ? $space_used_percent : $space_free_percent) . "%) / $space_total $uom (100%)";
+                     $tmp_output_error = $tmp_output_error . $multiline;
+                     $volumescnt++;
+                     }
+                  else
+                     {
+                     $tmp_output = $tmp_output . "$name ($volume_type)" . ($usedspace ? " used" : " free");
+                     $tmp_output = $tmp_output . ": ". ($usedspace ? $space_used : $space_free) . " " . $uom;
+                     $tmp_output = $tmp_output . " (" . ($usedspace ? $space_used_percent : $space_free_percent) . "%) / $space_total $uom (100%)";
+                     $tmp_output = $tmp_output . $multiline;
                      $volumescnt++;
                      }
                   }
                else
                   {
                   $state = 2;
-                  $output = $output . "'$name' is not accessible, ";
+                  $tmp_output_error = $tmp_output_error . "'$name' is not accessible, ";
                   $alertcnt++;
                   }
             
@@ -243,6 +271,27 @@ sub datastore_volumes_info
                   }
                }
             }
+
+    if (defined($warning) && defined($critical))
+       {
+       if ($alertonly)
+          {
+          $output = "Volumes above thresholds:" . $multiline;
+          $output = $output . $tmp_output_error;
+          }
+       else
+          {
+          $output = "Volumes above thresholds:" . $multiline;
+          $output = $output . $tmp_output_error;
+          $output = $output . "------------------------------------------------" . $multiline;
+          $output = $output . "Volumes below thresholds:" . $multiline;
+          $output = $output . $tmp_output;
+          }
+       }
+    else
+       {
+       $output = $tmp_output;
+       }
 
     if ($output)
        {
@@ -287,7 +336,7 @@ sub datastore_volumes_info
        {
        if ($alertonly)
           {
-          $output = "There are no alerts";
+          $output = "OK. There are no alerts";
           }
        else
           {
