@@ -1093,3 +1093,7 @@ History:
       seperated by a line and also introduced by a comment.
     - New commandline switch --spaceleft.  When checking multiple volumes the threshold
       must be given in either percent (old) OR space left on device.(New)
+
+- 28 Aug 2014 M.Fuerstenau version 0.9.20a
+  - datastore_volumes_info().
+    - Fixed some small bugs in output.

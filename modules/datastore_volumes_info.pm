@@ -28,7 +28,6 @@ sub datastore_volumes_info
     my $volume_type;
     my $uom = "MB";
     my $alertcnt = 0;
-    my $volumescnt = 0;
        
     if (defined($subselect) && defined($blacklist) && !defined($isregexp))
        {
@@ -247,7 +246,6 @@ sub datastore_volumes_info
                      $tmp_output_error = $tmp_output_error . ": ". ($usedspace ? $space_used : $space_free) . " " . $uom;
                      $tmp_output_error = $tmp_output_error . " (" . ($usedspace ? $space_used_percent : $space_free_percent) . "%) / $space_total $uom (100%)";
                      $tmp_output_error = $tmp_output_error . $multiline;
-                     $volumescnt++;
                      }
                   else
                      {
@@ -255,7 +253,6 @@ sub datastore_volumes_info
                      $tmp_output = $tmp_output . ": ". ($usedspace ? $space_used : $space_free) . " " . $uom;
                      $tmp_output = $tmp_output . " (" . ($usedspace ? $space_used_percent : $space_free_percent) . "%) / $space_total $uom (100%)";
                      $tmp_output = $tmp_output . $multiline;
-                     $volumescnt++;
                      }
                   }
                else
@@ -297,14 +294,7 @@ sub datastore_volumes_info
        {
        if ( $state == 0 )
           {
-          if ($volumescnt eq 1)
-             {
-             $output = "OK: " . $output;
-             }
-          else
-             {
-             $output = "OK for all selected volumes." . $multiline . $output;
-             }
+          $output = "OK for selected volume(s)." . $multiline . $output;
           }
        else
           {
@@ -312,22 +302,22 @@ sub datastore_volumes_info
              {
              if (($warn_is_percent) || ($crit_is_percent))
                 {
-                $output = $alertcnt . " alert(s) for the selected volume(s) (warn:" . $warning . "%,crit:" . $critical . "%)" . $multiline . $output;
+                $output = $alertcnt . " alert(s) for some of the selected volume(s) (warn:" . $warning . "%,crit:" . $critical . "%)" . $multiline . $output;
                 }
              else
                 {
-                $output = $alertcnt . " alert(s) for the selected volume(s) (warn:" . $warning . ",crit:" . $critical . ")" . $multiline . $output;
+                $output = $alertcnt . " alert(s) for some of the selected volume(s) (warn:" . $warning . ",crit:" . $critical . ")" . $multiline . $output;
                 }
              }
           else
              {
              if (($warn_is_percent) || ($crit_is_percent))
                 {
-                $output = $alertcnt . " alert(s) found for some for the selected volume(s) (warn:" . $warning . "%,crit:" . $critical . "%)" . $multiline . $output;
+                $output = $alertcnt . " alert(s) found for some of the selected volume(s) (warn:" . $warning . "%,crit:" . $critical . "%)" . $multiline . $output;
                 }
              else
                 {
-                $output = $alertcnt . " alert(s) found for some for the selected volume(s) (warn:" . $warning . ",crit:" . $critical . ")" . $multiline . $output;
+                $output = $alertcnt . " alert(s) found for some of the selected volume(s) (warn:" . $warning . ",crit:" . $critical . ")" . $multiline . $output;
                 }
              }
           }

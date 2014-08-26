@@ -1152,6 +1152,10 @@
 #       seperated by a line and also introduced by a comment.
 #     - New commandline switch --spaceleft.  When checking multiple volumes the threshold
 #       must be given in either percent (old) OR space left on device.(New)
+#
+# - 28 Aug 2014 M.Fuerstenau version 0.9.20a
+#   - datastore_volumes_info().
+#     - Fixed some small bugs in output.
 
 use strict;
 use warnings;
@@ -1193,7 +1197,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.20';                  # Contains the program version number
+our $prog_version = '0.9.20a';                  # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
