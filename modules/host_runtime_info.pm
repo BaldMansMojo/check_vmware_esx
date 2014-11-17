@@ -246,6 +246,14 @@ sub host_runtime_info
              foreach (@$cpuStatusInfo)
                      {
                      $actual_state = check_health_state($_->status->key);
+
+                     # Ejection seat for not running CIM Server
+                     if ($actual_state == 3)
+                        {
+                        print "Critical! No result from CIM server.CIM server is probably not running or not running correctly! Please restart!\n";
+                        exit 2;
+                        }
+                        
                      $itemref = {
                                 name => $_->name,
                                 summary => $_->status->summary

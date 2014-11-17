@@ -1156,6 +1156,18 @@
 # - 28 Aug 2014 M.Fuerstenau version 0.9.20a
 #   - datastore_volumes_info().
 #     - Fixed some small bugs in output.
+#
+# - 7 Oct 2014 M.Fuerstenau version 0.9.21
+#   - host_runtime_info()
+#     - If the CIM server is not running (or not running correctly) the health
+#       check receives a lot of unknown events even in the case the hardware
+#       status from the GUI looks ok. So we check for the first CPU. If it is
+#       unknown be sure the CIM server has to be restarted. After this you will
+#       notice a difference in the GUI too.
+#   - host_net_info()
+#     - In case of an unplugged/disconnected NIC the state is now warning
+#       instead of critical because an unplugged card is not always a critical
+#       situtation but the admin should take notice of that.
 
 use strict;
 use warnings;
@@ -1197,7 +1209,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.20a';                  # Contains the program version number
+our $prog_version = '0.9.21';                  # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
