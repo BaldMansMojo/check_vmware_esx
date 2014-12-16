@@ -1168,6 +1168,14 @@
 #     - In case of an unplugged/disconnected NIC the state is now warning
 #       instead of critical because an unplugged card is not always a critical
 #       situtation but the admin should take notice of that.
+#
+# - 16 Dec 2014 M.Fuerstenau version 0.9.22
+#   - Around line 1680:
+#     - The previous check for an valid session was done with a string compare. This method
+#       was taken from the VMware website. But it didn't work correctly. In $@ you will find
+#       after an eval the error message in case of an error or nothing when it was successfull.
+#       The problem was the string compare. If another language as English was choosen this
+#       didn't work. So now it's only checked whether $@ has a content (error) or is empty (success).
 
 use strict;
 use warnings;
@@ -1209,7 +1217,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.21';                  # Contains the program version number
+our $prog_version = '0.9.22';                  # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
@@ -1673,7 +1681,7 @@ if (!defined($nosession))
       close (SESSION_LOCK_FILE);    
    
       eval {Vim::load_session(session_file => $sessionfile_name)};
-      if (($@ =~ /The session is not authenticated/gi) || (Opts::get_option("url") ne $url2connect))
+      if (($@ ne '') || (Opts::get_option("url") ne $url2connect))
          {
          unlink $sessionfile_name;
          Util::connect($url2connect, $username, $password);
