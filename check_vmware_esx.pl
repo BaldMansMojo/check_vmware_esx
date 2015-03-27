@@ -1176,6 +1176,10 @@
 #       after an eval the error message in case of an error or nothing when it was successfull.
 #       The problem was the string compare. If another language as English was choosen this
 #       didn't work. So now it's only checked whether $@ has a content (error) or is empty (success).
+#
+# - 27 Dec 2015 M.Fuerstenau version 0.9.22a
+#   - Bugfix:
+#     - Instead of mapping 1 to 0 with --ignore_warning 2 was mapped to 0. Corrected.
 
 use strict;
 use warnings;
@@ -1767,7 +1771,7 @@ if (defined($ignoreunknown))
 
 if (defined($ignorewarning))
    {
-   if ($result eq 2)
+   if ($result eq 1)
       {
       $result = 0;
       }
