@@ -1783,7 +1783,7 @@ $perfdata =~ s/^[ \t]*//;
 
 if ( $result == 0 )
    {
-   print "$output";
+   print "OK: $output";
    if ($perfdata)
       {
       print "|$perfdata\n";
@@ -1799,7 +1799,7 @@ $output =~ s/$multiline$//;
 
 if ( $result == 1 )
    {
-   print "Warning! $output";
+   print "WARNING: $output";
    if ($perfdata)
       {
       print "|$perfdata\n";
@@ -1812,7 +1812,7 @@ if ( $result == 1 )
 
 if ( $result == 2 )
    {
-   print "Critical! $output";
+   print "CRITICAL: $output";
    if ($perfdata)
       {
       print "|$perfdata\n";
@@ -1825,7 +1825,7 @@ if ( $result == 2 )
 
 if ( $result == 3 )
    {
-   print "$output";
+   print "UNKNOWN: $output";
    if ($perfdata)
       {
       print "|$perfdata\n";

@@ -68,7 +68,7 @@ First install the VMware Perl SDK.
 ----------------------------------
 
 - Download the SDK from vmware.
-  - Go to www.vmware.com->Downloads->All downloads,drivers & tools
+  - Go to [www.vmware.com](www.vmware.com) -> Downloads -> "All downloads,drivers & tools""
   - Search for "Perl SDK"
   - Download the appropriate Perl SDK for your release (the SDK is free but you have to register yourself for this).
   - Install it. (Installation guide can be found here: http://www.vmware.com/support/developer/viperltoolkit/)
@@ -138,7 +138,7 @@ If a session logs in it sets a lock file (sessionfilename_locked). The lock file
 plugin run. A newly started check looks for the lock file and waits until it is no longer there. So here we have a serialization now. It will not
 hang forever due to the alarm routine. Therefore the default for the timeout is enhenced to 40 secs. instead of 30 secs..
 
-Example caommand and service check definition:
+Example command and service check definition:
 ----------------------------------------------
 
 define command{
