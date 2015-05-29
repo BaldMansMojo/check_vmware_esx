@@ -27,7 +27,6 @@ sub host_runtime_info
     my $issue_out = '';
     my $issue_cnt = 0;
     my $issues_ignored_cnt = 0;
-    my $issues_whitelisted_cnt = 0;
     my $issues_alarm_cnt = 0;
     my $itemref;
     my $item_ref;
@@ -753,27 +752,22 @@ sub host_runtime_info
             
                   if (defined($blacklist))
                      {
-                     $issues_ignored_cnt++;
                      if (isblacklisted(\$blacklist, $isregexp, $_->fullFormattedMessage))
                         {
+                        $issues_ignored_cnt++;
                         next;
                         }
                      }
                   if (defined($whitelist))
                      {
-                     $issues_whitelisted_cnt++;
                      if (isnotwhitelisted(\$whitelist, $isregexp, $_->fullFormattedMessage))
                         {
+                        $issues_ignored_cnt++;
                         next;
                         }
                      }
                   $issue_out = $issue_out . format_issue($_) . $multiline;
                   }
-          }
-
-       if (defined($whitelist))
-          {
-          $issues_ignored_cnt = $issue_cnt - $issues_whitelisted_cnt;
           }
 
        $issues_alarm_cnt = $issue_cnt - $issues_ignored_cnt;

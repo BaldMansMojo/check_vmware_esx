@@ -404,6 +404,7 @@ sub dc_runtime_info
                   {
                   if (isnotwhitelisted(\$whitelist, $isregexp, $vm->name))
                      {
+                     $vm_ignored_cnt++;
                      next;
                      }
                   }
@@ -698,9 +699,9 @@ sub dc_runtime_info
                        
                           if (defined($blacklist))
                              {
-                             $issues_ignored_cnt++;
                              if (isblacklisted(\$blacklist, $isregexp, $vc_name))
                                 {
+                                $issues_ignored_cnt++;
                                 next;
                                 }
                              }
@@ -708,6 +709,7 @@ sub dc_runtime_info
                              {
                              if (isnotwhitelisted(\$whitelist, $isregexp, $vc_name))
                                 {
+                                $issues_ignored_cnt++;
                                 next;
                                 }
                               }

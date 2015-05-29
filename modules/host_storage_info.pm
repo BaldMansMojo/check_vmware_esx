@@ -149,6 +149,7 @@ sub host_storage_info
                       isnotwhitelisted(\$whitelist, $isregexp, $dev->key) )
                      {
                      $count++;
+                     $ignored++;
                      next;
                      }
                   }                    
@@ -273,6 +274,7 @@ sub host_storage_info
                   if (isnotwhitelisted(\$whitelist, $isregexp, $canonicalName))
                      {
                      $count++;
+                     $ignored++;
                      next;
                      }
                   }
@@ -384,6 +386,7 @@ sub host_storage_info
                                 if ($scsi_id ne $scsi_id_old)
                                    {
                                    $mpath_cnt++;
+                                   $ignored++;
                                    next;
                                    }
                                 }
