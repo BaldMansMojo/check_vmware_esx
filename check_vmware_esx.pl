@@ -1324,7 +1324,7 @@ our $standbyok;                                # For multipathing if a standby m
 our $listall;                                  # used for host. Lists all available devices(use for listing purpose only)
 our $nostoragestatus;                          # To avoid a double alarm when also doing a check with -S runtime -s health
                                                # and -S runtime -s storagehealth for the same host.
-
+our $nostatelabels;                            # If set, service output does not contain the uppercase service state string.
 
 
 my  $trace;
@@ -1384,6 +1384,7 @@ GetOptions
                                          "sslport=s"        => \$sslport,
                                          "gigabyte"         => \$gigabyte,
                                          "nostoragestatus"  => \$nostoragestatus,
+                                         "nostatelabels"    => \$nostatelabels,
                                          "spaceleft"        => \$spaceleft,
 	 "V"   => \$version,             "version"          => \$version);
 
@@ -1781,59 +1782,23 @@ if (defined($ignorewarning))
 $perfdata =~ s/^$perfdata_init//;
 $perfdata =~ s/^[ \t]*//;
 
-if ( $result == 0 )
+my $statelabel = ""; 
+unless ($nostatelabels) 
    {
-   print "OK: $output";
-   if ($perfdata)
-      {
-      print "|$perfdata\n";
-      }
-      else
-      {
-      print "\n";
-      }
+   $statelabel = uc($status2text{$result}) . ": ";
    }
 
 # Remove the last multiline regardless whether it is \n or <br>
 $output =~ s/$multiline$//;
 
-if ( $result == 1 )
+printf "%s%s", $statelabel, $output;
+if ($perfdata)
    {
-   print "WARNING: $output";
-   if ($perfdata)
-      {
-      print "|$perfdata\n";
-      }
-      else
-      {
-      print "\n";
-      }
+   print "|$perfdata\n";
    }
-
-if ( $result == 2 )
+   else
    {
-   print "CRITICAL: $output";
-   if ($perfdata)
-      {
-      print "|$perfdata\n";
-      }
-      else
-      {
-      print "\n";
-      }
-   }
-
-if ( $result == 3 )
-   {
-   print "UNKNOWN: $output";
-   if ($perfdata)
-      {
-      print "|$perfdata\n";
-      }
-      else
-      {
-      print "\n";
-      }
+   print "\n";
    }
 
 exit $result;
