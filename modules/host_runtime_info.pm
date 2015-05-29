@@ -772,9 +772,9 @@ sub host_runtime_info
 
        $issues_alarm_cnt = $issue_cnt - $issues_ignored_cnt;
 
-       if ($issues_alarm_cnt > 1)
+       if ($issues_alarm_cnt > 0)
           {
-          $actual_state = 2;
+          $actual_state = 1;
           }
        else
           {
