@@ -1281,8 +1281,8 @@ my  $thresholds_given = 0;                     # During checking the threshold i
                                         
 our $spaceleft;                                # This is used for datastore volumes. When checking multiple volumes
                                                # the threshol must be given in either percent or space left on device.
-my  $plugin_cache="/var/nagios_plugin_cache/"; # Directory for caching plaugin data. Good idea to use a tmpfs
-                                               # because it speeds up operation    
+my  $plugin_cache="/var/";                     # Directory for caching plugin data. Good idea to use a tmpfs
+                                               # because it speeds up operation. Override with --plugincachedir 
 our $listsensors;                              # This flag set in conjunction with -l runtime -s health or -s sensors
                                                # will list all sensors
 our $usedspace;                                # Show used spaced instead of free
@@ -1325,8 +1325,8 @@ our $listall;                                  # used for host. Lists all availa
 our $nostoragestatus;                          # To avoid a double alarm when also doing a check with -S runtime -s health
                                                # and -S runtime -s storagehealth for the same host.
 our $nostatelabels;                            # If set, service output does not contain the uppercase service state string.
-
-
+our $plugincachedir;                           # Override $plugin_cache
+ 
 my  $trace;
 
 
@@ -1385,6 +1385,7 @@ GetOptions
                                          "gigabyte"         => \$gigabyte,
                                          "nostoragestatus"  => \$nostoragestatus,
                                          "nostatelabels"    => \$nostatelabels,
+                                         "plugincachedir"   => \$plugincachedir,
                                          "spaceleft"        => \$spaceleft,
 	 "V"   => \$version,             "version"          => \$version);
 
@@ -1410,6 +1411,28 @@ if (defined($blacklist) && defined($whitelist))
    print "Error: -B|--exclude and -W|--include should not be used together.\n\n";
    print_help($help);
    exit 1;
+   }
+
+# Set default best location for plugin_cache in this environment
+if ( $ENV{OMD_ROOT}) 
+   {
+   $plugin_cache = $ENV{OMD_ROOT} . "/var/check_vmware_esx/";
+   if ( ! -d $plugin_cache ) 
+      {
+      unless (mkdir $plugin_cache) 
+         {
+         die(sprintf "UNKNOWN: Unable to create plugin_cache directory %s.", $plugin_cache);
+         }
+      } 
+   }
+# as cmdline parameter take it as it is
+if ( $plugincachedir ) 
+   {
+   $plugin_cache = $plugincachedir; 
+   }
+unless (-d $plugin_cache) 
+   {
+   die(sprintf "UNKNOWN: plugin_cache directory %s does not exist.", $plugin_cache);
    }
 
 # Multiline output in GUI overview?
