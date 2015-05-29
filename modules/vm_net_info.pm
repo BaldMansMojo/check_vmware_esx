@@ -35,13 +35,13 @@ sub vm_net_info
           if ($subselect eq "all")
              {
              $output = "net usage=" . $value . " KBps"; 
-             $perfdata = $perfdata . " \'net_usage\'=" . $value . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'net_usage\'=" . $value . ";" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "net usage=" . $value . " KBps"; 
-             $perfdata = "\'net_usage\'=" . $value . $perf_thresholds . ";;";
+             $perfdata = "\'net_usage\'=" . $value . ";" . $perf_thresholds . ";;";
              $state = check_state($state, $actual_state);
              }
           }
@@ -62,13 +62,13 @@ sub vm_net_info
           if ($subselect eq "all")
              {
              $output = $output . ", net receive=" . $value . " KBps"; 
-             $perfdata = $perfdata . " \'net_receive\'=" . $value . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'net_receive\'=" . $value . ";" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "net receive=" . $value . " KBps"; 
-             $perfdata = "\'net_receive\'=" . $value . $perf_thresholds . ";;";
+             $perfdata = "\'net_receive\'=" . $value . ";" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
           }
@@ -98,13 +98,13 @@ sub vm_net_info
           if ($subselect eq "all")
              {
              $output =$output . ", net send=" . $value . " KBps"; 
-             $perfdata = $perfdata . " \'net_send\'=" . $value . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'net_send\'=" . $value . ";" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "net send=" . $value . " KBps"; 
-             $perfdata = "\'net_send\'=" . $value . $perf_thresholds . ";;";
+             $perfdata = "\'net_send\'=" . $value . ";" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
           }
