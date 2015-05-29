@@ -29,6 +29,7 @@ sub dc_runtime_info
     my $vm_state;
     my $vm_views;
     my $vm_cnt = 0;       
+    my $vm_bad_cnt = 0;       
     my $vm_ignored_cnt = 0;       
     my $guestToolsBlacklisted_cnt = 0;
     my $guestToolsCurrent_cnt = 0;
@@ -404,6 +405,7 @@ sub dc_runtime_info
                   {
                   if (isnotwhitelisted(\$whitelist, $isregexp, $vm->name))
                      {
+                     $vm_ignored_cnt++;
                      next;
                      }
                   }
@@ -444,10 +446,11 @@ sub dc_runtime_info
                               if ($vm_guest->toolsVersionStatus eq "guestToolsBlacklisted")
                                  {
                                  $guestToolsBlacklisted_cnt++;
-                                 $tools_out = $tools_out . $vm->name . " Installed,running,but the installed ";
+                                 $tools_out = $tools_out . "VM " . $vm->name . ": Installed,running,but the installed ";
                                  $tools_out = $tools_out ."version is known to have a grave bug and should ";
                                  $tools_out = $tools_out ."be immediately upgraded." . $multiline;
-                                 $actual_state = 2;
+                                 $actual_state = 2; 
+                                 $vm_bad_cnt++;
                                  $state = check_state($state, $actual_state);
                                  }
                               if ($vm_guest->toolsVersionStatus eq "guestToolsCurrent")
@@ -455,7 +458,6 @@ sub dc_runtime_info
                                  $guestToolsCurrent_cnt++;
                                  if (!$alertonly)
                                     {
-                                    $tools_out = $tools_out . $vm->name . " Installed,running and current." . $multiline;
                                     $actual_state = 0;
                                     $state = check_state($state, $actual_state);
                                     }
@@ -463,52 +465,57 @@ sub dc_runtime_info
                               if ($vm_guest->toolsVersionStatus eq "guestToolsNeedUpgrade")
                                  {
                                  $guestToolsNeedUpgrade_cnt++;
-                                 $tools_out = $tools_out . $vm->name . " Installed,running,version is not current." . $multiline;
+                                 $tools_out = $tools_out . "VM " . $vm->name . ": Installed,running,version is not current." . $multiline;
                                  $actual_state = 1;
+                                 $vm_bad_cnt++;
                                  $state = check_state($state, $actual_state);
                                  }
                               if ($vm_guest->toolsVersionStatus eq "guestToolsSupportedNew")
                                  {
                                  $guestToolsSupportedNew_cnt++;
-                                 $tools_out = $tools_out . $vm->name . " Installed,running,supported and newer than the ";
+                                 $tools_out = $tools_out . "VM " . $vm->name . ": Installed,running,supported and newer than the ";
                                  $tools_out = $tools_out ."version available on the host." . $multiline;
                                  $actual_state = 1;
+                                 $vm_bad_cnt++;
                                  $state = check_state($state, $actual_state);
                                  }
                               if ($vm_guest->toolsVersionStatus eq "guestToolsSupportedOld")
                                  {
                                  $guestToolsSupportedOld_cnt++;
-                                 $tools_out = $tools_out . $vm->name . " Installed,running,supported, but a newer version is available." . $multiline;
+                                 $tools_out = $tools_out . "VM " . $vm->name . ": Installed,running,supported, but a newer version is available." . $multiline;
                                  $actual_state = 1;
+                                 $vm_bad_cnt++;
                                  $state = check_state($state, $actual_state);
                                  }
                               if ($vm_guest->toolsVersionStatus eq "guestToolsTooNew")
                                  {
                                  $guestToolsTooNew_cnt++;
-                                 $tools_out = $tools_out . $vm->name . " Installed,running,but the version is known to be too new " . $multiline;
+                                 $tools_out = $tools_out . "VM " . $vm->name . ": Installed,running,but the version is known to be too new " . $multiline;
                                  $tools_out = $tools_out ."to work correctly with this virtual machine.";
                                  $actual_state = 2;
+                                 $vm_bad_cnt++;
                                  $state = check_state($state, $actual_state);
                                  }
                               if ($vm_guest->toolsVersionStatus eq "guestToolsTooOld")
                                  {
                                  $guestToolsTooOld_cnt++;
-                                 $tools_out = $tools_out . $vm->name . " Installed,running,but the version is too old." . $multiline;
+                                 $tools_out = $tools_out . "VM " . $vm->name . ": Installed,running,but the version is too old." . $multiline;
                                  $actual_state = 1;
+                                 $vm_bad_cnt++;
                                  $state = check_state($state, $actual_state);
                                  }
                               if ($vm_guest->toolsVersionStatus eq "guestToolsUnmanaged")
                                  {
                                  $guestToolsUnmanaged_cnt++;
-                                 $tools_out = $tools_out . $vm->name . " Installed,running,but not managed by VMWare. " . $multiline;
+                                 $tools_out = $tools_out . "VM " . $vm->name . ": Installed,running,but not managed by VMWare. " . $multiline;
                                  $actual_state = 2;
+                                 $vm_bad_cnt++;
                                  $state = check_state($state, $actual_state);
                                  }
                               }
                            else
                               {
                               $guestToolsUnknown_cnt++;
-                              $tools_out = $tools_out . $vm->name . " Tools starting." . $multiline;
                               $actual_state = 0;
                               $state = check_state($state, $actual_state);
                               }
@@ -516,24 +523,27 @@ sub dc_runtime_info
                         else
                            {
                            $guestToolsNotRunning_cnt++;
-                           $tools_out = $tools_out . $vm->name . " Tools not running." . $multiline;
+                           $tools_out = $tools_out . "VM " . $vm->name . ": Tools not running." . $multiline;
                            $actual_state = 1;
+                           $vm_bad_cnt++;
                            $state = check_state($state, $actual_state);
                            }
                         }
                      else
                         {
                         $guestToolsNotInstalled_cnt++;
-                        $tools_out = $tools_out ."VM " . $vm->name . " Tools not installed." . $multiline;
+                        $tools_out = $tools_out . "VM " . $vm->name . ": Tools not installed." . $multiline;
                         $actual_state = 1;
+                        $vm_bad_cnt++;
                         $state = check_state($state, $actual_state);
                         }
                      }
                   else
                      {
                      $guestToolsUnknown_cnt++;
-                     $tools_out = $tools_out . $vm->name . " No information about VMware tools available. Please check!" . $multiline;
+                     $tools_out = $tools_out . "VM " . $vm->name . ": No information about VMware tools available. Please check!" . $multiline;
                      $actual_state = 1;
+                     $vm_bad_cnt++;
                      $state = check_state($state, $actual_state);
                      }
                   }
@@ -544,14 +554,12 @@ sub dc_runtime_info
                      if ($vm->get_property('runtime.powerState')->val eq "poweredOff")
                         {
                         $guestToolsPOF_cnt++;
-                        $tools_out = $tools_out . $vm->name . " powered off. Tools not running." . $multiline;
                         $actual_state = 0;
                         $state = check_state($state, $actual_state);
                         }
                      if ($vm->get_property('runtime.powerState')->val eq "suspended")
                         {
                         $guestToolsSuspendePOF_cnt++;
-                        $tools_out = $tools_out . $vm->name . " suspended. Tools not running." . $multiline;
                         $actual_state = 0;
                         $state = check_state($state, $actual_state);
                         }
@@ -561,33 +569,11 @@ sub dc_runtime_info
 
        if ($subselect eq "all")
           {
-          $output = $output . " - " . $vm_cnt . " VMs - " . $guestToolsCurrent_cnt . " Installed,running and current.";
-          $output = $output . " - " . $guestToolsBlacklisted_cnt . " Installed,running,but the installed version is known to have a grave";
-          $output = $output . " bug and should be immediately upgraded - " .  $guestToolsNeedUpgrade_cnt . " Installed,running,version is";
-          $output = $output . " not current - " .  $guestToolsSupportedNew_cnt . " Installed,running,supported and newer than the";
-          $output = $output . "version available on the host - " . $guestToolsSupportedOld_cnt . " Installed,running,supported, but a newer";
-          $output = $output . " version is available - " . $guestToolsTooNew_cnt . " Installed,running,but the version is known to be too new ";
-          $output = $output . " too new to work correctly with this virtual machine - " .  $guestToolsTooOld_cnt . " Installed,running,but";
-          $output = $output . " the version is too old - " .  $guestToolsUnmanaged_cnt . " Installed,running,but not managed by VMWare - ";
-          $output = $output . $guestToolsUnknown_cnt . " Tools starting - " . $guestToolsNotRunning_cnt . " Tools not running - ";
-          $output = $output . $guestToolsNotInstalled_cnt . " Tools not installed - " . $guestToolsUnknown_cnt . " No information about";
-          $output = $output . " VMware tools available. - " . $guestToolsPOF_cnt . " Powered off. Tools not running - ";
-          $output = $output . $guestToolsSuspendePOF_cnt . " Suspended. Tools not running";
+          $output = $output . $vm_cnt . " VMs checked for VMWare Tools state, " . $vm_bad_cnt . " are not OK.";
           }
        else
           {
-          $output = $output . $vm_cnt . " VMs - " . $guestToolsCurrent_cnt . " Installed,running and current.";
-          $output = $output . " - " . $guestToolsBlacklisted_cnt . " Installed,running,but the installed version is known to have a grave";
-          $output = $output . " bug and should be immediately upgraded - " .  $guestToolsNeedUpgrade_cnt . " Installed,running,version is";
-          $output = $output . " not current - " .  $guestToolsSupportedNew_cnt . " Installed,running,supported and newer than the";
-          $output = $output . "version available on the host - " . $guestToolsSupportedOld_cnt . " Installed,running,supported, but a newer";
-          $output = $output . " version is available - " . $guestToolsTooNew_cnt . " Installed,running,but the version is known to be too new ";
-          $output = $output . " too new to work correctly with this virtual machine - " .  $guestToolsTooOld_cnt . " Installed,running,but";
-          $output = $output . " the version is too old - " .  $guestToolsUnmanaged_cnt . " Installed,running,but not managed by VMWare - ";
-          $output = $output . $guestToolsUnknown_cnt . " Tools starting - " . $guestToolsNotRunning_cnt . " Tools not running - ";
-          $output = $output . $guestToolsNotInstalled_cnt . " Tools not installed - " . $guestToolsUnknown_cnt . " No information about";
-          $output = $output . " VMware tools available. - " . $guestToolsPOF_cnt . " Powered off. Tools not running - ";
-          $output = $output . $guestToolsSuspendePOF_cnt . " Suspended. Tools not running";
+          $output = $output . $vm_cnt . " VMs checked for VMWare Tools state, " . $vm_bad_cnt . " are not OK.";
           $output = $output . $multiline . $tools_out;
           }
        }
@@ -698,9 +684,9 @@ sub dc_runtime_info
                        
                           if (defined($blacklist))
                              {
-                             $issues_ignored_cnt++;
                              if (isblacklisted(\$blacklist, $isregexp, $vc_name))
                                 {
+                                $issues_ignored_cnt++;
                                 next;
                                 }
                              }
@@ -708,6 +694,7 @@ sub dc_runtime_info
                              {
                              if (isnotwhitelisted(\$whitelist, $isregexp, $vc_name))
                                 {
+                                $issues_ignored_cnt++;
                                 next;
                                 }
                               }

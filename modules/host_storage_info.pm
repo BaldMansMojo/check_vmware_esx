@@ -142,25 +142,18 @@ sub host_storage_info
                      }
                   }
 
-               if (defined($whitelist))
+                  if (defined($whitelist))
                   {
-                  if (isnotwhitelisted(\$whitelist, $isregexp, $dev->device))
+                  if (isnotwhitelisted(\$whitelist, $isregexp, $dev->device) and
+                      isnotwhitelisted(\$whitelist, $isregexp, $dev->model) and
+                      isnotwhitelisted(\$whitelist, $isregexp, $dev->key) )
                      {
                      $count++;
+                     $ignored++;
                      next;
                      }
-                  if (isnotwhitelisted(\$whitelist, $isregexp, $dev->model))
-                     {
-                     $count++;
-                     next;
-                     }
-                  if (isnotwhitelisted(\$whitelist, $isregexp, $dev->key))
-                     {
-                     $count++;
-                     next;
-                     }
-                  }
-                     
+                  }                    
+ 
                if ($dev->status eq "online")
                   {
                   $count++;
@@ -281,6 +274,7 @@ sub host_storage_info
                   if (isnotwhitelisted(\$whitelist, $isregexp, $canonicalName))
                      {
                      $count++;
+                     $ignored++;
                      next;
                      }
                   }
@@ -392,6 +386,7 @@ sub host_storage_info
                                 if ($scsi_id ne $scsi_id_old)
                                    {
                                    $mpath_cnt++;
+                                   $ignored++;
                                    next;
                                    }
                                 }
