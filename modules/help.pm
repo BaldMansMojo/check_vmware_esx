@@ -93,12 +93,13 @@ sub print_help
        print "-?, --usage                          Print usage information\n";
        print "-h, --help                           Print detailed help screen\n";
        print "-V, --version                        Print version information\n";
-       print "--ignore_unknown                     Sometimes 3 (unknown) is returned from a component.\n";
+       print "    --ignore_unknown                 Sometimes 3 (unknown) is returned from a component.\n";
        print "                                     But the check itself is ok.\n";
        print "                                     With this option the plugin will return OK (0) instead of UNKNOWN (3).\n";
-       print "--ignore_warning                     Sometimes 2 (warning) is returned from a component.\n";
+       print "    --ignore_warning                 Sometimes 2 (warning) is returned from a component.\n";
        print "                                     But the check itself is ok (from an operator view).\n";
        print "                                     With this option the plugin will return OK (0) instead of WARNING (1).\n";
+       print "    --statelabels                    Seconds before plugin times out (default: 90)\n";
        print "-t, --timeout=INTEGER                Seconds before plugin times out (default: 90)\n";
        print "    --trace=<level>                  Set verbosity level of vSphere API request/respond trace.\n";
        print "\n";
@@ -125,7 +126,7 @@ sub print_help
        print "                                     in the command definition as \$ARGn\$.\n";
        print "     --sessionfile=<sessionfile>     (Optional).Session file name enhancement.\n";
        print "     --sessionfiledir=<directory>    (Optional).If this option is set a path different from the path stored in\n";
-       print "                                     \$nagios_plugin_cache will be used.\n";
+       print "                                     \$sessionfile_dir_def, which is defined in the plugin will be used.\n";
        print "     --nosession                     (Optional). Don't use a session file. This is the old behaviour. It should\n";
        print "     --nosession                     be used for production use because it can cause a lot of entries in the log\n";
        print "                                     files an therefore can cause abnormal growing of the log.\n";
@@ -297,6 +298,7 @@ sub print_help
        print "                                    - Installed,running,but the version is too old\n";
        print "                                    - Installed,running,but not managed by VMWare\n";
        print "    --poweredonly                   List only VMs which are powered on.\n";
+       print "    --showall                       List all VMs. Otherwise only VM with problems are listed.\n";
        print "-B, --exclude=<black_list>          Blacklist VMs.\n";
        print "-W, --include=<white_list>          Whitelist VMs.\n";
        print "\n";

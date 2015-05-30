@@ -1180,6 +1180,32 @@
 # - 27 Dec 2015 M.Fuerstenau version 0.9.22a
 #   - Bugfix:
 #     - Instead of mapping 1 to 0 with --ignore_warning 2 was mapped to 0. Corrected.
+#
+# - 31 May 2015 M.Fuerstenau version 0.9.23
+#   - check_vmware_esx.pl:
+#     - New option --statelabel to have the label OK, CRITICAL etc. in plugin output to
+#       fulfill the rules of the plugin developer guidelines. This was proposed by Simon Meggle.
+#       See Readme.
+#     - Added test for session file directory. Thanks Simon.
+#     - Replaced variable $plugin_cache with $sessionfile_dir_def. $plugin_cache was copied from
+#       another plugin of me. But this plugin doesn't  store any data. it was only used to store the 
+#       session files (and session file lock files) and therefore the name was misleading.
+#   - host_storage_info()
+#     - Bugfix: Fixed bug in host storage adapter whitelisting.(Simon Meggle)
+#     - Bugfix: Elements not matching the whitelist were not counted as ignored.(Simon Meggle)
+#   - host_net_info()
+#     - Bugfix: Fixed missing semicolon between some perf values and warning threshold.(Simon Meggle)
+#   - host_runtime_info()
+#     - Bugfix: Elements not matching the whitelist were not counted as ignored.(Simon Meggle)
+#     - Raise a message after first host runtime issue. Changed state for that check to warning.(Simon Meggle)
+#   - dc_runtime_info.pm
+#     - Bugfix: Elements not matching the whitelist were not counted as ignored.(Simon Meggle)
+#     - New option --showall. Without this only the tool status of machines with problems is listed.
+#     -  Bugfix: "Installed,running,supported and newer than the version available on the host." was set
+#        to warning but this is quit ok.
+#      - In case of a complete runtime check the output is shorted. 
+#   - vm_net_info()
+#     - Bugfix: Fixed missing semicolon between some perf values and warning threshold.(Simon Meggle)
 
 use strict;
 use warnings;
@@ -1221,7 +1247,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.22';                  # Contains the program version number
+our $prog_version = '0.9.23';                  # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
@@ -1281,8 +1307,9 @@ my  $thresholds_given = 0;                     # During checking the threshold i
                                         
 our $spaceleft;                                # This is used for datastore volumes. When checking multiple volumes
                                                # the threshol must be given in either percent or space left on device.
-my  $plugin_cache="/var/nagios_plugin_cache/"; # Directory for caching plaugin data. Good idea to use a tmpfs
-                                               # because it speeds up operation    
+my  $sessionfile_dir_def="/tmp/";              # Directory for caching the session files and sessionfile lock files
+                                               # Good idea to use a tmpfs because it speeds up operation    
+
 our $listsensors;                              # This flag set in conjunction with -l runtime -s health or -s sensors
                                                # will list all sensors
 our $usedspace;                                # Show used spaced instead of free
@@ -1318,12 +1345,15 @@ my  $multiline_def="\n";                       # Default for $multiline;
 
 our $vm_tools_poweredon_only;                  # Used with Vcenter runtime check to list only powered on VMs when
                                                # checking the tools
+our $showall;                                  # Shows all where used
+                                               # checking the tools
 our $ignoreunknown;                            # Maps unknown to ok
 our $ignorewarning;                            # Maps warning to ok
 our $standbyok;                                # For multipathing if a standby multipath is ok
 our $listall;                                  # used for host. Lists all available devices(use for listing purpose only)
 our $nostoragestatus;                          # To avoid a double alarm when also doing a check with -S runtime -s health
                                                # and -S runtime -s storagehealth for the same host.
+my $statelabels;                               # If set, service output does contain the uppercase service state string.
 
 
 
@@ -1380,10 +1410,12 @@ GetOptions
                                          "isregexp"         => \$isregexp,
                                          "listall"          => \$listall,
                                          "poweredonly"      => \$vm_tools_poweredon_only,
+                                         "showall"          => \$showall,
                                          "standbyok"        => \$standbyok,
                                          "sslport=s"        => \$sslport,
                                          "gigabyte"         => \$gigabyte,
                                          "nostoragestatus"  => \$nostoragestatus,
+                                         "statelabels"      => \$statelabels,
                                          "spaceleft"        => \$spaceleft,
 	 "V"   => \$version,             "version"          => \$version);
 
@@ -1628,6 +1660,19 @@ if (!defined($nosession))
       }
       
    
+   # Set default best location for sessionfile_dir_def in this environment
+   if ( $ENV{OMD_ROOT}) 
+      {
+      $sessionfile_dir_def = $ENV{OMD_ROOT} . "/var/check_vmware_esx/";
+      if ( ! -d $sessionfile_dir_def ) 
+         {
+         unless (mkdir $sessionfile_dir_def) 
+            {
+            die(sprintf "UNKNOWN: Unable to create sessionfile_dir_def directory %s.", $sessionfile_dir_def);
+            }
+         } 
+      }
+
    if (defined($sessionfile_dir))
       {
       # If path contains trailing slash remove it
@@ -1636,9 +1681,14 @@ if (!defined($nosession))
       }
    else
       {
-      $sessionfile_name = $plugin_cache . $sessionfile_name;
+      $sessionfile_name = $sessionfile_dir_def . $sessionfile_name;
       }
    
+   unless (-d $sessionfile_dir_def) 
+          {
+          die(sprintf "UNKNOWN: sessionfile_dir_def directory %s does not exist.", $sessionfile_dir_def);
+          }
+
    $sessionlockfile = $sessionfile_name . "_locked";
    
    if ( -e $sessionfile_name )
@@ -1783,7 +1833,15 @@ $perfdata =~ s/^[ \t]*//;
 
 if ( $result == 0 )
    {
-   print "$output";
+   if (defined($statelabels))
+      {
+      print "OK: $output";
+      }
+   else
+      {
+      print "$output";
+      }
+
    if ($perfdata)
       {
       print "|$perfdata\n";
@@ -1799,12 +1857,20 @@ $output =~ s/$multiline$//;
 
 if ( $result == 1 )
    {
-   print "Warning! $output";
+   if (defined($statelabels))
+      {
+      print "WARNING: $output";
+      }
+   else
+      {
+      print "$output";
+      }
+
    if ($perfdata)
       {
       print "|$perfdata\n";
       }
-      else
+   else
       {
       print "\n";
       }
@@ -1812,12 +1878,20 @@ if ( $result == 1 )
 
 if ( $result == 2 )
    {
-   print "Critical! $output";
+   if (defined($statelabels))
+      {
+      print "CRITICAL: $output";
+      }
+   else
+      {
+      print "$output";
+      }
+
    if ($perfdata)
       {
       print "|$perfdata\n";
       }
-      else
+   else
       {
       print "\n";
       }
@@ -1825,12 +1899,20 @@ if ( $result == 2 )
 
 if ( $result == 3 )
    {
-   print "$output";
+   if (defined($statelabels))
+      {
+      print "UNKNOWN: $output";
+      }
+   else
+      {
+      print "$output";
+      }
+
    if ($perfdata)
       {
       print "|$perfdata\n";
       }
-      else
+   else
       {
       print "\n";
       }

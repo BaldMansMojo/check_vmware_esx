@@ -1121,3 +1121,30 @@ History:
 - 27 Dec 2015 M.Fuerstenau version 0.9.22a
   - Bugfix:
     - Instead of mapping 1 to 0 with --ignore_warning 2 was mapped to 0. Corrected.
+
+- 31 May 2015 M.Fuerstenau version 0.9.23
+  - check_vmware_esx.pl:
+    - New option --statelabel to have the label OK, CRITICAL etc. in plugin output to
+      fulfill the rules of the plugin developer guidelines. This was proposed by Simon Meggle.
+      See Readme.
+    - Added test for session file directory. Thanks Simon.
+    - Replaced variable $plugin_cache with $sessionfile_dir_def. $plugin_cache was copied from
+      another plugin of me. But this plugin doesn't  store any data. it was only used to store the 
+      session files (and session file lock files) and therefore the name was misleading.
+  - host_storage_info()
+    - Bugfix: Fixed bug in host storage adapter whitelisting.(Simon Meggle)
+    - Bugfix: Elements not matching the whitelist were not counted as ignored.(Simon Meggle)
+  - host_net_info()
+    - Bugfix: Fixed missing semicolon between some perf values and warning threshold.(Simon Meggle)
+  - host_runtime_info()
+    - Bugfix: Elements not matching the whitelist were not counted as ignored.(Simon Meggle)
+    - Raise a message after first host runtime issue. Changed state for that check to warning.(Simon Meggle)
+  - dc_runtime_info.pm
+    - Bugfix: Elements not matching the whitelist were not counted as ignored.(Simon Meggle)
+    - New option --showall. Without this only the tool status of machines with problems is listed.
+    -  Bugfix: "Installed,running,supported and newer than the version available on the host." was set
+       to warning but this is quit ok.
+     - In case of a complete runtime check the output is shorted. 
+  - vm_net_info()
+    - Bugfix: Fixed missing semicolon between some perf values and warning threshold.(Simon Meggle)
+
