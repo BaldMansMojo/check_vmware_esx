@@ -1,5 +1,5 @@
 
-check_vmware_esx.pl,Version 0.9.20
+check_vmware_esx.pl,Version 0.9.23
 
 This vmware Infrastructure monitoring plugin is free software, and comes with ABSOLUTELY NO WARRANTY.
 It may be used, redistributed and/or modified under the terms of the GNU General Public Licence 
@@ -14,12 +14,13 @@ General options:
 -?, --usage                          Print usage information
 -h, --help                           Print detailed help screen
 -V, --version                        Print version information
---ignore_unknown                     Sometimes 3 (unknown) is returned from a component.
+    --ignore_unknown                 Sometimes 3 (unknown) is returned from a component.
                                      But the check itself is ok.
                                      With this option the plugin will return OK (0) instead of UNKNOWN (3).
---ignore_warning                     Sometimes 2 (warning) is returned from a component.
+    --ignore_warning                 Sometimes 2 (warning) is returned from a component.
                                      But the check itself is ok (from an operator view).
                                      With this option the plugin will return OK (0) instead of WARNING (1).
+    --statelabels                    Seconds before plugin times out (default: 90)
 -t, --timeout=INTEGER                Seconds before plugin times out (default: 90)
     --trace=<level>                  Set verbosity level of vSphere API request/respond trace.
 
@@ -45,7 +46,7 @@ Options for authentication:
                                      in the command definition as $ARGn$.
      --sessionfile=<sessionfile>     (Optional).Session file name enhancement.
      --sessionfiledir=<directory>    (Optional).If this option is set a path different from the path stored in
-                                     $nagios_plugin_cache will be used.
+                                     $sessionfile_dir_def, which is defined in the plugin will be used.
      --nosession                     (Optional). Don't use a session file. This is the old behaviour. It should
      --nosession                     be used for production use because it can cause a lot of entries in the log
                                      files an therefore can cause abnormal growing of the log.
@@ -212,6 +213,7 @@ or
                                     - Installed,running,but the version is too old
                                     - Installed,running,but not managed by VMWare
     --poweredonly                   List only VMs which are powered on.
+    --showall                       List all VMs. Otherwise only VM with problems are listed.
 -B, --exclude=<black_list>          Blacklist VMs.
 -W, --include=<white_list>          Whitelist VMs.
 
