@@ -99,7 +99,12 @@ sub print_help
        print "    --ignore_warning                 Sometimes 2 (warning) is returned from a component.\n";
        print "                                     But the check itself is ok (from an operator view).\n";
        print "                                     With this option the plugin will return OK (0) instead of WARNING (1).\n";
-       print "    --statelabels                    Seconds before plugin times out (default: 90)\n";
+       print "    --statelabels=<y/n>              Whether or not statelabels as described in the Nagios Plugin Developer\n";
+       print "                                     Guidelines (OK, CRITICAL, WARNING etc.) will printed out. Technically\n";
+       print "                                     these are not neccessary because the infomation is available via the colour\n";
+       print "                                     in the WebGui (red/green/yellow etc.)and for notifications via the macros\n";
+       print "                                     \$SERVICESTATE\$ and \$SERVICESTATEID\$. The default behaviour can be changed\n";
+       print "                                     by setting the variable \$statelabels_def in the plugin from y to n.\n";
        print "-t, --timeout=INTEGER                Seconds before plugin times out (default: 90)\n";
        print "    --trace=<level>                  Set verbosity level of vSphere API request/respond trace.\n";
        print "\n";

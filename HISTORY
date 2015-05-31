@@ -1124,7 +1124,7 @@ History:
 
 - 31 May 2015 M.Fuerstenau version 0.9.23
   - check_vmware_esx.pl:
-    - New option --statelabel to have the label OK, CRITICAL etc. in plugin output to
+    - New option --statelabels to have the label OK, CRITICAL etc. in plugin output to
       fulfill the rules of the plugin developer guidelines. This was proposed by Simon Meggle.
       See Readme.
     - Added test for session file directory. Thanks Simon.
@@ -1148,3 +1148,10 @@ History:
   - vm_net_info()
     - Bugfix: Fixed missing semicolon between some perf values and warning threshold.(Simon Meggle)
 
+- 31 May 2015 M.Fuerstenau version 0.9.24
+  - check_vmware_esx.pl:
+    - Option --statelabels changed from a switch to handing over a value (y or n). This was done as mentioned 
+      earlier to fulfill to have the label OK, CRITICAL etc. in plugin output to
+      fulfill the rules of the plugin developer guidelines. This was proposed by Simon Meggle.
+      See Readme.
+    - Bugfix: Wrong output for --statelabels from the help.

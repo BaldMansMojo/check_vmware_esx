@@ -1206,6 +1206,14 @@
 #      - In case of a complete runtime check the output is shorted. 
 #   - vm_net_info()
 #     - Bugfix: Fixed missing semicolon between some perf values and warning threshold.(Simon Meggle)
+#
+# - 31 May 2015 M.Fuerstenau version 0.9.24
+#   - check_vmware_esx.pl:
+#     - Option --statelabels changed from a switch to handing over a value (y or n). This was done as mentioned 
+#       earlier to fulfill to have the label OK, CRITICAL etc. in plugin output to
+#       fulfill the rules of the plugin developer guidelines. This was proposed by Simon Meggle.
+#       See Readme.
+#     - Bugfix: Wrong output for --statelabels from the help.
 
 use strict;
 use warnings;
@@ -1247,7 +1255,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.23';                  # Contains the program version number
+our $prog_version = '0.9.24';                  # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
@@ -1353,7 +1361,13 @@ our $standbyok;                                # For multipathing if a standby m
 our $listall;                                  # used for host. Lists all available devices(use for listing purpose only)
 our $nostoragestatus;                          # To avoid a double alarm when also doing a check with -S runtime -s health
                                                # and -S runtime -s storagehealth for the same host.
-my $statelabels;                               # If set, service output does contain the uppercase service state string.
+
+my $statelabels_def="y";                       # Default value for state labels in plugin output as described in the
+                                               # Nagios Plugin Developer Guidelines. In my opinion this values don't make
+                                               # sense but to to be compatible.... . It can be overwritten via commandline.
+                                               # If you prefer no state labels (as it was default in earlier versions)
+                                               # set this default to "n".
+my $statelabels;                               # To overwrite $statelabels_def via commandline.
 
 
 
@@ -1831,9 +1845,36 @@ if (defined($ignorewarning))
 $perfdata =~ s/^$perfdata_init//;
 $perfdata =~ s/^[ \t]*//;
 
+# $statelabels set or using default?
+if (defined($statelabels))
+   {
+   # This eliminates typos like Y or yes or nO etc.
+   if ($statelabels =~ m/^y.*$/i)
+      {
+      $statelabels = "y";
+      }
+   else
+      {
+      if ($statelabels =~ m/^n.*$/i)
+         {
+         $statelabels = "n";
+         }
+      else
+         {
+         print "Wrong value for --statelabels. Must be y or no and not $statelabels\n";
+         exit 2;
+         }
+      }
+   }
+else
+   {
+   $statelabels = $statelabels_def;
+   }
+   
+   
 if ( $result == 0 )
    {
-   if (defined($statelabels))
+   if ($statelabels eq "y")
       {
       print "OK: $output";
       }
@@ -1857,7 +1898,7 @@ $output =~ s/$multiline$//;
 
 if ( $result == 1 )
    {
-   if (defined($statelabels))
+   if ($statelabels eq "y")
       {
       print "WARNING: $output";
       }
@@ -1878,7 +1919,7 @@ if ( $result == 1 )
 
 if ( $result == 2 )
    {
-   if (defined($statelabels))
+   if ($statelabels eq "y")
       {
       print "CRITICAL: $output";
       }
@@ -1899,7 +1940,7 @@ if ( $result == 2 )
 
 if ( $result == 3 )
    {
-   if (defined($statelabels))
+   if ($statelabels eq "y")
       {
       print "UNKNOWN: $output";
       }

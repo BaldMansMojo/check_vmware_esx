@@ -20,7 +20,12 @@ General options:
     --ignore_warning                 Sometimes 2 (warning) is returned from a component.
                                      But the check itself is ok (from an operator view).
                                      With this option the plugin will return OK (0) instead of WARNING (1).
-    --statelabels                    Seconds before plugin times out (default: 90)
+    --statelabels=<y/n>              Whether or not statelabels as described in the Nagios Plugin Developer
+                                     Guidelines (OK, CRITICAL, WARNING etc.) will printed out. Technically
+                                     these are not neccessary because the infomation is available via the colour
+                                     in the WebGui (red/green/yellow etc.)and for notifications via the macros
+                                     $SERVICESTATE$ and $SERVICESTATEID$. The default behaviour can be changed
+                                     by setting the variable $statelabels_def in the plugin from y to n.
 -t, --timeout=INTEGER                Seconds before plugin times out (default: 90)
     --trace=<level>                  Set verbosity level of vSphere API request/respond trace.
 
