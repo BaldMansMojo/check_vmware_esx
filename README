@@ -138,6 +138,52 @@ round first. Caused by some feedback I decided to offer all options. If you don'
 the variable to "n".
 
 
+Using Open VM Tools
+===================
+
+Vmware no recommends using the Open VM Tools (https://github.com/vmware/open-vm-tools) instead of host deployed tools. According
+to pkgs.org (http://pkgs.org/download/open-vm-tools) these tools are available for most Linux systems. For SLES you find them via
+https://www.suse.com/communities/conversations/free_tools/installing-vmware-tools-easy-way-osp/.
+
+"VMware Tools is installed, but it is not managed by VMWare" is now quite ok for package based Linux installation, but for all
+other systems (like MS Windows) this will cause a warning because it's not ok.
+
+Therefore I implemented  a new option --open-vm-tools.
+
+But how to handle it in a command definition? Two defintions (one for Linux, one for the rest?
+
+No - we handle this option over to the command as an argument:
+
+define command{
+        command_name    check_vshpere_tools_state
+        command_line    /MyPluginPath/check_vmware_esx.pl -D $DATACENTER_HOSTADDRESS$ -u $ARG1$ -p $ARG2$ -S runtime -s tools $ARG3$
+        }
+        
+Service check for Linux:
+
+define service{
+       ....
+       .
+       .
+       .
+       .....
+       check_command                   check_vsphere_tools_state!Nagios!MyMonitorPassword!"--open-vm-tools"
+       }
+
+Service check for the rest:
+
+define service{
+       ....
+       .
+       .
+       .
+       .....
+       check_command                   check_vsphere_tools_state!Nagios!MyMonitorPassword
+       }
+
+So you can see in the second definition $ARG3$ is empty and therefore the option ist not set.
+
+
 Using a sessionfile
 ===================
 

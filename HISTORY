@@ -1155,3 +1155,11 @@ History:
       fulfill the rules of the plugin developer guidelines. This was proposed by Simon Meggle.
       See Readme.
     - Bugfix: Wrong output for --statelabels from the help.
+
+- 3 Jun 2015 M.Fuerstenau version 0.9.25
+  - check_vmware_esx.pl:and dc_runtime_info()
+    - New optione --open-vm-tools to signalize that Open VM Tools are used and that the 
+      version of the tools on the host is obsolete.
+  - dc_runtime_info()
+    - "VMware Tools is installed, but it is not managed by VMWare" will except the previous point
+      now lead to a warning (1) instead of a critical (2).

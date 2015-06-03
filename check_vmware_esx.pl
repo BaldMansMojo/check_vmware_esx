@@ -1214,6 +1214,14 @@
 #       fulfill the rules of the plugin developer guidelines. This was proposed by Simon Meggle.
 #       See Readme.
 #     - Bugfix: Wrong output for --statelabels from the help.
+#
+# - 3 Jun 2015 M.Fuerstenau version 0.9.25
+#   - check_vmware_esx.pl:and dc_runtime_info()
+#     - New optione --open-vm-tools to signalize that Open VM Tools are used and that the 
+#       version of the tools on the host is obsolete.
+#   - dc_runtime_info()
+#     - "VMware Tools is installed, but it is not managed by VMWare" will except the previous point
+#       now lead to a warning (1) instead of a critical (2).
 
 use strict;
 use warnings;
@@ -1255,7 +1263,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.24';                  # Contains the program version number
+our $prog_version = '0.9.25';                  # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
@@ -1368,6 +1376,13 @@ my $statelabels_def="y";                       # Default value for state labels 
                                                # If you prefer no state labels (as it was default in earlier versions)
                                                # set this default to "n".
 my $statelabels;                               # To overwrite $statelabels_def via commandline.
+our 
+- 3 Jun 2015 M.Fuerstenau version 0.9.25
+  - check_vmware_esx.pl:and dc_runtime_info()
+    - New optione --open-vm-tools to signalize that Open VM Tools are used and that the 
+      version of the tools on the host is obsolete.
+;                              # This is a option to tell dc_runtime_info() that Open VM Tools are used
+                                               # and therefore the version on the host is obsolete.
 
 
 
@@ -1430,6 +1445,7 @@ GetOptions
                                          "gigabyte"         => \$gigabyte,
                                          "nostoragestatus"  => \$nostoragestatus,
                                          "statelabels"      => \$statelabels,
+                                         "open-vm-tools"    => \$openvmtools,
                                          "spaceleft"        => \$spaceleft,
 	 "V"   => \$version,             "version"          => \$version);
 
