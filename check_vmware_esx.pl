@@ -1376,13 +1376,7 @@ my $statelabels_def="y";                       # Default value for state labels 
                                                # If you prefer no state labels (as it was default in earlier versions)
                                                # set this default to "n".
 my $statelabels;                               # To overwrite $statelabels_def via commandline.
-our 
-- 3 Jun 2015 M.Fuerstenau version 0.9.25
-  - check_vmware_esx.pl:and dc_runtime_info()
-    - New optione --open-vm-tools to signalize that Open VM Tools are used and that the 
-      version of the tools on the host is obsolete.
-;                              # This is a option to tell dc_runtime_info() that Open VM Tools are used
-                                               # and therefore the version on the host is obsolete.
+our $openvmtools;                              # Signalize that you use Open VM Tools instead of the servers one.
 
 
 
