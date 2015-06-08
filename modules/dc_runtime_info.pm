@@ -516,7 +516,7 @@ sub dc_runtime_info
                                  else
                                     {
                                     $actual_state = 1;
-                                    ]
+                                    }
                                  $state = check_state($state, $actual_state);
                                  }
                               }
