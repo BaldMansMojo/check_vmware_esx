@@ -133,7 +133,7 @@ sub print_help
        print "     --sessionfiledir=<directory>    (Optional).If this option is set a path different from the path stored in\n";
        print "                                     \$sessionfile_dir_def, which is defined in the plugin will be used.\n";
        print "     --nosession                     (Optional). Don't use a session file. This is the old behaviour. It should\n";
-       print "     --nosession                     be used for production use because it can cause a lot of entries in the log\n";
+       print "                                     not be used for production use because it can cause a lot of entries in the log\n";
        print "                                     files an therefore can cause abnormal growing of the log.\n";
        print "                                     IT SHOULD BE USED FOR TESTING PURPOSES ONLY!\n";
        print "-u, --username=<username>            Username to connect with.\n";

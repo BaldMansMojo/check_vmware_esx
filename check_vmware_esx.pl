@@ -1222,6 +1222,12 @@
 #   - dc_runtime_info()
 #     - "VMware Tools is installed, but it is not managed by VMWare" will except the previous point
 #       now lead to a warning (1) instead of a critical (2).
+#
+#- 10 Jun 2015 M.Fuerstenau version 0.9.26
+#  - help()
+#    - Bugfix: --nosession was printed out twice. Same line the not "not" was missing.
+#      This was bad because it changed the meaning of the line. Same error in the command reference
+#      because the reference is only the output from the help in a file.
 
 use strict;
 use warnings;
@@ -1263,7 +1269,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.25';                  # Contains the program version number
+our $prog_version = '0.9.26';                  # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
