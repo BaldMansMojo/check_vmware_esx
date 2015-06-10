@@ -53,7 +53,7 @@ Options for authentication:
      --sessionfiledir=<directory>    (Optional).If this option is set a path different from the path stored in
                                      $sessionfile_dir_def, which is defined in the plugin will be used.
      --nosession                     (Optional). Don't use a session file. This is the old behaviour. It should
-     --nosession                     be used for production use because it can cause a lot of entries in the log
+                                     not be used for production use because it can cause a lot of entries in the log
                                      files an therefore can cause abnormal growing of the log.
                                      IT SHOULD BE USED FOR TESTING PURPOSES ONLY!
 -u, --username=<username>            Username to connect with.
