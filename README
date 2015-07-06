@@ -74,6 +74,19 @@ First install the VMware Perl SDK.
   - Install it. (Installation guide can be found here: http://www.vmware.com/support/developer/viperltoolkit/)
   
 
+Prerequisites
+-------------
+
+Please ensure that the followin Perl modules has been installed on your system:
+
+- File::Basename
+- HTTP::Date
+- Getopt::Long
+- VMware::VIRuntime (see above)
+- Time::Duration
+- Time::HiRes
+
+
 Second install the plugin
 -------------------------
   
