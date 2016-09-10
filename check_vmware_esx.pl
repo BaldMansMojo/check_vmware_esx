@@ -1765,7 +1765,7 @@ if (!defined($nosession))
       close (SESSION_LOCK_FILE);    
    
       eval {Vim::load_session(session_file => $sessionfile_name)};
-      if (($@ ne '') || (Opts::get_option("url") ne $url2connect))
+      if ($@ ne '')
          {
          unlink $sessionfile_name;
          Util::connect($url2connect, $username, $password);
