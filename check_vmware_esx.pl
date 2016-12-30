@@ -1741,7 +1741,14 @@ if (!defined($nosession))
          close (SESSION_LOCK_FILE);    
       
          # Third - check for the process which wrote the lock file the last time
-         $PID_exists = kill 0, $PID_old;
+         if ( $PID_old )
+            {
+                $PID_exists = kill (0, $PID_old);
+            }
+         else
+             {
+                 $PID_exists = undef;
+             }
          
          # Fourth - if the process is not available any more remove the lock file
          if ( !$PID_exists )
