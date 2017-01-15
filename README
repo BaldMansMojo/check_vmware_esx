@@ -70,6 +70,7 @@ First install the VMware Perl SDK.
 - Download the SDK from vmware.
   - Go to www.vmware.com->Downloads->All downloads,drivers & tools
   - Search for "Perl SDK"
+  - Do not use SDK 6.x because it contains some bugs an incompatibilities. Use SDK 5.x. This works well.
   - Download the appropriate Perl SDK for your release (the SDK is free but you have to register yourself for this).
   - Install it. (Installation guide can be found here: http://www.vmware.com/support/developer/viperltoolkit/)
   
