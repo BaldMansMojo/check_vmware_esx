@@ -55,11 +55,10 @@ sub datastore_volumes_info
        {
        $isregexp = 0;
        }
-               
-    foreach $ref_store (@{$datastore})
-            {
-            $store = Vim::get_view(mo_ref => $ref_store, properties => ['summary', 'info']);
 
+    my $stores = Vim::get_views(mo_ref_array => $datastore, properties => ['summary', 'info']);
+    foreach my $store (@{$stores})
+            {
             $name = $store->summary->name;
             $volume_type = $store->summary->type;
 
