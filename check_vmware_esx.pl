@@ -1228,6 +1228,15 @@
 #    - Bugfix: --nosession was printed out twice. Same line the not "not" was missing.
 #      This was bad because it changed the meaning of the line. Same error in the command reference
 #      because the reference is only the output from the help in a file.
+#- 24 Feb 2017 C.Koebke
+#   - check_vmware_esx.pl:
+#     - Changed SSL certificate validation code for newer LWP versions
+#   - vm_disk_io_info()
+#     - Removed not supported UOMs from perfdata output.
+#   - host_disk_io_info()
+#     - Removed not supported UOMs from perfdata output.
+
+
 
 use strict;
 use warnings;
@@ -1247,7 +1256,15 @@ use datastore_volumes_info;
 
 # Prevent SSL certificate validation
 
-$ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0; 
+BEGIN {
+    $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0;
+    eval {
+        # required for new IO::Socket::SSL versions
+        require IO::Socket::SSL;
+        IO::Socket::SSL->import();
+        IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
+    };
+};
 
 if ( $@ )
    {

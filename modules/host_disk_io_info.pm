@@ -99,13 +99,13 @@ sub host_disk_io_info
           if ($subselect eq "all")
              {
              $output = $output . " - I/O read=" . $value . " KB/sec.";
-             $perfdata = $perfdata . " \'io_read\'=" . $value . "KB;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'io_read\'=" . $value . ";" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "I/O read=" . $value . " KB/sec.";
-             $perfdata = "\'io_read\'=" . $value . "KB;" . $perf_thresholds . ";;";
+             $perfdata = "\'io_read\'=" . $value . ";" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
           }
@@ -171,13 +171,13 @@ sub host_disk_io_info
           if ($subselect eq "all")
              {
              $output = $output . " - I/O write=" . $value . " KB/sec.";
-             $perfdata = $perfdata . " \'io_write\'=" . $value . "KB;" . $perf_thresholds . ";;";
+             $perfdata = $perfdata . " \'io_write\'=" . $value . ";" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "I/O write=" . $value . " KB/sec.";
-             $perfdata = "\'io_write\'=" . $value . "KB;" . $perf_thresholds . ";;";
+             $perfdata = "\'io_write\'=" . $value . ";" . $perf_thresholds . ";;";
              $state = check_against_threshold($value);
              }
           }
@@ -243,13 +243,13 @@ sub host_disk_io_info
           if ($subselect eq "all")
              {
              $output = $output . " - I/O usage=" . $value . " KB/sec.";
-             $perfdata = $perfdata . " \'io_usage\'=" . $value . "KB;;;";
+             $perfdata = $perfdata . " \'io_usage\'=" . $value . ";;;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
              $output = "I/O usage=" . $value . " KB/sec., ";
-             $perfdata = "\'io_usage\'=" . $value . "KB;;;";
+             $perfdata = "\'io_usage\'=" . $value . ";;;";
              $state = check_against_threshold($value);
              }
           }
