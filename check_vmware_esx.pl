@@ -2480,7 +2480,7 @@ sub catch_alarm
     {
     print "UNKNOWN: Script timed out.\n";
     require Carp;
-    Carp::cluck "We timed out, this is the current backtrace:"
+    Carp::cluck "We timed out, this is the current backtrace:";
     exit 3;
     }
 
