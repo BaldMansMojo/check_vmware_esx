@@ -1638,13 +1638,13 @@ if (defined($authfile))
 
 if (defined($datacenter))
    {
-   $url2connect = $datacenter;
+   $url2connect = lc($datacenter);
    }
 else
    {
    if (defined($host))
       {
-      $url2connect = $host;
+      $url2connect = lc($host);
       }
    else
       {
