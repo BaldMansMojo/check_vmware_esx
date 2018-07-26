@@ -2114,6 +2114,13 @@ sub main_select
           ($result, $output) = soap_check();
           return($result, $output);
           }
+       if ($select eq "snapshots")
+          {
+          require host_snapshot_info;
+          import host_snapshot_info;
+          ($result, $output) = host_snapshot_info($esx_server);
+          return($result, $output);
+          }
 
           get_me_out("Unknown host select");
         }
@@ -2165,6 +2172,13 @@ sub main_select
        if ($select eq "soap")
           {
           ($result, $output) = soap_check();
+          return($result, $output);
+          }
+       if ($select eq "snapshots")
+          {
+          require dc_snapshot_info;
+          import dc_snapshot_info;
+          ($result, $output) = dc_snapshot_info();
           return($result, $output);
           }
 
