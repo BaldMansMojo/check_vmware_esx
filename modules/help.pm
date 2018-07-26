@@ -324,6 +324,29 @@ sub print_help
        print "-S, --select=soap                   simple check to verify a successfull connection\n";
        print "                                    to VMWare SOAP API.\n";
        print "\n";
+       print "Snapshots\n";
+       print "-------------\n";
+       print "-S, --select=snapshots              List vm's wich have snapshots older or bigger than a certain threshold\n";
+       print "-w, --warning=<threshold>           Warning threshold.\n";
+       print "-c, --critical=<threshold>          Critical threshold.\n";
+       print "-B, --exclude=<black_list>          Blacklist VMs.\n";
+       print "-W, --include=<white_list>          Whitelist VMs.\n";
+       print "\n";
+       print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
+       print "                                    is not allowed.\n";
+       print "\n";
+       print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
+       print "    --listall                       List all VMs with all snapshots.\n";
+       print "    --multiline                     Multiline output in overview. This mean technically that\n";
+       print "                                    a multiline output uses a HTML <br> for the GUI instead of\n";
+       print "                                    Be aware that your messing connections (email, SMS...) must use\n";
+       print "                                    a filter to file out the <br>. A sed oneliner like the following\n";
+       print "                                    will do the job: sed 's/<[^<>]*>//g'\n";
+       print "or with\n";
+       print "-s, --subselect=age                 Shows age of snapshots in days.\n";
+       print "or\n";
+       print "-s, --subselect=count               Counts the number of snapshots of VMs.\n";
+       print "\n";
        }
 
 #--- Host ----------------------
@@ -712,6 +735,29 @@ sub print_help
        print "-S, --select=soap                   Simple check to verify a successfull connection\n";
        print "                                    to VMWare SOAP API.\n";
        print "\n";
+       print "Snapshots\n";
+       print "-------------\n";
+       print "-S, --select=snapshots              List vm's wich have snapshots older or bigger than a certain threshold\n";
+       print "-w, --warning=<threshold>           Warning threshold.\n";
+       print "-c, --critical=<threshold>          Critical threshold.\n";
+       print "-B, --exclude=<black_list>          Blacklist VMs.\n";
+       print "-W, --include=<white_list>          Whitelist VMs.\n";
+       print "\n";
+       print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
+       print "                                    is not allowed.\n";
+       print "\n";
+       print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
+       print "    --listall                       List all VMs with all snapshots.\n";
+       print "    --multiline                     Multiline output in overview. This mean technically that\n";
+       print "                                    a multiline output uses a HTML <br> for the GUI instead of\n";
+       print "                                    Be aware that your messing connections (email, SMS...) must use\n";
+       print "                                    a filter to file out the <br>. A sed oneliner like the following\n";
+       print "                                    will do the job: sed 's/<[^<>]*>//g'\n";
+       print "or with\n";
+       print "-s, --subselect=age                 Shows age of snapshots in days.\n";
+       print "or\n";
+       print "-s, --subselect=count               Counts the number of snapshots of VMs.\n";
+       print "\n";
        }
 
 
@@ -976,6 +1022,6 @@ sub print_help
        }
     }
 
-# A module always must end with a returncode of 1. So placing 1 at the end of a module 
+# A module always must end with a returncode of 1. So placing 1 at the end of a module
 # is a common method to ensure this.
 1;
