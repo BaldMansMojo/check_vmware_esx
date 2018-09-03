@@ -1169,3 +1169,8 @@ History:
     - Bugfix: --nosession was printed out twice. Same line the not "not" was missing.
       This was bad because it changed the meaning of the line. Same error in the command reference
       because the reference is only the output from the help in a file.
+
+- 31 Jul 2015 Markus Frosch
+  - rewritten session locking behavior, locking is only done when writing a session due
+    a new login or when no session existed.
+    Parallel runs with no session will only cause the first process to write a sessionfile.

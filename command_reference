@@ -43,12 +43,6 @@ Options for authentication:
                                      Multiple sessions are possible using different session file names. To form different
                                      session file names the default name is enhenced by the value you set with
                                      --sessionfile.
-
-                                     NOTICE! All checks using the same session are serialized. So a lot of checks
-                                     using only one session can cause timeouts. In this case you should enhence the
-                                     number of sessions by using --sessionfile in the command definition and define
-                                     the value in the service definition command as an extra argument so it can be used
-                                     in the command definition as $ARGn$.
      --sessionfile=<sessionfile>     (Optional).Session file name enhancement.
      --sessionfiledir=<directory>    (Optional).If this option is set a path different from the path stored in
                                      $sessionfile_dir_def, which is defined in the plugin will be used.
