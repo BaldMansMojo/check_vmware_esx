@@ -1169,3 +1169,44 @@ History:
     - Bugfix: --nosession was printed out twice. Same line the not "not" was missing.
       This was bad because it changed the meaning of the line. Same error in the command reference
       because the reference is only the output from the help in a file.
+
+- 31 Jul 2015 Markus Frosch
+  - rewritten session locking behavior, locking is only done when writing a session due
+    a new login or when no session existed.
+    Parallel runs with no session will only cause the first process to write a sessionfile.
+
+- 3 Sep 2018 Ricardo Bartels version 0.9.XX
+  - merged session locking behaviour from Markus Frosch
+  - Use Perl from env instead of a fixed path (Michael Friedrich)
+    - This allows the plugin to run on any distribution in a yet better way.
+  - renamed readme -> readme.md (Michael Friedrich)
+  -  Rewrite documentation for better installation and troubleshooting experience (Michael Friedrich)
+    - Add About section which explains the purpose of this plugin
+    - Explain two installation modes
+    - Move specific explanations into FAQ chapter
+    - Add a note on VMware API timeouts
+    - Add some examples and references to Icinga 2 configuration and CheckCommands
+    - Add chapters similar to known Icinga projects
+    - Reformat everything as proper Markdown
+  - make session file usage more robust (Sven Nierlein)
+    Compare the api returned url and the given url2connect less error prone.
+    Using --sslport=443 results in a url2connect https://vcenter:443/... while
+    get_option returns https://vcenter/...
+    Also it seems like some api returns .../sdk while others return .../sdk/webService
+    so just ignore that part.
+    Both leads to not resuing the existing session files.
+  - added support to query host/datacenter snapshots (Gerhard Lausser)
+    - List vm's wich have snapshots older or bigger than a certain threshold
+  - reduce API calls in datastore_volumes_info (Danijel Tasov)
+    Instead of calling Vim::get_view for each datastore call
+    Vim::get_views with all of them at once.
+  - lowercase hostnames in connect urls (Danijel Tasov)
+    otherwise cookies may not match with LWP
+  - Fix logic error (Danijel Tasov)
+    $host_state cannot equal to UP and "Maintenance Mode" at the same time
+  - increase $unknown on undefined $host_state (Danijel Tasov)
+  - warn if no volumes match (Danijel Tasov)
+  - fix bad OUM in vm_disk_io_info (6uellerBpanda)
+  - A unpluged network interface is considered critical (Ricardo Bartels)
+  - Be more consistent in return level of maintenance mode (Ricardo Bartels)
+    only write warning if host runtime is checked with no subselect
