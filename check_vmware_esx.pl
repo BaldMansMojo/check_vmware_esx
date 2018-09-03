@@ -1659,13 +1659,13 @@ if (defined($authfile))
 
 if (defined($datacenter))
    {
-   $url2connect = $datacenter;
+   $url2connect = lc($datacenter);
    }
 else
    {
    if (defined($host))
       {
-      $url2connect = $host;
+      $url2connect = lc($host);
       }
    else
       {
@@ -2667,8 +2667,9 @@ sub cluster_runtime_info
                         foreach my $host (@$host_views) {
                                 $host->update_view_data(['name', 'runtime.powerState']);
                                 my $host_state = $host_state_strings{$host->get_property('runtime.powerState')->val};
+                                $unknown += !defined($host_state);
                                 $unknown += $host_state eq "3";
-                                if ($host_state eq "UP" && $host_state eq "Maintenance Mode") {
+                                if ($host_state eq "UP" || $host_state eq "Maintenance Mode") {
                                         $up++;
                                         $output = $output . $host->name . "(UP), ";
                                 } else
