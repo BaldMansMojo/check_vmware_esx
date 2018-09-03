@@ -1765,7 +1765,7 @@ if (!defined($nosession))
       close (SESSION_LOCK_FILE);    
    
       eval {Vim::load_session(session_file => $sessionfile_name)};
-      if (($@ ne '') || (Opts::get_option("url") ne $url2connect))
+      if (($@ ne '') || (trim_connect_url(Opts::get_option("url")) ne trim_connect_url($url2connect)))
          {
          unlink $sessionfile_name;
          Util::connect($url2connect, $username, $password);
@@ -2294,6 +2294,14 @@ sub convert_number
              }
           }
     return $state;
+    }
+
+sub trim_connect_url
+    {
+    my($url) = @_;
+    $url =~ s/:443//gmx;
+    $url =~ s/\/webService$//gmx;
+    return($url);
     }
 
 sub check_health_state
