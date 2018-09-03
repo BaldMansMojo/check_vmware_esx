@@ -11,7 +11,7 @@ sub host_snapshot_info
     my $match;
     my $displayname;
     my $devices;
-   
+
     $host_view = Vim::find_entity_view(view_type => 'HostSystem', filter => $host, properties => ['name', 'runtime.inMaintenanceMode']);
     if (!defined($host_view))
        {
@@ -45,12 +45,12 @@ sub host_snapshot_info
             next unless defined $vm_snapinfo;
             # change get_property to {} to avoid infinite loop
             $istemplate = $vm->{'config.template'};
-            
+
             if ($istemplate && ($istemplate eq 'true'))
                {
                next;
                }
-            
+
             $match = 0;
             $displayname = $vm->name;
 
@@ -62,7 +62,7 @@ sub host_snapshot_info
                {
                $isregexp = 0;
                }
-               
+
             if (defined($blacklist))
                {
                if (isblacklisted(\$blacklist, $isregexp, $displayname))
@@ -92,7 +92,6 @@ sub host_snapshot_info
             if ($snapstate)
                {
                $state = final_state($state, $snapstate);
-               $multiline = "<br>";
                $count++;
                $output = "$snapoutput" . $multiline . $output;
                }
@@ -139,7 +138,7 @@ sub check_snapshot_age
     my $vm_snaplist = shift;
     my $output = "";
     my $state = 0;
-    $multiline = "<br>";
+
     foreach my $vm_snap (@{$vm_snaplist})
             {
             if ($vm_snap->{childSnapshotList})
@@ -173,7 +172,6 @@ sub check_snapshot_count
     my $recursion = shift || 0;
     my $output = "";
     my $state = 0;
-    $multiline = "<br>";
 
     foreach my $vm_snap (@{$vm_snaplist})
             {
@@ -217,6 +215,6 @@ sub final_state
        return $state2;
        }
     }
-# A module always must end with a returncode of 1. So placing 1 at the end of a module
+# A module always must end with a return code of 1. So placing 1 at the end of a module
 # is a common method to ensure this.
 1;
