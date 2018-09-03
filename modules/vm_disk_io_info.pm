@@ -12,7 +12,7 @@ sub vm_disk_io_info
                                  # 1 -> non existing subselect
 
     $values = return_host_vmware_performance_values($vmname, 'disk', ('usage.average:*', 'read.average:*', 'write.average:*'));
-    
+
     if (!defined($subselect))
        {
        # This means no given subselect. So all checks must be performemed
@@ -35,14 +35,14 @@ sub vm_disk_io_info
           $value = simplify_number(convert_number($$values[0][0]->value), 0);
           if ($subselect eq "all")
              {
-             $output = "I/O usage=" . $value . " KB/s";
-             $perfdata = $perfdata . " \'io_usage\'=" . $value . "KB/s;" . $perf_thresholds . ";;";
+             $output = "I/O usage=" . $value . " KB/sec";
+             $perfdata = $perfdata . " \'io_usage\'=" . $value . "KB;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
-             $output = "I/O usage=" . $value . " KB/s";
-             $perfdata = "\'io_usage\'=" . $value . "KB/s;" . $perf_thresholds . ";;";
+             $output = "I/O usage=" . $value . " KB/sec";
+             $perfdata = "\'io_usage\'=" . $value . "KB;" . $perf_thresholds . ";;";
              $state = check_state($state, $actual_state);
              }
           }
@@ -53,7 +53,7 @@ sub vm_disk_io_info
           $state = check_state($state, $actual_state);
           }
        }
-    
+
     if (($subselect eq "read") || ($subselect eq "all"))
        {
        $true_sub_sel = 0;
@@ -62,14 +62,14 @@ sub vm_disk_io_info
           $value = simplify_number(convert_number($$values[0][1]->value), 0);
           if ($subselect eq "all")
              {
-             $output = $output . " - I/O read=" . $value . " KB/s";
-             $perfdata = $perfdata . " \'io_read\'=" . $value . "KB/s;" . $perf_thresholds . ";;";
+             $output = $output . " - I/O read=" . $value . " KB/sec";
+             $perfdata = $perfdata . " \'io_read\'=" . $value . "KB;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
-             $output = "I/O read=" . $value . " KB/s";
-             $perfdata = " \'io_read\'=" . $value . "KB/s;" . $perf_thresholds . ";;";
+             $output = "I/O read=" . $value . " KB/sec";
+             $perfdata = " \'io_read\'=" . $value . "KB;" . $perf_thresholds . ";;";
              $state = check_state($state, $actual_state);
              }
           }
@@ -98,14 +98,14 @@ sub vm_disk_io_info
           $value = simplify_number(convert_number($$values[0][2]->value), 0);
           if ($subselect eq "all")
              {
-             $output = $output . " - I/O write=" . $value . " KB/s";
-             $perfdata = $perfdata . " \'io_write\'=" . $value . "KB/s;" . $perf_thresholds . ";;";
+             $output = $output . " - I/O write=" . $value . " KB/sec";
+             $perfdata = $perfdata . " \'io_write\'=" . $value . "KB;" . $perf_thresholds . ";;";
              }
           else
              {
              $actual_state = check_against_threshold($value);
-             $output = "I/O write=" . $value . " KB/s";
-             $perfdata = " \'io_write\'=" . $value . "KB/s;" . $perf_thresholds . ";;";
+             $output = "I/O write=" . $value . " KB/sec";
+             $perfdata = " \'io_write\'=" . $value . "KB;" . $perf_thresholds . ";;";
              $state = check_state($state, $actual_state);
              }
           }
@@ -125,7 +125,7 @@ sub vm_disk_io_info
              }
           }
        }
-       
+
     if ($true_sub_sel == 1)
        {
        get_me_out("Unknown VM IO subselect");
@@ -136,6 +136,6 @@ sub vm_disk_io_info
        }
     }
 
-# A module always must end with a returncode of 1. So placing 1 at the end of a module 
+# A module always must end with a returncode of 1. So placing 1 at the end of a module
 # is a common method to ensure this.
 1;
