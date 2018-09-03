@@ -221,7 +221,7 @@ sub host_net_info
                                         $output_nic = $output_nic . ", ";
                                         }
                                      $output_nic = $output_nic . $multiline . $NIC{$nic_key}->device . " is unplugged";
-                                     $state = 1;
+                                     $state = 2;
                                      $BadCount++;
                                      }
                                   else
