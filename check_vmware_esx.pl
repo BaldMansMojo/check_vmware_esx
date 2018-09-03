@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 #
 # Nagios plugin to monitor vmware ESX and vSphere servers
 #
@@ -167,14 +167,14 @@
 #
 #   General statement for all changes done by me:
 #
-#   Nagios, Icingia etc. are tools for
+#   Nagios, Icinga etc. are tools for
 #
 #   a) Alarming. That means checking values against thresholds (internal or handed over)
 #   b) Collecting performance data. These data, collected with the checks, like network traffic, cpu usage or so should be
 #      interpretable without a lot of other data.
 #
 #   So as a conclusion collecting historic performance data collected by a monitored system should not be done using Nagios,
-#   pnp4nagios etc.. It should be interpreted with the approriate admin tools of the relevant system. For vmware it means use
+#   pnp4nagios etc.. It should be interpreted with the appropriate admin tools of the relevant system. For vmware it means use
 #   the (web)client for this and not Nagios. Same for performance counters not self explaining.
 #
 #   Example:
