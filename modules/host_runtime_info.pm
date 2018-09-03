@@ -94,6 +94,10 @@ sub host_runtime_info
     if ($runtime->inMaintenanceMode)
        {
        print "Notice: " . $host_view->name . " is in maintenance mode, check skipped\n";
+       if ($subselect ne "all")
+           {
+           exit 0;
+           }
        exit 1;
        }
 

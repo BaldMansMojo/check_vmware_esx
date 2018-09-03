@@ -12,7 +12,7 @@ sub host_list_vm_volumes_info
     if (($host_view->get_property('runtime.inMaintenanceMode')) eq "true")
        {
        print "Notice: " . $host_view->name . " is in maintenance mode, check skipped\n";
-       exit 1;
+       exit 0;
        }
 
     if (!defined($host_view->datastore))
