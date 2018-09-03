@@ -6,7 +6,20 @@
 # This plugin is a forked by Martin Fuerstenau from the original one from op5
 # Copyright (c) 2008 op5 AB
 # Author: Kostyantyn Hushchyn <dev@op5.com>
-# Contributor(s): Patrick Müller, Jeremy Martin, Eric Jonsson, stumpr, John Cavanaugh, Libor Klepac, maikmayers, Steffen Poulsen, Mark Elliott, simeg, sebastien.prudhomme, Raphael Schitz
+# Contributor(s):
+#   Patrick Müller
+#   Jeremy Martin
+#   Eric Jonsson
+#   stumpr
+#   John Cavanaugh
+#   Libor Klepac
+#   maikmayers
+#   Steffen Poulsen
+#   Mark Elliott
+#   simeg
+#   sebastien.prudhomme
+#   Raphael Schitz
+#   Markus Frosch
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -1228,6 +1241,11 @@
 #    - Bugfix: --nosession was printed out twice. Same line the not "not" was missing.
 #      This was bad because it changed the meaning of the line. Same error in the command reference
 #      because the reference is only the output from the help in a file.
+#
+# - 31 Jul 2015 Markus Frosch
+#   - rewritten session locking behavior, locking is only done when writing a session due
+#     a new login or when no session existed.
+#     Parallel runs with no session will only cause the first process to write a sessionfile.
 
 use strict;
 use warnings;
@@ -1286,7 +1304,6 @@ my  $password;                                 # Password for vmware host or vsp
 my  $authfile;                                 # If username/password should read from a file ....
 my  $sessionfile_name;                         # Contains the name of the sessionfile if a
                                                # a sessionfile is used for faster authentication
-my  $sessionlockfile;                          # Lockfile to protect the session
 my  $sessionfile_dir;                          # Optinal. Contains the path to the sessionfile. Used in conjunction
                                                # with sessionfile
 my  $nosession;                                # Just a flag to avoid using a sessionfile
@@ -1354,7 +1371,9 @@ my  $mon;                                      # Month        - used for some da
 my  $year;                                     # Year         - used for some date functions
 
 my  $timeout = 90;                             # Time in seconds befor the plugin kills itself when it' not ready
-my  $ms_ts = 1500;                             # Milliseconds to sleep for waiting for accessing the lockfile.
+my  $DEBUG = 0;                                # global switch for debugging
+
+my  $program_start = time();                   # record the program_start
 
 # Output options
 our $multiline;                                # Multiline output in overview. This mean technically that
@@ -1447,7 +1466,9 @@ GetOptions
                                          "statelabels"      => \$statelabels,
                                          "open-vm-tools"    => \$openvmtools,
                                          "spaceleft"        => \$spaceleft,
-	 "V"   => \$version,             "version"          => \$version);
+         "V"   => \$version,             "version"          => \$version,
+         "d|debug" => \$DEBUG,
+);
 
 # Show version
 if ($version)
@@ -1719,75 +1740,27 @@ if (!defined($nosession))
           die(sprintf "UNKNOWN: sessionfile_dir_def directory %s does not exist.", $sessionfile_dir_def);
           }
 
-   $sessionlockfile = $sessionfile_name . "_locked";
-   
    if ( -e $sessionfile_name )
       {
-      usleep(int(rand($ms_ts)) * 1000);
-      
-      if ( -e $sessionlockfile )
-         {
-         # Session locked? First open the lock file for reading
-         unless(open SESSION_LOCK_FILE, '<', $sessionlockfile)
-               {
-               print "Unable to open session lock file \"$sessionlockfile\"\n";
-               exit 3;
-               }
-         # Second get the old PID
-         while(<SESSION_LOCK_FILE>)
-              {
-              $PID_old = $_;
-              }
-         close (SESSION_LOCK_FILE);    
-      
-         # Third - check for the process which wrote the lock file the last time
-         $PID_exists = kill 0, $PID_old;
-         
-         # Fourth - if the process is not available any more remove the lock file
-         if ( !$PID_exists )
-            {
-            unlink $sessionlockfile;
-            }
-         }
-   
-      # Now we are sure that we have no dead lock file and we will wait for free session
-      while ( -e $sessionlockfile )
-            {
-            usleep(int(rand($ms_ts)) * 1000);
-            }
-   
-      unless(open SESSION_LOCK_FILE, '>', $sessionlockfile)
-            {
-            print "Unable to create session lock file \"$sessionlockfile\"\n";
-            exit 3;
-            }
-      print SESSION_LOCK_FILE "$PID\n"; 
-      close (SESSION_LOCK_FILE);    
-   
+      debug("Trying to resume existing session from '%s'", $sessionfile_name);
+
       eval {Vim::load_session(session_file => $sessionfile_name)};
       if (($@ ne '') || (trim_connect_url(Opts::get_option("url")) ne trim_connect_url($url2connect)))
          {
-         unlink $sessionfile_name;
+         debug("session resume failed, logging in at %s as %s", $url2connect, $username);
          Util::connect($url2connect, $username, $password);
-         Vim::save_session(session_file => $sessionfile_name);
-         }
-      else
-         {
-         Vim::load_session(session_file => $sessionfile_name);
+
+         save_session($sessionfile_name);
          }
       }
    else
       {
-      unless(open SESSION_LOCK_FILE, '>', $sessionlockfile)
-            {
-            print "Unable to create session lock file \"$sessionlockfile\"\n";
-            exit 3;
-            }
-      print SESSION_LOCK_FILE "$PID\n"; 
-      close (SESSION_LOCK_FILE);    
-   
+      debug("sessionfile '%s' does not exist", $sessionfile_name);
+
+      debug("logging in at %s as %s", $url2connect, $username);
       Util::connect($url2connect, $username, $password);
-      Vim::save_session(session_file => $sessionfile_name);
+
+      save_session($sessionfile_name);
       }
    }
 else
@@ -1831,7 +1804,6 @@ if ($@)
 if (defined($sessionfile_name) and -e $sessionfile_name)
    {
    Vim::unset_logout_on_disconnect();
-   unlink $sessionlockfile;
    }
 else
    {
@@ -2493,9 +2465,15 @@ sub catch_alarm
 sub catch_intterm
     {
     print "UNKNOWN: Script killed by monitor.\n";
-    unlink $sessionlockfile;
     exit 3;
     }
+
+sub exit_error
+    {
+    my $message = shift;
+    printf "$message\n", @_;
+    exit 3;
+}
  
 #=====================================================================| Cluster |============================================================================#
 
@@ -2784,6 +2762,40 @@ sub cluster_runtime_info
         return ($state, $output);
 }
 
+sub debug
+{
+    unless ($DEBUG) { return; }
+    my $message = shift;
+    printf "$message\n", @_;
+}
 
+sub save_session
+{
+    my $sessionfile = shift
+        or exit_error("save_session needs a parameter!");
+    my $lock = $sessionfile . "_locked";
 
+    if (-e $sessionfile)
+    {
+        my $mtime = (stat($sessionfile))[9];
+        if ($mtime > $program_start)
+        {
+            debug("Not saving session, session file '%s' is newer than program start!", $sessionfile);
+            return;
+        }
+    }
+
+    my $fh;
+    open $fh, '>', $lock
+        or exit_error "Unable to create session lock file '%s'!", $lock;
+
+    flock $fh, 2
+        or exit_error "could not lock '$lock'!";
+
+    debug("Saving session to '%s'", $sessionfile);
+    Vim::save_session(session_file => $sessionfile);
+
+    close $fh;
+    unlink $lock;
+}
 

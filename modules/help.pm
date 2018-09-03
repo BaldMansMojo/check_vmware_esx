@@ -123,12 +123,6 @@ sub print_help
        print "                                     Multiple sessions are possible using different session file names. To form different\n";
        print "                                     session file names the default name is enhenced by the value you set with\n";
        print "                                     --sessionfile.\n";
-       print "\n";
-       print "                                     NOTICE! All checks using the same session are serialized. So a lot of checks\n";
-       print "                                     using only one session can cause timeouts. In this case you should enhence the\n";
-       print "                                     number of sessions by using --sessionfile in the command definition and define\n";
-       print "                                     the value in the service definition command as an extra argument so it can be used\n";
-       print "                                     in the command definition as \$ARGn\$.\n";
        print "     --sessionfile=<sessionfile>     (Optional).Session file name enhancement.\n";
        print "     --sessionfiledir=<directory>    (Optional).If this option is set a path different from the path stored in\n";
        print "                                     \$sessionfile_dir_def, which is defined in the plugin will be used.\n";
