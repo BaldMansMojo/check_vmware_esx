@@ -1253,7 +1253,7 @@
 #     a new login or when no session existed.
 #     Parallel runs with no session will only cause the first process to write a sessionfile.
 #
-# - 3 Sep 2018 Ricardo Bartels version 0.9.XX
+# - 4 Sep 2018 Ricardo Bartels version 0.9.26.1
 #   - merged session locking behaviour from Markus Frosch
 #   - Use Perl from env instead of a fixed path (Michael Friedrich)
 #     - This allows the plugin to run on any distribution in a yet better way.
@@ -1288,6 +1288,13 @@
 #   - A unpluged network interface is considered critical (Ricardo Bartels)
 #   - Be more consistent in return level of maintenance mode (Ricardo Bartels)
 #     only write warning if host runtime is checked with no subselect
+#   - Added option "--ignore_health" to host runtime (all) check
+#     Sometimes not all hardware components are correctly reported via
+#     CIM interface which leads to check errors when checking runtime
+#     status all. This option ignores the health status and prevents the
+#     the plugin from failing to report the overall status of the host.
+#     IMPORTENT: make sure to monitor the host health status separately!
+#     Most likely via ILO/ILOM interface.
 
 use strict;
 use warnings;
@@ -1329,7 +1336,7 @@ $SIG{TERM} = 'catch_intterm';
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.26';                  # Contains the program version number
+our $prog_version = '0.9.26.1';                # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
@@ -1393,6 +1400,7 @@ my  $sessionfile_dir_def="/tmp/";              # Directory for caching the sessi
 
 our $listsensors;                              # This flag set in conjunction with -l runtime -s health or -s sensors
                                                # will list all sensors
+our $ignorehealth;                             # ignore health issues when requesting runtime informations
 our $usedspace;                                # Show used spaced instead of free
 our $gigabyte;                                 # Output in gigabyte instead of megabyte
 our $perf_free_space;                          # To display perfdata as free space instead of used when using
@@ -1493,6 +1501,7 @@ GetOptions
 	                                 "ignore_warning"   => \$ignorewarning,
 	                                 "trace=s"          => \$trace,
                                          "listsensors"      => \$listsensors,
+                                         "ignore_health"    => \$ignorehealth,
                                          "usedspace"        => \$usedspace,
                                          "perf_free_space"  => \$perf_free_space,
                                          "alertonly"        => \$alertonly,

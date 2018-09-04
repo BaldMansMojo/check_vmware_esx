@@ -1,5 +1,5 @@
 
-check_vmware_esx.pl,Version 0.9.23
+check_vmware_esx.pl,Version 0.9.26.1
 
 This vmware Infrastructure monitoring plugin is free software, and comes with ABSOLUTELY NO WARRANTY.
 It may be used, redistributed and/or modified under the terms of the GNU General Public Licence 
@@ -233,6 +233,29 @@ SOAP API:
 -S, --select=soap                   simple check to verify a successfull connection
                                     to VMWare SOAP API.
 
+Snapshots
+-------------
+-S, --select=snapshots              List vm's wich have snapshots older or bigger than a certain threshold
+-w, --warning=<threshold>           Warning threshold.
+-c, --critical=<threshold>          Critical threshold.
+-B, --exclude=<black_list>          Blacklist VMs.
+-W, --include=<white_list>          Whitelist VMs.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --listall                       List all VMs with all snapshots.
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+or with
+-s, --subselect=age                 Shows age of snapshots in days.
+or
+-s, --subselect=count               Counts the number of snapshots of VMs.
+
 Monitoring the vmware host:
 ===========================
 
@@ -454,6 +477,9 @@ Runtime info:
 -S, --select=runtime                Shows runtime info. Used without -s show all runtime info:
                                     VMs, overall status, connection state, health, storagehealth, temperature
                                     and sensor are represented as one value and without thresholds.
+    --ignore_health                 ignore health issues when requesting runtime all status.
+                                    Sometimes helpful with unsupported hardware. Make sure to
+                                    monitor hardware separately!
 or with
 -s, --subselect=con                 Shows connection state.
 or
@@ -615,6 +641,29 @@ SOAP API:
 
 -S, --select=soap                   Simple check to verify a successfull connection
                                     to VMWare SOAP API.
+
+Snapshots
+-------------
+-S, --select=snapshots              List vm's wich have snapshots older or bigger than a certain threshold
+-w, --warning=<threshold>           Warning threshold.
+-c, --critical=<threshold>          Critical threshold.
+-B, --exclude=<black_list>          Blacklist VMs.
+-W, --include=<white_list>          Whitelist VMs.
+
+                                    Use blacklist OR(!) whitelist. Using both in one statement
+                                    is not allowed.
+
+    --isregexp                      Whether to treat blacklist and whitelist as regexp
+    --listall                       List all VMs with all snapshots.
+    --multiline                     Multiline output in overview. This mean technically that
+                                    a multiline output uses a HTML <br> for the GUI instead of
+                                    Be aware that your messing connections (email, SMS...) must use
+                                    a filter to file out the <br>. A sed oneliner like the following
+                                    will do the job: sed 's/<[^<>]*>//g'
+or with
+-s, --subselect=age                 Shows age of snapshots in days.
+or
+-s, --subselect=count               Counts the number of snapshots of VMs.
 
 Monitoring a virtual machine via vmware datacenter or vmware host:
 ==================================================================
