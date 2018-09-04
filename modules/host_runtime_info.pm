@@ -231,7 +231,7 @@ sub host_runtime_info
           }
        }
 
-    if (($subselect eq "health") || ($subselect eq "all"))
+    if ((($subselect eq "health") || ($subselect eq "all")) && (not defined($ignorehealth)))
        {
        $true_sub_sel = 0;
        $OKCount = 0;
@@ -253,7 +253,7 @@ sub host_runtime_info
                      # Ejection seat for not running CIM Server
                      if ($actual_state == 3)
                         {
-                        print "Critical! No result from CIM server.CIM server is probably not running or not running correctly! Please restart!\n";
+                        print "Critical! No result from CIM server regarding health state. CIM server is probably not running or not running correctly! Please restart!\n";
                         exit 2;
                         }
                         

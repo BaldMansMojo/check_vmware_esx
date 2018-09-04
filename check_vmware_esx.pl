@@ -1393,6 +1393,7 @@ my  $sessionfile_dir_def="/tmp/";              # Directory for caching the sessi
 
 our $listsensors;                              # This flag set in conjunction with -l runtime -s health or -s sensors
                                                # will list all sensors
+our $ignorehealth;                             # ignore health issues when requesting runtime informations
 our $usedspace;                                # Show used spaced instead of free
 our $gigabyte;                                 # Output in gigabyte instead of megabyte
 our $perf_free_space;                          # To display perfdata as free space instead of used when using
@@ -1493,6 +1494,7 @@ GetOptions
 	                                 "ignore_warning"   => \$ignorewarning,
 	                                 "trace=s"          => \$trace,
                                          "listsensors"      => \$listsensors,
+                                         "ignore_health"    => \$ignorehealth,
                                          "usedspace"        => \$usedspace,
                                          "perf_free_space"  => \$perf_free_space,
                                          "alertonly"        => \$alertonly,

@@ -1210,3 +1210,10 @@ History:
   - A unpluged network interface is considered critical (Ricardo Bartels)
   - Be more consistent in return level of maintenance mode (Ricardo Bartels)
     only write warning if host runtime is checked with no subselect
+  - Added option "--ignore_health" to host runtime (all) check
+    Sometimes not all hardware components are correctly reported via
+    CIM interface which leads to check errors when checking runtime
+    status all. This option ignores the health status and prevents the
+    the plugin from failing to report the overall status of the host.
+    IMPORTENT: make sure to monitor the host health status separately!
+    Most likely via ILO/ILOM interface.

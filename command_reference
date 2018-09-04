@@ -454,6 +454,9 @@ Runtime info:
 -S, --select=runtime                Shows runtime info. Used without -s show all runtime info:
                                     VMs, overall status, connection state, health, storagehealth, temperature
                                     and sensor are represented as one value and without thresholds.
+    --ignore_health                 ignore health issues when requesting runtime all status.
+                                    Sometimes helpful with unsupported hardware. Make sure to
+                                    monitor hardware separately!
 or with
 -s, --subselect=con                 Shows connection state.
 or

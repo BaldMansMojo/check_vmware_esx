@@ -567,6 +567,9 @@ sub print_help
        print "-S, --select=runtime                Shows runtime info. Used without -s show all runtime info:\n";
        print "                                    VMs, overall status, connection state, health, storagehealth, temperature\n";
        print "                                    and sensor are represented as one value and without thresholds.\n";
+       print "    --ignore_health                 ignore health issues when requesting runtime all status.\n";
+       print "                                    Sometimes helpful with unsupported hardware. Make sure to\n";
+       print "                                    monitor hardware separately!\n";
        print "or with\n";
        print "-s, --subselect=con                 Shows connection state.\n";
        print "or\n";
