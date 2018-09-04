@@ -1175,7 +1175,7 @@ History:
     a new login or when no session existed.
     Parallel runs with no session will only cause the first process to write a sessionfile.
 
-- 3 Sep 2018 Ricardo Bartels version 0.9.XX
+- 4 Sep 2018 Ricardo Bartels version 0.9.26.1
   - merged session locking behaviour from Markus Frosch
   - Use Perl from env instead of a fixed path (Michael Friedrich)
     - This allows the plugin to run on any distribution in a yet better way.

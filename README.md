@@ -40,7 +40,7 @@ to kindly ask and discuss can be joined at [monitoring-portal.org](https://monit
 Download the [VMware Perl SDK](https://code.vmware.com/web/sdk/65/vsphere-perl) (requires a free account
 that you sign up for at the same page).
 
-Do not use SDK 6.x because it contains some bugs and incompatibilities. Use SDK 5.x. This works well.
+Do not use SDK 6.0 because it contains some bugs and incompatibilities. Use SDK 5.5 or 6.5. Both work well.
 
 Install the SDK. An installation guide can be found [here](https://www.vmware.com/support/developer/viperltoolkit/).
 
