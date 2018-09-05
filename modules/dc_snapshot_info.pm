@@ -79,13 +79,13 @@ sub dc_snapshot_info
                {
                $state = final_state($state, $snapstate);
                $count++;
-               $output = "$snapoutput" . $multiline . $output;
+               $output .= $snapoutput . $multiline;
                }
                else
                {
                if ($listall)
                   {
-                  $output .= "$snapoutput" . $multiline;
+                  $output .= $snapoutput . $multiline;
                   }
                }
             }
@@ -105,7 +105,7 @@ sub dc_snapshot_info
        {
        if ($listall)
           {
-          $output = "No VMs with outdated/too many snapshots found. VMs." . $multiline . $output;
+          $output = "No VMs with outdated/too many snapshots found. VMs:" . $multiline . $output;
           }
        else
           {
@@ -129,7 +129,7 @@ sub check_snapshot_age
             if ($vm_snap->{childSnapshotList})
                {
                my ($cstate, $coutput) = check_snapshot_age($vm_name, $vm_snap->{childSnapshotList});
-               if ($cstate)
+               if ($cstate || $listall)
                   {
                   $output .= $coutput . $multiline;
                   $state = final_state($state, $cstate);
@@ -139,7 +139,7 @@ sub check_snapshot_age
             my $epoch_snap = str2time( $vm_snap->{createTime} );
             my $days_snap = ( ( time() - $epoch_snap ) / 86400 );
             my $tstate = check_against_threshold($days_snap);
-            if ($tstate)
+            if ($tstate || $listall)
                {
                $output .= sprintf "Snapshot \"%s\" (VM: '%s') is %0.1f days old",
                 $vm_snap->{name}, $vm_name, $days_snap . $multiline;
