@@ -99,7 +99,7 @@ sub host_snapshot_info
                {
                if ($listall)
                   {
-                  $output = $output . "$snapoutput" . $multiline;
+                  $output .= "$snapoutput" . $multiline;
                   }
                }
             }
@@ -114,7 +114,6 @@ sub host_snapshot_info
     if ($count)
        {
        $output = "VMs with snapshots:" . $multiline . $output;
-       #$state = 1;
        }
     else
        {
@@ -146,7 +145,7 @@ sub check_snapshot_age
                my ($cstate, $coutput) = check_snapshot_age($vm_name, $vm_snap->{childSnapshotList});
                if ($cstate)
                   {
-                  $output = $output . $multiline . $coutput;
+                  $output .= $coutput . $multiline;
                   $state = final_state($state, $cstate);
                   }
                }
@@ -156,8 +155,8 @@ sub check_snapshot_age
             my $tstate = check_against_threshold($days_snap);
             if ($tstate)
                {
-               $output = $output . $multiline . sprintf "Snapshot \"%s\" (VM: '%s') is %0.1f days old",
-                $vm_snap->{name}, $vm_name, $days_snap;
+               $output .= sprintf "Snapshot \"%s\" (VM: '%s') is %0.1f days old",
+                $vm_snap->{name}, $vm_name, $days_snap . $multiline;
                $state = final_state($state, $tstate);
                }
             }
@@ -184,8 +183,8 @@ sub check_snapshot_count
             if ($recursion == 0)
                {
                my $tstate = check_against_threshold($vm_snapcount->{$vm_name});
-               $output = $output . $multiline . sprintf "VM '%s' has %d snapshots",
-                   $vm_name, $vm_snapcount->{$vm_name};
+               $output .= sprintf "VM '%s' has %d snapshots",
+                   $vm_name, $vm_snapcount->{$vm_name} . $multiline;
                $state = final_state($state, $tstate);
                return ($state, $output);
                }
@@ -194,7 +193,7 @@ sub check_snapshot_count
 sub final_state
     {
     my ($state1, $state2) = @_;
-    my $final_state = 0;
+
     if ($state1)
        {
        if ($state2 == 2)
