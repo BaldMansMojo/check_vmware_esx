@@ -84,7 +84,6 @@ sub host_mounted_media_info
                     }
             if ($match)
                {
-               $multiline = "<br>";
                $count++;
                $output = "$displayname(Hits: $match)" . $multiline . $output;
                }
