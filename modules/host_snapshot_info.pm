@@ -132,7 +132,7 @@ sub host_snapshot_info
        }
     else
        {
-       if ($listall)
+       if ($listall && $output ne "")
           {
           $output = "No VMs with " . $output_subselect_text . " snapshots found. VMs:" . $multiline . $output;
           }
@@ -150,6 +150,7 @@ sub check_snapshot_age
     {
     my $vm_name = shift;
     my $vm_snaplist = shift;
+    my $recursion = shift || 0;
     my $output = "";
     my $state = 0;
 
@@ -157,7 +158,7 @@ sub check_snapshot_age
             {
             if ($vm_snap->{childSnapshotList})
                {
-               my ($cstate, $coutput) = check_snapshot_age($vm_name, $vm_snap->{childSnapshotList});
+               my ($cstate, $coutput) = check_snapshot_age($vm_name, $vm_snap->{childSnapshotList}, 1);
                if ($cstate || $listall)
                   {
                   $output .= $coutput . $multiline;
@@ -170,6 +171,10 @@ sub check_snapshot_age
             my $tstate = check_against_threshold($days_snap);
             if ($tstate || $listall)
                {
+              if ($recursion == 1 && $output ne "")
+                 {
+                 $output .= $multiline;
+                 }
                $output .= sprintf "Snapshot \"%s\" (VM: '%s') is %0.1f days old",
                 $vm_snap->{name}, $vm_name, $days_snap;
                $state = final_state($state, $tstate);
