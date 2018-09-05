@@ -28,6 +28,13 @@ sub dc_snapshot_info
 
     foreach $vm (@$vm_views)
             {
+           if (defined($vm_tools_poweredon_only))
+              {
+              if ($vm->{'runtime.powerState'}->val ne "poweredOn")
+                 {
+                 next;
+                 }
+              }
             my $vm_snapinfo = $vm->{snapshot};
             next unless defined $vm_snapinfo;
             # change get_property to {} to avoid infinite loop
