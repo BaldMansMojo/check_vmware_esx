@@ -3,6 +3,7 @@ sub dc_snapshot_info
     my $count = 0;
     my $state;
     my $output;
+    my $output_subselect_text;
     my $host_view;
     my $vm_views;
     my $vm;
@@ -97,19 +98,26 @@ sub dc_snapshot_info
        $output  =~ s/\n$//i;
        }
 
+    if ($subselect eq "age")
+       {
+       $output_subselect_text = "outdated";
+       } else {
+       $output_subselect_text = "too many";
+       }
+
     if ($count)
        {
-       $output = "VMs with snapshots:" . $multiline . $output;
+       $output = "VMs with " . $output_subselect_text . " snapshots:" . $multiline . $output;
        }
     else
        {
        if ($listall)
           {
-          $output = "No VMs with outdated/too many snapshots found. VMs:" . $multiline . $output;
+          $output = "No VMs with " . $output_subselect_text . " snapshots found. VMs:" . $multiline . $output;
           }
        else
           {
-          $output = "No VMs with outdated/too many snapshots found.";
+          $output = "No VMs with " . $output_subselect_text . " snapshots found.";
           }
        $state = 0;
        }
@@ -142,7 +150,7 @@ sub check_snapshot_age
             if ($tstate || $listall)
                {
                $output .= sprintf "Snapshot \"%s\" (VM: '%s') is %0.1f days old",
-                $vm_snap->{name}, $vm_name, $days_snap . $multiline;
+                $vm_snap->{name}, $vm_name, $days_snap;
                $state = final_state($state, $tstate);
                }
             }
@@ -169,8 +177,8 @@ sub check_snapshot_count
             if ($recursion == 0)
                {
                my $tstate = check_against_threshold($vm_snapcount->{$vm_name});
-               $output .= sprintf "VM '%s' has %d snapshots",
-                   $vm_name, $vm_snapcount->{$vm_name} . $multiline;
+               $output .= sprintf "VM '%s' has %d snapshot%s",
+                   $vm_name, $vm_snapcount->{$vm_name}, ($vm_snapcount->{$vm_name} gt 1 ) ? "s" : "";
                $state = final_state($state, $tstate);
                return ($state, $output);
                }
