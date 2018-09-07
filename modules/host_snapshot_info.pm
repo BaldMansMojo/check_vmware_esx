@@ -4,6 +4,7 @@ sub host_snapshot_info
     my $count = 0;
     my $state;
     my $output;
+    my $output_subselect_text;
     my $host_view;
     my $vm_views;
     my $vm;
@@ -41,6 +42,13 @@ sub host_snapshot_info
 
     foreach $vm (@$vm_views)
             {
+           if (defined($vm_tools_poweredon_only))
+              {
+              if ($vm->{'runtime.powerState'}->val ne "poweredOn")
+                 {
+                 next;
+                 }
+              }
             my $vm_snapinfo = $vm->{snapshot};
             next unless defined $vm_snapinfo;
             # change get_property to {} to avoid infinite loop
@@ -93,13 +101,13 @@ sub host_snapshot_info
                {
                $state = final_state($state, $snapstate);
                $count++;
-               $output = "$snapoutput" . $multiline . $output;
+               $output .= $snapoutput . $multiline;
                }
                else
                {
                if ($listall)
                   {
-                  $output = $output . "$snapoutput" . $multiline;
+                  $output .= $snapoutput . $multiline;
                   }
                }
             }
@@ -111,20 +119,26 @@ sub host_snapshot_info
        $output  =~ s/\n$//i;
        }
 
+    if ($subselect eq "age")
+       {
+       $output_subselect_text = "outdated";
+       } else {
+       $output_subselect_text = "too many";
+       }
+
     if ($count)
        {
-       $output = "VMs with snapshots:" . $multiline . $output;
-       #$state = 1;
+       $output = "VMs with " . $output_subselect_text . " snapshots:" . $multiline . $output;
        }
     else
        {
-       if ($listall)
+       if ($listall && $output ne "")
           {
-          $output = "No VMs with outdated/too many snapshots found. VMs." . $multiline . $output;
+          $output = "No VMs with " . $output_subselect_text . " snapshots found. VMs:" . $multiline . $output;
           }
        else
           {
-          $output = "No VMs with outdated/too many snapshots found.";
+          $output = "No VMs with " . $output_subselect_text . " snapshots found.";
           }
        $state = 0;
        }
@@ -136,6 +150,7 @@ sub check_snapshot_age
     {
     my $vm_name = shift;
     my $vm_snaplist = shift;
+    my $recursion = shift || 0;
     my $output = "";
     my $state = 0;
 
@@ -143,10 +158,10 @@ sub check_snapshot_age
             {
             if ($vm_snap->{childSnapshotList})
                {
-               my ($cstate, $coutput) = check_snapshot_age($vm_name, $vm_snap->{childSnapshotList});
-               if ($cstate)
+               my ($cstate, $coutput) = check_snapshot_age($vm_name, $vm_snap->{childSnapshotList}, 1);
+               if ($cstate || $listall)
                   {
-                  $output = $output . $multiline . $coutput;
+                  $output .= $coutput . $multiline;
                   $state = final_state($state, $cstate);
                   }
                }
@@ -154,9 +169,13 @@ sub check_snapshot_age
             my $epoch_snap = str2time( $vm_snap->{createTime} );
             my $days_snap = ( ( time() - $epoch_snap ) / 86400 );
             my $tstate = check_against_threshold($days_snap);
-            if ($tstate)
+            if ($tstate || $listall)
                {
-               $output = $output . $multiline . sprintf "Snapshot \"%s\" (VM: '%s') is %0.1f days old",
+              if ($recursion == 1 && $output ne "")
+                 {
+                 $output .= $multiline;
+                 }
+               $output .= sprintf "Snapshot \"%s\" (VM: '%s') is %0.1f days old",
                 $vm_snap->{name}, $vm_name, $days_snap;
                $state = final_state($state, $tstate);
                }
@@ -184,8 +203,8 @@ sub check_snapshot_count
             if ($recursion == 0)
                {
                my $tstate = check_against_threshold($vm_snapcount->{$vm_name});
-               $output = $output . $multiline . sprintf "VM '%s' has %d snapshots",
-                   $vm_name, $vm_snapcount->{$vm_name};
+               $output .= sprintf "VM '%s' has %d snapshot%s",
+                   $vm_name, $vm_snapcount->{$vm_name}, ($vm_snapcount->{$vm_name} gt 1 ) ? "s" : "";
                $state = final_state($state, $tstate);
                return ($state, $output);
                }
@@ -194,7 +213,7 @@ sub check_snapshot_count
 sub final_state
     {
     my ($state1, $state2) = @_;
-    my $final_state = 0;
+
     if ($state1)
        {
        if ($state2 == 2)

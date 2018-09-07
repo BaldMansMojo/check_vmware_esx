@@ -331,6 +331,7 @@ sub print_help
        print "\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --listall                       List all VMs with all snapshots.\n";
+       print "    --poweredonly                   List only VMs which are powered on.\n";
        print "    --multiline                     Multiline output in overview. This mean technically that\n";
        print "                                    a multiline output uses a HTML <br> for the GUI instead of\n";
        print "                                    Be aware that your messing connections (email, SMS...) must use\n";
@@ -745,6 +746,7 @@ sub print_help
        print "\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --listall                       List all VMs with all snapshots.\n";
+       print "    --poweredonly                   List only VMs which are powered on.\n";
        print "    --multiline                     Multiline output in overview. This mean technically that\n";
        print "                                    a multiline output uses a HTML <br> for the GUI instead of\n";
        print "                                    Be aware that your messing connections (email, SMS...) must use\n";
