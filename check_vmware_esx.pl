@@ -1295,6 +1295,8 @@
 #     the plugin from failing to report the overall status of the host.
 #     IMPORTENT: make sure to monitor the host health status separately!
 #     Most likely via ILO/ILOM interface.
+#   - declare all file handles as UTF-8 to be able to print multibyte strings
+#     from CIM interface (e.g. snapshot names)
 
 use strict;
 use warnings;
@@ -1329,7 +1331,9 @@ if ( $@ )
 $SIG{ALRM} = 'catch_alarm';
 $SIG{INT}  = 'catch_intterm';
 $SIG{TERM} = 'catch_intterm';
- 
+
+# define alle file handles as UTF-8
+use open qw(:std :utf8);
 
 #--- Start presets and declarations -------------------------------------
 # 1. Define variables
