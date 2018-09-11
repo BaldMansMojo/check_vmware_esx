@@ -1217,3 +1217,5 @@ History:
     the plugin from failing to report the overall status of the host.
     IMPORTENT: make sure to monitor the host health status separately!
     Most likely via ILO/ILOM interface.
+  - declare all file handles as UTF-8 to be able to print multibyte strings
+    from CIM interface (e.g. snapshot names)
