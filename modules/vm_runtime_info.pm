@@ -3,7 +3,7 @@ sub vm_runtime_info
     my ($vmname) = @_;
     my $state = 0;
     my $output = " ";
-    my $runtime;                 # A reference to the runime view.
+    my $runtime;                 # A reference to the runtime view.
     my $vm_connectionState;      # Holds the vm connection state. It is shorter than
                                  # $runtime->connectionState->val in the code.
     my $vm_guestState;           # Holds the vm guest state. It is shorter than
@@ -13,7 +13,7 @@ sub vm_runtime_info
     my $issue_cnt = 0;           # Counter for issues
     my $issue_out = '';          # Temporary output in the issue section
     my $actual_state;            # Hold the actual state for to be compared
-    my $true_sub_sel=1;          # Just a flag. To have only one return at the en
+    my $true_sub_sel=1;          # Just a flag. To have only one return at the end
                                  # we must ensure that we had a valid subselect. If
                                  # no subselect is given we select all
                                  # 0 -> existing subselect
