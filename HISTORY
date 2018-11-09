@@ -1254,5 +1254,5 @@ History:
     the cluster part is unfinished.
   - Some minor reformatting of code.
 
-- 25 May 2018 Ricardo Bartels
+- 25 May 2019 Ricardo Bartels
   - add feature to request licenses informations from host or vCenter
