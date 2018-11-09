@@ -257,6 +257,13 @@ or with
 or
 -s, --subselect=count               Counts the number of snapshots of VMs.
 
+License
+-------------
+-S, --select=license                Checks the currently installed license. If in Evaluation Mode the
+                                    remainig evaluation time will be displayed
+
+    --hidekey                       Hide license key from output.
+
 Monitoring the vmware host:
 ===========================
 
@@ -666,6 +673,13 @@ or with
 -s, --subselect=age                 Shows age of snapshots in days.
 or
 -s, --subselect=count               Counts the number of snapshots of VMs.
+
+License
+-------------
+-S, --select=license                Checks the currently installed license. If in Evaluation Mode the
+                                    remainig evaluation time will be displayed
+
+    --hidekey                       Hide license key from output.
 
 Monitoring a virtual machine via vmware datacenter or vmware host:
 ==================================================================
