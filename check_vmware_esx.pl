@@ -1300,6 +1300,7 @@
 #
 # - 9 Nov 2018 Ricardo Bartels version 0.9.26.2
 #   - add feature to request licenses informations from host or vCenter
+#   - request ESXi host or vCenter version trough runtime
 
 use strict;
 use warnings;
