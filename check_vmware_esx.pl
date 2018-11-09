@@ -1336,6 +1336,10 @@
 #   - Moved exit_unknown(), debug() and save_session() before the cluster sub routines because
 #     the cluster part is unfinished.
 #   - Some minor reformatting of code.
+#
+# - 25 May 2019 Ricardo Bartels
+#   - request ESXi host or vCenter version trough runtime
+#
 
 use strict;
 use warnings;

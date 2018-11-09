@@ -321,6 +321,8 @@ sub print_help
        print "                                    a filter to file out the <br>. A sed oneliner like the following\n";
        print "                                    will do the job: sed 's/<[^<>]*>//g'\n";
        print "    --alertonly                     List only alerting VMs. Important here to avoid masses of data.\n";
+       print "or\n";
+       print "-s, --subselect=version             Full version string of this vCenter installation.\n";
        print "\n";
        print "SOAP API:\n";
        print "---------\n";
@@ -660,6 +662,8 @@ sub print_help
        print "                                    Be aware that your messing connections (email, SMS...) must use\n";
        print "                                    a filter to file out the <br>. A sed oneliner like the following\n";
        print "                                    will do the job: sed 's/<[^<>]*>//g'\n";
+       print "or\n";
+       print "-s, --subselect=version             Full version string of this ESXi host installation.\n";
        print "\n";
        print "Storage info:\n";
        print "-------------\n";
