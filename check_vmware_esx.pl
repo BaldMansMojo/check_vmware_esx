@@ -1344,7 +1344,7 @@ use open qw(:std :utf8);
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.26.1';                # Contains the program version number
+our $prog_version = '0.9.26.2';                # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
