@@ -1297,6 +1297,8 @@
 #     Most likely via ILO/ILOM interface.
 #   - declare all file handles as UTF-8 to be able to print multibyte strings
 #     from CIM interface (e.g. snapshot names)
+# - 9 Nov 2018 Ricardo Bartels version 0.9.26.2
+#   - request ESXi host or vCenter version trough runtime
 
 use strict;
 use warnings;
