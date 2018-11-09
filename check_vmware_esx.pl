@@ -1297,6 +1297,9 @@
 #     Most likely via ILO/ILOM interface.
 #   - declare all file handles as UTF-8 to be able to print multibyte strings
 #     from CIM interface (e.g. snapshot names)
+#
+# - 9 Nov 2018 Ricardo Bartels version 0.9.26.2
+#   - add feature to request licenses informations from host or vCenter
 
 use strict;
 use warnings;
@@ -1456,6 +1459,7 @@ my $statelabels_def="y";                       # Default value for state labels 
                                                # set this default to "n".
 my $statelabels;                               # To overwrite $statelabels_def via commandline.
 our $openvmtools;                              # Signalize that you use Open VM Tools instead of the servers one.
+our $hidekey;                                  # Hide licenses key when requesting license informations
 
 
 
@@ -1520,6 +1524,7 @@ GetOptions
                                          "nostoragestatus"  => \$nostoragestatus,
                                          "statelabels"      => \$statelabels,
                                          "open-vm-tools"    => \$openvmtools,
+                                         "hidekey"          => \$hidekey,
                                          "spaceleft"        => \$spaceleft,
          "V"   => \$version,             "version"          => \$version,
          "d|debug" => \$DEBUG,
@@ -2148,6 +2153,13 @@ sub main_select
           ($result, $output) = host_snapshot_info($esx_server);
           return($result, $output);
           }
+       if ($select eq "license")
+          {
+          require system_license_info;
+          import system_license_info;
+          ($result, $output) = system_license_info($esx_server);
+          return($result, $output);
+          }
 
           get_me_out("Unknown host select");
         }
@@ -2206,6 +2218,13 @@ sub main_select
           require dc_snapshot_info;
           import dc_snapshot_info;
           ($result, $output) = dc_snapshot_info();
+          return($result, $output);
+          }
+       if ($select eq "license")
+          {
+          require system_license_info;
+          import system_license_info;
+          ($result, $output) = system_license_info();
           return($result, $output);
           }
 
