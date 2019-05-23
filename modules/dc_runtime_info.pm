@@ -64,7 +64,7 @@ sub dc_runtime_info
     my $vc_yellow_cnt = 0;       # Vcenter yellow state counter
     my $vc_name;
 
-    my $true_sub_sel=1;          # Just a flag. To have only one return at the en
+    my $true_sub_sel=1;          # Just a flag. To have only one return at the end
                                  # we must ensure that we had a valid subselect. If
                                  # no subselect is given we select all
                                  # 0 -> existing subselect

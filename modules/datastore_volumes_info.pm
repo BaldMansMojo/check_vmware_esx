@@ -55,11 +55,10 @@ sub datastore_volumes_info
        {
        $isregexp = 0;
        }
-               
-    foreach $ref_store (@{$datastore})
-            {
-            $store = Vim::get_view(mo_ref => $ref_store, properties => ['summary', 'info']);
 
+    my $stores = Vim::get_views(mo_ref_array => $datastore, properties => ['summary', 'info']);
+    foreach my $store (@{$stores})
+            {
             $name = $store->summary->name;
             $volume_type = $store->summary->type;
 
@@ -290,7 +289,7 @@ sub datastore_volumes_info
        $output = $tmp_output;
        }
 
-    if ($output)
+    if ($tmp_output or $tmp_output_error)
        {
        if ( $state == 0 )
           {
@@ -324,7 +323,12 @@ sub datastore_volumes_info
        }
     else
        {
-       if ($alertonly)
+       if(!$tmp_output and !$tmp_output_error)
+           {
+           $output = "No matching volumes found";
+           $state = 1;
+           }
+       elsif($alertonly)
           {
           $output = "OK. There are no alerts";
           }

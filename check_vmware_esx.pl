@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 #
 # Nagios plugin to monitor vmware ESX and vSphere servers
 #
@@ -6,7 +6,26 @@
 # This plugin is a forked by Martin Fuerstenau from the original one from op5
 # Copyright (c) 2008 op5 AB
 # Author: Kostyantyn Hushchyn <dev@op5.com>
-# Contributor(s): Patrick Müller, Jeremy Martin, Eric Jonsson, stumpr, John Cavanaugh, Libor Klepac, maikmayers, Steffen Poulsen, Mark Elliott, simeg, sebastien.prudhomme, Raphael Schitz
+# Contributor(s):
+#   Patrick Müller
+#   Jeremy Martin
+#   Eric Jonsson
+#   stumpr
+#   John Cavanaugh
+#   Libor Klepac
+#   maikmayers
+#   Steffen Poulsen
+#   Mark Elliott
+#   simeg
+#   sebastien.prudhomme
+#   Raphael Schitz
+#   Markus Frosch
+#   Michael Friedrich
+#   Sven Nierlein
+#   Gerhard Lausser
+#   Danijel Tasov
+#   6uellerBpanda
+#   Ricardo Bartels
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -167,14 +186,14 @@
 #
 #   General statement for all changes done by me:
 #
-#   Nagios, Icingia etc. are tools for
+#   Nagios, Icinga etc. are tools for
 #
 #   a) Alarming. That means checking values against thresholds (internal or handed over)
 #   b) Collecting performance data. These data, collected with the checks, like network traffic, cpu usage or so should be
 #      interpretable without a lot of other data.
 #
 #   So as a conclusion collecting historic performance data collected by a monitored system should not be done using Nagios,
-#   pnp4nagios etc.. It should be interpreted with the approriate admin tools of the relevant system. For vmware it means use
+#   pnp4nagios etc.. It should be interpreted with the appropriate admin tools of the relevant system. For vmware it means use
 #   the (web)client for this and not Nagios. Same for performance counters not self explaining.
 #
 #   Example:
@@ -1228,6 +1247,56 @@
 #    - Bugfix: --nosession was printed out twice. Same line the not "not" was missing.
 #      This was bad because it changed the meaning of the line. Same error in the command reference
 #      because the reference is only the output from the help in a file.
+#
+# - 31 Jul 2015 Markus Frosch
+#   - rewritten session locking behavior, locking is only done when writing a session due
+#     a new login or when no session existed.
+#     Parallel runs with no session will only cause the first process to write a sessionfile.
+#
+# - 4 Sep 2018 Ricardo Bartels version 0.9.26.1
+#   - merged session locking behaviour from Markus Frosch
+#   - Use Perl from env instead of a fixed path (Michael Friedrich)
+#     - This allows the plugin to run on any distribution in a yet better way.
+#   - renamed readme -> readme.md (Michael Friedrich)
+#   -  Rewrite documentation for better installation and troubleshooting experience (Michael Friedrich)
+#     - Add About section which explains the purpose of this plugin
+#     - Explain two installation modes
+#     - Move specific explanations into FAQ chapter
+#     - Add a note on VMware API timeouts
+#     - Add some examples and references to Icinga 2 configuration and CheckCommands
+#     - Add chapters similar to known Icinga projects
+#     - Reformat everything as proper Markdown
+#   - make session file usage more robust (Sven Nierlein)
+#     Compare the api returned url and the given url2connect less error prone.
+#     Using --sslport=443 results in a url2connect https://vcenter:443/... while
+#     get_option returns https://vcenter/...
+#     Also it seems like some api returns .../sdk while others return .../sdk/webService
+#     so just ignore that part.
+#     Both leads to not resuing the existing session files.
+#   - added support to query host/datacenter snapshots (Gerhard Lausser)
+#     - List vm's wich have snapshots older or bigger than a certain threshold
+#   - reduce API calls in datastore_volumes_info (Danijel Tasov)
+#     Instead of calling Vim::get_view for each datastore call
+#     Vim::get_views with all of them at once.
+#   - lowercase hostnames in connect urls (Danijel Tasov)
+#     otherwise cookies may not match with LWP
+#   - Fix logic error (Danijel Tasov)
+#     $host_state cannot equal to UP and "Maintenance Mode" at the same time
+#   - increase $unknown on undefined $host_state (Danijel Tasov)
+#   - warn if no volumes match (Danijel Tasov)
+#   - fix bad OUM in vm_disk_io_info (6uellerBpanda)
+#   - A unpluged network interface is considered critical (Ricardo Bartels)
+#   - Be more consistent in return level of maintenance mode (Ricardo Bartels)
+#     only write warning if host runtime is checked with no subselect
+#   - Added option "--ignore_health" to host runtime (all) check
+#     Sometimes not all hardware components are correctly reported via
+#     CIM interface which leads to check errors when checking runtime
+#     status all. This option ignores the health status and prevents the
+#     the plugin from failing to report the overall status of the host.
+#     IMPORTENT: make sure to monitor the host health status separately!
+#     Most likely via ILO/ILOM interface.
+#   - declare all file handles as UTF-8 to be able to print multibyte strings
+#     from CIM interface (e.g. snapshot names)
 
 use strict;
 use warnings;
@@ -1262,14 +1331,16 @@ if ( $@ )
 $SIG{ALRM} = 'catch_alarm';
 $SIG{INT}  = 'catch_intterm';
 $SIG{TERM} = 'catch_intterm';
- 
+
+# define alle file handles as UTF-8
+use open qw(:std :utf8);
 
 #--- Start presets and declarations -------------------------------------
 # 1. Define variables
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.26';                  # Contains the program version number
+our $prog_version = '0.9.26.1';                # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
@@ -1286,7 +1357,6 @@ my  $password;                                 # Password for vmware host or vsp
 my  $authfile;                                 # If username/password should read from a file ....
 my  $sessionfile_name;                         # Contains the name of the sessionfile if a
                                                # a sessionfile is used for faster authentication
-my  $sessionlockfile;                          # Lockfile to protect the session
 my  $sessionfile_dir;                          # Optinal. Contains the path to the sessionfile. Used in conjunction
                                                # with sessionfile
 my  $nosession;                                # Just a flag to avoid using a sessionfile
@@ -1334,6 +1404,7 @@ my  $sessionfile_dir_def="/tmp/";              # Directory for caching the sessi
 
 our $listsensors;                              # This flag set in conjunction with -l runtime -s health or -s sensors
                                                # will list all sensors
+our $ignorehealth;                             # ignore health issues when requesting runtime informations
 our $usedspace;                                # Show used spaced instead of free
 our $gigabyte;                                 # Output in gigabyte instead of megabyte
 our $perf_free_space;                          # To display perfdata as free space instead of used when using
@@ -1354,7 +1425,9 @@ my  $mon;                                      # Month        - used for some da
 my  $year;                                     # Year         - used for some date functions
 
 my  $timeout = 90;                             # Time in seconds befor the plugin kills itself when it' not ready
-my  $ms_ts = 1500;                             # Milliseconds to sleep for waiting for accessing the lockfile.
+my  $DEBUG = 0;                                # global switch for debugging
+
+my  $program_start = time();                   # record the program_start
 
 # Output options
 our $multiline;                                # Multiline output in overview. This mean technically that
@@ -1432,6 +1505,7 @@ GetOptions
 	                                 "ignore_warning"   => \$ignorewarning,
 	                                 "trace=s"          => \$trace,
                                          "listsensors"      => \$listsensors,
+                                         "ignore_health"    => \$ignorehealth,
                                          "usedspace"        => \$usedspace,
                                          "perf_free_space"  => \$perf_free_space,
                                          "alertonly"        => \$alertonly,
@@ -1447,7 +1521,9 @@ GetOptions
                                          "statelabels"      => \$statelabels,
                                          "open-vm-tools"    => \$openvmtools,
                                          "spaceleft"        => \$spaceleft,
-	 "V"   => \$version,             "version"          => \$version);
+         "V"   => \$version,             "version"          => \$version,
+         "d|debug" => \$DEBUG,
+);
 
 # Show version
 if ($version)
@@ -1638,13 +1714,13 @@ if (defined($authfile))
 
 if (defined($datacenter))
    {
-   $url2connect = $datacenter;
+   $url2connect = lc($datacenter);
    }
 else
    {
    if (defined($host))
       {
-      $url2connect = $host;
+      $url2connect = lc($host);
       }
    else
       {
@@ -1719,75 +1795,27 @@ if (!defined($nosession))
           die(sprintf "UNKNOWN: sessionfile_dir_def directory %s does not exist.", $sessionfile_dir_def);
           }
 
-   $sessionlockfile = $sessionfile_name . "_locked";
-   
    if ( -e $sessionfile_name )
       {
-      usleep(int(rand($ms_ts)) * 1000);
-      
-      if ( -e $sessionlockfile )
-         {
-         # Session locked? First open the lock file for reading
-         unless(open SESSION_LOCK_FILE, '<', $sessionlockfile)
-               {
-               print "Unable to open session lock file \"$sessionlockfile\"\n";
-               exit 3;
-               }
-         # Second get the old PID
-         while(<SESSION_LOCK_FILE>)
-              {
-              $PID_old = $_;
-              }
-         close (SESSION_LOCK_FILE);    
-      
-         # Third - check for the process which wrote the lock file the last time
-         $PID_exists = kill 0, $PID_old;
-         
-         # Fourth - if the process is not available any more remove the lock file
-         if ( !$PID_exists )
-            {
-            unlink $sessionlockfile;
-            }
-         }
-   
-      # Now we are sure that we have no dead lock file and we will wait for free session
-      while ( -e $sessionlockfile )
-            {
-            usleep(int(rand($ms_ts)) * 1000);
-            }
-   
-      unless(open SESSION_LOCK_FILE, '>', $sessionlockfile)
-            {
-            print "Unable to create session lock file \"$sessionlockfile\"\n";
-            exit 3;
-            }
-      print SESSION_LOCK_FILE "$PID\n"; 
-      close (SESSION_LOCK_FILE);    
-   
+      debug("Trying to resume existing session from '%s'", $sessionfile_name);
+
       eval {Vim::load_session(session_file => $sessionfile_name)};
-      if (($@ ne '') || (Opts::get_option("url") ne $url2connect))
+      if (($@ ne '') || (trim_connect_url(Opts::get_option("url")) ne trim_connect_url($url2connect)))
          {
-         unlink $sessionfile_name;
+         debug("session resume failed, logging in at %s as %s", $url2connect, $username);
          Util::connect($url2connect, $username, $password);
-         Vim::save_session(session_file => $sessionfile_name);
-         }
-      else
-         {
-         Vim::load_session(session_file => $sessionfile_name);
+
+         save_session($sessionfile_name);
          }
       }
    else
       {
-      unless(open SESSION_LOCK_FILE, '>', $sessionlockfile)
-            {
-            print "Unable to create session lock file \"$sessionlockfile\"\n";
-            exit 3;
-            }
-      print SESSION_LOCK_FILE "$PID\n"; 
-      close (SESSION_LOCK_FILE);    
-   
+      debug("sessionfile '%s' does not exist", $sessionfile_name);
+
+      debug("logging in at %s as %s", $url2connect, $username);
       Util::connect($url2connect, $username, $password);
-      Vim::save_session(session_file => $sessionfile_name);
+
+      save_session($sessionfile_name);
       }
    }
 else
@@ -1831,7 +1859,6 @@ if ($@)
 if (defined($sessionfile_name) and -e $sessionfile_name)
    {
    Vim::unset_logout_on_disconnect();
-   unlink $sessionlockfile;
    }
 else
    {
@@ -2114,6 +2141,13 @@ sub main_select
           ($result, $output) = soap_check();
           return($result, $output);
           }
+       if ($select eq "snapshots")
+          {
+          require host_snapshot_info;
+          import host_snapshot_info;
+          ($result, $output) = host_snapshot_info($esx_server);
+          return($result, $output);
+          }
 
           get_me_out("Unknown host select");
         }
@@ -2165,6 +2199,13 @@ sub main_select
        if ($select eq "soap")
           {
           ($result, $output) = soap_check();
+          return($result, $output);
+          }
+       if ($select eq "snapshots")
+          {
+          require dc_snapshot_info;
+          import dc_snapshot_info;
+          ($result, $output) = dc_snapshot_info();
           return($result, $output);
           }
 
@@ -2294,6 +2335,14 @@ sub convert_number
              }
           }
     return $state;
+    }
+
+sub trim_connect_url
+    {
+    my($url) = @_;
+    $url =~ s/:443//gmx;
+    $url =~ s/\/webService$//gmx;
+    return($url);
     }
 
 sub check_health_state
@@ -2485,9 +2534,15 @@ sub catch_alarm
 sub catch_intterm
     {
     print "UNKNOWN: Script killed by monitor.\n";
-    unlink $sessionlockfile;
     exit 3;
     }
+
+sub exit_error
+    {
+    my $message = shift;
+    printf "$message\n", @_;
+    exit 3;
+}
  
 #=====================================================================| Cluster |============================================================================#
 
@@ -2667,8 +2722,9 @@ sub cluster_runtime_info
                         foreach my $host (@$host_views) {
                                 $host->update_view_data(['name', 'runtime.powerState']);
                                 my $host_state = $host_state_strings{$host->get_property('runtime.powerState')->val};
+                                $unknown += !defined($host_state);
                                 $unknown += $host_state eq "3";
-                                if ($host_state eq "UP" && $host_state eq "Maintenance Mode") {
+                                if ($host_state eq "UP" || $host_state eq "Maintenance Mode") {
                                         $up++;
                                         $output = $output . $host->name . "(UP), ";
                                 } else
@@ -2776,6 +2832,40 @@ sub cluster_runtime_info
         return ($state, $output);
 }
 
+sub debug
+{
+    unless ($DEBUG) { return; }
+    my $message = shift;
+    printf "$message\n", @_;
+}
 
+sub save_session
+{
+    my $sessionfile = shift
+        or exit_error("save_session needs a parameter!");
+    my $lock = $sessionfile . "_locked";
 
+    if (-e $sessionfile)
+    {
+        my $mtime = (stat($sessionfile))[9];
+        if ($mtime > $program_start)
+        {
+            debug("Not saving session, session file '%s' is newer than program start!", $sessionfile);
+            return;
+        }
+    }
+
+    my $fh;
+    open $fh, '>', $lock
+        or exit_error "Unable to create session lock file '%s'!", $lock;
+
+    flock $fh, 2
+        or exit_error "could not lock '$lock'!";
+
+    debug("Saving session to '%s'", $sessionfile);
+    Vim::save_session(session_file => $sessionfile);
+
+    close $fh;
+    unlink $lock;
+}
 
