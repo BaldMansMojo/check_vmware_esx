@@ -4,8 +4,9 @@
 #
 # License: GPL
 # This plugin is a forked by Martin Fuerstenau from the original one from op5
+#
 # Copyright (c) 2008 op5 AB
-# Author: Kostyantyn Hushchyn <dev@op5.com>
+# Original author: Kostyantyn Hushchyn <dev@op5.com>
 # Contributor(s):
 #   Patrick Müller
 #   Jeremy Martin
@@ -16,8 +17,8 @@
 #   maikmayers
 #   Steffen Poulsen
 #   Mark Elliott
-#   simeg
-#   sebastien.prudhomme
+#   Simon Meggle
+#   Sebastien Prudhomme
 #   Raphael Schitz
 #   Markus Frosch
 #   Michael Friedrich
@@ -1255,9 +1256,12 @@
 #
 # - 4 Sep 2018 Ricardo Bartels version 0.9.26.1
 #   - merged session locking behaviour from Markus Frosch
+#
 #   - Use Perl from env instead of a fixed path (Michael Friedrich)
 #     - This allows the plugin to run on any distribution in a yet better way.
+#
 #   - renamed readme -> readme.md (Michael Friedrich)
+#
 #   -  Rewrite documentation for better installation and troubleshooting experience (Michael Friedrich)
 #     - Add About section which explains the purpose of this plugin
 #     - Explain two installation modes
@@ -1266,6 +1270,7 @@
 #     - Add some examples and references to Icinga 2 configuration and CheckCommands
 #     - Add chapters similar to known Icinga projects
 #     - Reformat everything as proper Markdown
+#
 #   - make session file usage more robust (Sven Nierlein)
 #     Compare the api returned url and the given url2connect less error prone.
 #     Using --sslport=443 results in a url2connect https://vcenter:443/... while
@@ -1273,21 +1278,31 @@
 #     Also it seems like some api returns .../sdk while others return .../sdk/webService
 #     so just ignore that part.
 #     Both leads to not resuing the existing session files.
+#
 #   - added support to query host/datacenter snapshots (Gerhard Lausser)
 #     - List vm's wich have snapshots older or bigger than a certain threshold
+#
 #   - reduce API calls in datastore_volumes_info (Danijel Tasov)
 #     Instead of calling Vim::get_view for each datastore call
 #     Vim::get_views with all of them at once.
+#
 #   - lowercase hostnames in connect urls (Danijel Tasov)
 #     otherwise cookies may not match with LWP
+#
 #   - Fix logic error (Danijel Tasov)
 #     $host_state cannot equal to UP and "Maintenance Mode" at the same time
+#
 #   - increase $unknown on undefined $host_state (Danijel Tasov)
+#
 #   - warn if no volumes match (Danijel Tasov)
+#
 #   - fix bad OUM in vm_disk_io_info (6uellerBpanda)
+#
 #   - A unpluged network interface is considered critical (Ricardo Bartels)
+#
 #   - Be more consistent in return level of maintenance mode (Ricardo Bartels)
 #     only write warning if host runtime is checked with no subselect
+#
 #   - Added option "--ignore_health" to host runtime (all) check
 #     Sometimes not all hardware components are correctly reported via
 #     CIM interface which leads to check errors when checking runtime
@@ -1295,8 +1310,15 @@
 #     the plugin from failing to report the overall status of the host.
 #     IMPORTENT: make sure to monitor the host health status separately!
 #     Most likely via ILO/ILOM interface.
+#
 #   - declare all file handles as UTF-8 to be able to print multibyte strings
 #     from CIM interface (e.g. snapshot names)
+#
+# - 24 Sep 2019 M.Fuerstenau version 1.0.0
+#   - Merged most pull requests (see 0.9.26.1)
+#   - Bugfix - Back to direct call of the command interpreter in shebang. Using Linux
+#     it normally only possible to one argument. So "/usr/bin/env perl" will
+#     work while "/usr/bin/env perl -w " won't.
 
 use strict;
 use warnings;
@@ -1340,7 +1362,7 @@ use open qw(:std :utf8);
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '0.9.26.1';                # Contains the program version number
+our $prog_version = '1.0.0';                   # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be

@@ -1177,6 +1177,7 @@ History:
 
 - 4 Sep 2018 Ricardo Bartels version 0.9.26.1
   - merged session locking behaviour from Markus Frosch
+
   - Use Perl from env instead of a fixed path (Michael Friedrich)
     - This allows the plugin to run on any distribution in a yet better way.
   - renamed readme -> readme.md (Michael Friedrich)
@@ -1188,6 +1189,7 @@ History:
     - Add some examples and references to Icinga 2 configuration and CheckCommands
     - Add chapters similar to known Icinga projects
     - Reformat everything as proper Markdown
+
   - make session file usage more robust (Sven Nierlein)
     Compare the api returned url and the given url2connect less error prone.
     Using --sslport=443 results in a url2connect https://vcenter:443/... while
@@ -1195,19 +1197,28 @@ History:
     Also it seems like some api returns .../sdk while others return .../sdk/webService
     so just ignore that part.
     Both leads to not resuing the existing session files.
+
   - added support to query host/datacenter snapshots (Gerhard Lausser)
     - List vm's wich have snapshots older or bigger than a certain threshold
+
   - reduce API calls in datastore_volumes_info (Danijel Tasov)
     Instead of calling Vim::get_view for each datastore call
     Vim::get_views with all of them at once.
+
   - lowercase hostnames in connect urls (Danijel Tasov)
     otherwise cookies may not match with LWP
+
   - Fix logic error (Danijel Tasov)
     $host_state cannot equal to UP and "Maintenance Mode" at the same time
+
   - increase $unknown on undefined $host_state (Danijel Tasov)
+
   - warn if no volumes match (Danijel Tasov)
+
   - fix bad OUM in vm_disk_io_info (6uellerBpanda)
+
   - A unpluged network interface is considered critical (Ricardo Bartels)
+
   - Be more consistent in return level of maintenance mode (Ricardo Bartels)
     only write warning if host runtime is checked with no subselect
   - Added option "--ignore_health" to host runtime (all) check
@@ -1219,3 +1230,9 @@ History:
     Most likely via ILO/ILOM interface.
   - declare all file handles as UTF-8 to be able to print multibyte strings
     from CIM interface (e.g. snapshot names)
+
+- 24 Sep 2019 M.Fuerstenau version 1.0.0
+  - Merged most pull requests (see 0.9.26.1)
+  - Bugfix - Back to direct call of the command interpreter in shebang. Using Linux
+    it normally only possible to one argument. So "/usr/bin/env perl" will
+    work while "/usr/bin/env perl -w " won't.
