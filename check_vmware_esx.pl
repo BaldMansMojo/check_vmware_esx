@@ -1319,6 +1319,7 @@
 #   - Bugfix - Back to direct call of the command interpreter in shebang. Using Linux
 #     it normally only possible to one argument. So "/usr/bin/env perl" will
 #     work while "/usr/bin/env perl -w " won't.
+#
 
 use strict;
 use warnings;
