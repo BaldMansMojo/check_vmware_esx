@@ -1336,6 +1336,10 @@
 #   - Moved exit_unknown(), debug() and save_session() before the cluster sub routines because
 #     the cluster part is unfinished.
 #   - Some minor reformatting of code.
+#
+# - 25 May 2019 Ricardo Bartels
+#   - add feature to request licenses informations from host or vCenter
+#
 
 use strict;
 use warnings;
@@ -1503,6 +1507,7 @@ my $statelabels_def="y";                       # Default value for state labels 
                                                # set this default to "n".
 my $statelabels;                               # To overwrite $statelabels_def via commandline.
 our $openvmtools;                              # Signalize that you use Open VM Tools instead of the servers one.
+our $hidekey;                                  # Hide licenses key when requesting license informations
 
 
 
@@ -1567,6 +1572,7 @@ GetOptions
                                          "nostoragestatus"          => \$nostoragestatus,
                                          "statelabels"              => \$statelabels,
                                          "open-vm-tools"            => \$openvmtools,
+                                         "hidekey"                  => \$hidekey,
                                          "spaceleft"                => \$spaceleft,
                                          "maintenance_mode_state=s" => \$maintenance_mode_state,
          "V"   => \$version,             "version"                  => \$version,
@@ -2234,6 +2240,13 @@ sub main_select
           ($result, $output) = host_snapshot_info($esx_server, $maintenance_mode_state);
           return($result, $output);
           }
+       if ($select eq "license")
+          {
+          require system_license_info;
+          import system_license_info;
+          ($result, $output) = system_license_info($esx_server);
+          return($result, $output);
+          }
 
           get_me_out("Unknown host select");
         }
@@ -2292,6 +2305,13 @@ sub main_select
           require dc_snapshot_info;
           import dc_snapshot_info;
           ($result, $output) = dc_snapshot_info();
+          return($result, $output);
+          }
+       if ($select eq "license")
+          {
+          require system_license_info;
+          import system_license_info;
+          ($result, $output) = system_license_info();
           return($result, $output);
           }
 
