@@ -352,6 +352,13 @@ sub print_help
        print "or\n";
        print "-s, --subselect=count               Counts the number of snapshots of VMs.\n";
        print "\n";
+       print "License\n";
+       print "-------------\n";
+       print "-S, --select=license                Checks the currently installed license. If in Evaluation Mode the\n";
+       print "                                    remainig evaluation time will be displayed\n";
+       print "\n";
+       print "    --hidekey                       Hide license key from output.\n";
+       print "\n";
        }
 
 #--- Host ----------------------
@@ -766,6 +773,13 @@ sub print_help
        print "-s, --subselect=age                 Shows age of snapshots in days.\n";
        print "or\n";
        print "-s, --subselect=count               Counts the number of snapshots of VMs.\n";
+       print "\n";
+       print "License\n";
+       print "-------------\n";
+       print "-S, --select=license                Checks the currently installed license. If in Evaluation Mode the\n";
+       print "                                    remainig evaluation time will be displayed\n";
+       print "\n";
+       print "    --hidekey                       Hide license key from output.\n";
        print "\n";
        }
 
