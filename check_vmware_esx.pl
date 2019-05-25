@@ -1337,7 +1337,7 @@
 #     the cluster part is unfinished.
 #   - Some minor reformatting of code.
 #
-# - 25 May 2019 Ricardo Bartels
+# - 25 May 2019 Ricardo Bartels version 1.2.0
 #   - add feature to request licenses informations from host or vCenter
 #
 
@@ -1383,7 +1383,7 @@ use open qw(:std :utf8);
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '1.1.0';                   # Contains the program version number
+our $prog_version = '1.2.0';                   # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
