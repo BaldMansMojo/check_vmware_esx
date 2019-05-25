@@ -8,7 +8,7 @@
 # Copyright (c) 2008 op5 AB
 # Original author: Kostyantyn Hushchyn <dev@op5.com>
 # Contributor(s):
-#   Patrick MÃ¼ller
+#   Patrick Müller
 #   Jeremy Martin
 #   Eric Jonsson
 #   stumpr

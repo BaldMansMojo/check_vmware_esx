@@ -262,7 +262,14 @@ sub vm_runtime_info
                    if ($vm_view->guest->toolsVersionStatus eq "guestToolsUnmanaged")
                       {
                       $tools_out = "VMware Tools are installed and running, but not managed by VMWare. ";
-                      $actual_state = 2;
+                      if (defined($openvmtools))
+                         {
+                         $actual_state = 0;
+                         }
+                      else
+                         {
+                         $actual_state = 1;
+                         }
                       }
                    }
                 else
