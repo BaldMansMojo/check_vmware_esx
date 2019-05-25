@@ -88,7 +88,7 @@ sub host_runtime_info
        exit 2;
        }
 
-    $host_view->update_view_data(['name', 'runtime', 'overallStatus', 'configIssue']);
+    $host_view->update_view_data(['name', 'runtime', 'overallStatus', 'configIssue', 'summary.config.product.fullName']);
     $runtime = $host_view->runtime;
 
     if ($runtime->inMaintenanceMode)
@@ -729,6 +729,13 @@ sub host_runtime_info
        return ($state, $output);
        }
 
+
+    if ($subselect eq "version")
+       {
+       $output = $host_view->get_property('summary.config.product.fullName');
+       $state = 0;
+       return ($state, $output);
+       }
 
     if (($subselect eq "issues") || ($subselect eq "all"))
        {

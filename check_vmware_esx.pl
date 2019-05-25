@@ -1337,9 +1337,6 @@
 #     the cluster part is unfinished.
 #   - Some minor reformatting of code.
 #
-# - 25 May 2019 Ricardo Bartels version 1.2.0
-#   - add feature to request licenses informations from host or vCenter
-#
 
 use strict;
 use warnings;

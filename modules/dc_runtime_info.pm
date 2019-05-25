@@ -784,6 +784,14 @@ sub dc_runtime_info
        $state = check_state($state, $actual_state);
        }
 
+    if ($subselect eq "version")
+       {
+       $target_vcenter_view = Vim::get_service_content();
+       $output = $target_vcenter_view->about->fullName;
+       $state = 0;
+       return ($state, $output);
+       }
+
     if ($true_sub_sel == 1)
        {
        get_me_out("Unknown DC RUNTIME subselect");
