@@ -1,6 +1,6 @@
 sub host_service_info
     {
-    my ($host) = @_;
+    my ($host, $maintenance_mode_state) = @_;
     my $state = 0;
     my $output;
     my $services;
@@ -21,7 +21,7 @@ sub host_service_info
     if (($host_view->get_property('runtime.inMaintenanceMode')) eq "true")
        {
        print "Notice: " . $host_view->name . " is in maintenance mode, check skipped\n";
-       exit 0;
+       exit $maintenance_mode_state;
        }
 
     $services = Vim::get_view(mo_ref => $host_view->configManager->serviceSystem, properties => ['serviceInfo'])->serviceInfo->service;

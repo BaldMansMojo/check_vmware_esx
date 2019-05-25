@@ -1,6 +1,6 @@
 sub host_runtime_info
     {
-    my ($host) = @_;
+    my ($host, $maintenance_mode_state) = @_;
     my $charging;
     my $summary;
     my $sensorname;
@@ -94,11 +94,7 @@ sub host_runtime_info
     if ($runtime->inMaintenanceMode)
        {
        print "Notice: " . $host_view->name . " is in maintenance mode, check skipped\n";
-       if ($subselect ne "all")
-           {
-           exit 0;
-           }
-       exit 1;
+       exit $maintenance_mode_state;
        }
 
     if (($subselect eq "listvms") || ($subselect eq "all"))

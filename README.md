@@ -456,6 +456,7 @@ that part of code is loaded which is needed.
 - op5 for the original plugin
 - Sven Nierlein
 - Simon Meggle
+- Riccardo Bartels for additional work and creating a "monster" pull request merging a lot of others
 - Everyone contributing their time for feedback, patches and issue reports
 
 ## Contributing

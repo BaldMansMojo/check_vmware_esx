@@ -3,7 +3,7 @@
 
 sub host_net_info
     {
-    my ($host) = @_;
+    my ($host, $maintenance_mode_state) = @_;
     my $state = 0;
     my $value;
     my $output;
@@ -157,7 +157,7 @@ sub host_net_info
        if (uc($host_view->get_property('runtime.inMaintenanceMode')) eq "TRUE")
           {
           print "Notice: " . $host_view->name . " is in maintenance mode, check skipped\n";
-          exit 0;
+          exit $maintenance_mode_state;
           }
  
        $network_system = Vim::get_view(mo_ref => $host_view->get_property('configManager.networkSystem') , properties => ['networkInfo']);

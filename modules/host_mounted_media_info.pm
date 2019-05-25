@@ -1,6 +1,6 @@
 sub host_mounted_media_info
     {
-    my ($host) = @_;
+    my ($host, $maintenance_mode_state) = @_;
     my $count = 0;
     my $state;
     my $output;
@@ -22,7 +22,7 @@ sub host_mounted_media_info
     if (($host_view->get_property('runtime.inMaintenanceMode')) eq "true")
        {
        print "Notice: " . $host_view->name . " is in maintenance mode, check skipped\n";
-       exit 0;
+       exit $maintenance_mode_state;
        }
 
     $vm_views = Vim::find_entity_views(view_type => 'VirtualMachine', begin_entity => $host_view, properties => ['name', 'config.template', 'config.hardware.device', 'runtime.powerState']);

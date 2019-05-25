@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -w
+#!/usr/bin/perl -w
 #
 # Nagios plugin to monitor vmware ESX and vSphere servers
 #
@@ -1320,6 +1320,22 @@
 #     it normally only possible to one argument. So "/usr/bin/env perl" will
 #     work while "/usr/bin/env perl -w " won't.
 #
+# - 25 Sep 2019 M.Fuerstenau version 1.1.0
+#   - Merged most pull requests (see 0.9.26.1)
+#   - New option  --maintenance_mode_state. Sets status in case ESX host is in maintenance
+#     mode.
+#
+#     Possible values are:
+#     OK or ok
+#     CRITICAL or critical or CRIT or crit
+#     WARNING or warning or WARN or warn
+#
+#     Default is UNKNOWN. Values are case insensitve.
+#
+#   - Renamed exit_error to exit_unknown because it exits with 3 and not with 2 or 1  
+#   - Moved exit_unknown(), debug() and save_session() before the cluster sub routines because
+#     the cluster part is unfinished.
+#   - Some minor reformatting of code.
 
 use strict;
 use warnings;
@@ -1363,7 +1379,7 @@ use open qw(:std :utf8);
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '1.0.0';                   # Contains the program version number
+our $prog_version = '1.1.0';                   # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
@@ -1389,6 +1405,14 @@ our $host;                                     # Name of the vmware server
 my  $cluster;                                  # Name of the monitored cluster
 our $datacenter;                               # Name of the vCenter server
 our $vmname;                                   # Name of the virtual machine
+
+my  $maintenance_mode_state;                   # Status in case ESX host is in maintenance mode
+
+                                               # Possible values are
+                                               # OK or ok
+                                               # CRITICAL or critical or CRIT or crit
+                                               # WARNING or warning or WARN or warn
+my  $maintenance_mode_state_def="unknown";     # Default status for maintenance mode
 
 my  $output;                                   # Contains the output string
 my  $values;
@@ -1506,45 +1530,46 @@ $NoA=$#ARGV;
 
 Getopt::Long::Configure('bundling');
 GetOptions
-	("h:s" => \$help,                "help:s"           => \$help,
-	 "H=s" => \$host,                "host=s"           => \$host,
-	 "C=s" => \$cluster,             "cluster=s"        => \$cluster,
-	 "D=s" => \$datacenter,          "datacenter=s"     => \$datacenter,
-	 "w=s" => \$warning,             "warning=s"        => \$warning,
-	 "c=s" => \$critical,            "critical=s"       => \$critical,
-	 "N=s" => \$vmname,              "name=s"           => \$vmname,
-	 "u=s" => \$username,            "username=s"       => \$username,
-	 "p=s" => \$password,            "password=s"       => \$password,
-	 "f=s" => \$authfile,            "authfile=s"       => \$authfile,
-	 "S=s" => \$select,              "select=s"         => \$select,
-	 "s=s" => \$subselect,           "subselect=s"      => \$subselect,
-	                                 "sessionfile=s"    => \$sessionfile_name,
-	                                 "sessionfiledir=s" => \$sessionfile_dir,
-	                                 "nosession"        => \$nosession,
-	 "B=s" => \$blacklist,           "exclude=s"        => \$blacklist,
-	 "W=s" => \$whitelist,           "include=s"        => \$whitelist,
-         "t=s" => \$timeout,             "timeout=s"        => \$timeout,
-	                                 "ignore_unknown"   => \$ignoreunknown,
-	                                 "ignore_warning"   => \$ignorewarning,
-	                                 "trace=s"          => \$trace,
-                                         "listsensors"      => \$listsensors,
-                                         "ignore_health"    => \$ignorehealth,
-                                         "usedspace"        => \$usedspace,
-                                         "perf_free_space"  => \$perf_free_space,
-                                         "alertonly"        => \$alertonly,
-                                         "multiline"        => \$multiline,
-                                         "isregexp"         => \$isregexp,
-                                         "listall"          => \$listall,
-                                         "poweredonly"      => \$vm_tools_poweredon_only,
-                                         "showall"          => \$showall,
-                                         "standbyok"        => \$standbyok,
-                                         "sslport=s"        => \$sslport,
-                                         "gigabyte"         => \$gigabyte,
-                                         "nostoragestatus"  => \$nostoragestatus,
-                                         "statelabels"      => \$statelabels,
-                                         "open-vm-tools"    => \$openvmtools,
-                                         "spaceleft"        => \$spaceleft,
-         "V"   => \$version,             "version"          => \$version,
+	("h:s" => \$help,                "help:s"                   => \$help,
+	 "H=s" => \$host,                "host=s"                   => \$host,
+	 "C=s" => \$cluster,             "cluster=s"                => \$cluster,
+	 "D=s" => \$datacenter,          "datacenter=s"             => \$datacenter,
+	 "w=s" => \$warning,             "warning=s"                => \$warning,
+	 "c=s" => \$critical,            "critical=s"               => \$critical,
+	 "N=s" => \$vmname,              "name=s"                   => \$vmname,
+	 "u=s" => \$username,            "username=s"               => \$username,
+	 "p=s" => \$password,            "password=s"               => \$password,
+	 "f=s" => \$authfile,            "authfile=s"               => \$authfile,
+	 "S=s" => \$select,              "select=s"                 => \$select,
+	 "s=s" => \$subselect,           "subselect=s"              => \$subselect,
+	                                 "sessionfile=s"            => \$sessionfile_name,
+	                                 "sessionfiledir=s"         => \$sessionfile_dir,
+	                                 "nosession"                => \$nosession,
+	 "B=s" => \$blacklist,           "exclude=s"                => \$blacklist,
+	 "W=s" => \$whitelist,           "include=s"                => \$whitelist,
+         "t=s" => \$timeout,             "timeout=s"                => \$timeout,
+	                                 "ignore_unknown"           => \$ignoreunknown,
+	                                 "ignore_warning"           => \$ignorewarning,
+	                                 "trace=s"                  => \$trace,
+                                         "listsensors"              => \$listsensors,
+                                         "ignore_health"            => \$ignorehealth,
+                                         "usedspace"                => \$usedspace,
+                                         "perf_free_space"          => \$perf_free_space,
+                                         "alertonly"                => \$alertonly,
+                                         "multiline"                => \$multiline,
+                                         "isregexp"                 => \$isregexp,
+                                         "listall"                  => \$listall,
+                                         "poweredonly"              => \$vm_tools_poweredon_only,
+                                         "showall"                  => \$showall,
+                                         "standbyok"                => \$standbyok,
+                                         "sslport=s"                => \$sslport,
+                                         "gigabyte"                 => \$gigabyte,
+                                         "nostoragestatus"          => \$nostoragestatus,
+                                         "statelabels"              => \$statelabels,
+                                         "open-vm-tools"            => \$openvmtools,
+                                         "spaceleft"                => \$spaceleft,
+                                         "maintenance_mode_state=s" => \$maintenance_mode_state,
+         "V"   => \$version,             "version"                  => \$version,
          "d|debug" => \$DEBUG,
 );
 
@@ -1600,6 +1625,44 @@ if ($timeout)
 $output = "Unknown ERROR!";
 $result = 2;
 
+# Set exit code for checks when in maintenance mode
+if (!(defined($maintenance_mode_state)))
+   {
+   $maintenance_mode_state=$maintenance_mode_state_def;
+   }
+
+# We are using regex instead of a simple compare to be fault tolerant
+if ($maintenance_mode_state =~ m/^ok.*$/i)
+   {
+   $maintenance_mode_state = 0;
+   }
+else
+   {
+   if ($maintenance_mode_state =~ m/^wa.*$/i)
+      {
+      $maintenance_mode_state = 1;
+      }
+   else
+      {
+      if ($maintenance_mode_state =~ m/^cr.*$/i)
+         {
+         $maintenance_mode_state = 2;
+         }
+      else
+         {
+         if ($maintenance_mode_state =~ m/^un.*$/i)
+            {
+            $maintenance_mode_state = 3;
+            }
+         else
+            {
+            print "Error: Unknown exit status for checks when in maintenance mode. Please check.\n";
+            exit 2;
+            }
+         }
+      }
+   }
+   
 # Check $subselect and if defined set it to upper case letters
 if (defined($subselect))
    {
@@ -1607,7 +1670,7 @@ if (defined($subselect))
       {
       $subselect = undef;
       }
-      else
+   else
       {
       if ( $select ne "volumes")
          {
@@ -2106,7 +2169,7 @@ sub main_select
           {
           require host_net_info;
           import host_net_info;
-          ($result, $output) = host_net_info($esx_server);
+          ($result, $output) = host_net_info($esx_server, $maintenance_mode_state);
           return($result, $output);
           }
        if ($select eq "io")
@@ -2120,14 +2183,14 @@ sub main_select
           {
           require host_list_vm_volumes_info;
           import host_list_vm_volumes_info;
-          ($result, $output) = host_list_vm_volumes_info($esx_server);
+          ($result, $output) = host_list_vm_volumes_info($esx_server, $maintenance_mode_state);
           return($result, $output);
           }
        if ($select eq "runtime")
           {
           require host_runtime_info;
           import host_runtime_info;
-          ($result, $output) = host_runtime_info($esx_server);
+          ($result, $output) = host_runtime_info($esx_server, $maintenance_mode_state);
           return($result, $output);
           }
        # service OR services because I always type the wrong one :-)) - M.Fuerstenau
@@ -2135,14 +2198,14 @@ sub main_select
           {
           require host_service_info;
           import host_service_info;
-          ($result, $output) = host_service_info($esx_server);
+          ($result, $output) = host_service_info($esx_server, $maintenance_mode_state);
           return($result, $output);
           }
        if ($select eq "storage")
           {
           require host_storage_info;
           import host_storage_info;
-          ($result, $output) = host_storage_info($esx_server, $blacklist);
+          ($result, $output) = host_storage_info($esx_server, $blacklist, $maintenance_mode_state);
           return($result, $output);
           }
        if ($select eq "uptime")
@@ -2156,7 +2219,7 @@ sub main_select
           {
           require host_mounted_media_info;
           import host_mounted_media_info;
-          ($result, $output) = host_mounted_media_info($esx_server);
+          ($result, $output) = host_mounted_media_info($esx_server, $maintenance_mode_state);
           return($result, $output);
           }
        if ($select eq "soap")
@@ -2168,7 +2231,7 @@ sub main_select
           {
           require host_snapshot_info;
           import host_snapshot_info;
-          ($result, $output) = host_snapshot_info($esx_server);
+          ($result, $output) = host_snapshot_info($esx_server, $maintenance_mode_state);
           return($result, $output);
           }
 
@@ -2560,13 +2623,51 @@ sub catch_intterm
     exit 3;
     }
 
-sub exit_error
+sub exit_unknown
     {
     my $message = shift;
     printf "$message\n", @_;
     exit 3;
-}
+    }
  
+sub debug
+    {
+    unless ($DEBUG) { return; }
+    my $message = shift;
+    printf "$message\n", @_;
+    }
+
+sub save_session
+    {
+    my $sessionfile = shift
+        or exit_unknown("save_session needs a parameter!");
+    my $lock = $sessionfile . "_locked";
+    my $fh;
+    my $mtime;
+
+    if (-e $sessionfile)
+       {
+       $mtime = (stat($sessionfile))[9];
+       if ($mtime > $program_start)
+          {
+          debug("Not saving session, session file '%s' is newer than program start!", $sessionfile);
+          return;
+          }
+       }
+
+    open $fh, '>', $lock
+        or exit_unknown "Unable to create session lock file '%s'!", $lock;
+
+    flock $fh, 2
+        or exit_unknown "could not lock '$lock'!";
+
+    debug("Saving session to '%s'", $sessionfile);
+    Vim::save_session(session_file => $sessionfile);
+
+    close $fh;
+    unlink $lock;
+    }
+
 #=====================================================================| Cluster |============================================================================#
 
 sub cluster_cluster_info
@@ -2853,42 +2954,5 @@ sub cluster_runtime_info
         }
 
         return ($state, $output);
-}
-
-sub debug
-{
-    unless ($DEBUG) { return; }
-    my $message = shift;
-    printf "$message\n", @_;
-}
-
-sub save_session
-{
-    my $sessionfile = shift
-        or exit_error("save_session needs a parameter!");
-    my $lock = $sessionfile . "_locked";
-
-    if (-e $sessionfile)
-    {
-        my $mtime = (stat($sessionfile))[9];
-        if ($mtime > $program_start)
-        {
-            debug("Not saving session, session file '%s' is newer than program start!", $sessionfile);
-            return;
-        }
-    }
-
-    my $fh;
-    open $fh, '>', $lock
-        or exit_error "Unable to create session lock file '%s'!", $lock;
-
-    flock $fh, 2
-        or exit_error "could not lock '$lock'!";
-
-    debug("Saving session to '%s'", $sessionfile);
-    Vim::save_session(session_file => $sessionfile);
-
-    close $fh;
-    unlink $lock;
 }
 

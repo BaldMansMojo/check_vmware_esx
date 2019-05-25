@@ -1,6 +1,6 @@
 sub host_storage_info
     {
-    my ($host, $blacklist) = @_;
+    my ($host, $blacklist, $maintenance_mode_state) = @_;
     my $count = 0;                        # Counter for items (adapter,luns etc.)
     my $warn_count = 0;                   # Warning counter for items (adapter,luns etc.)
     my $err_count = 0;                    # Error counter for items (adapter,luns etc.)
@@ -84,7 +84,7 @@ sub host_storage_info
     if (($host_view->get_property('runtime.inMaintenanceMode')) eq "true")
        {
        print "Notice: " . $host_view->name . " is in maintenance mode, check skipped\n";
-       exit 0;
+       exit $maintenance_mode_state;
        }
    
     if (!defined($subselect))

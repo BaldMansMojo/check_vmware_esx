@@ -1,6 +1,6 @@
 sub host_list_vm_volumes_info
     {
-    my ($host) = @_;
+    my ($host, $maintenance_mode_state) = @_;
     my $host_view = Vim::find_entity_view(view_type => 'HostSystem', filter => $host, properties => ['name', 'datastore', 'runtime.inMaintenanceMode']);
 
     if (!defined($host_view))
@@ -12,7 +12,7 @@ sub host_list_vm_volumes_info
     if (($host_view->get_property('runtime.inMaintenanceMode')) eq "true")
        {
        print "Notice: " . $host_view->name . " is in maintenance mode, check skipped\n";
-       exit 0;
+       exit $maintenance_mode_state;
        }
 
     if (!defined($host_view->datastore))

@@ -96,6 +96,16 @@ sub print_help
        print "    --ignore_unknown                 Sometimes 3 (unknown) is returned from a component.\n";
        print "                                     But the check itself is ok.\n";
        print "                                     With this option the plugin will return OK (0) instead of UNKNOWN (3).\n";
+       print "    --maintenance_mode_state         Set status in case ESX host is in maintenance mode.\n";
+       print "\n";
+       print "                                     Possible values are:\n";
+       print "                                     OK or ok\n";
+       print "                                     CRITICAL or critical or CRIT or crit\n";
+       print "                                     WARNING or warning or WARN or warn\n";
+       print "\n";
+       print "                                     Default is UNKNOWN because you do not know the real state.\n";
+       print "                                     Values are case insensitve.\n";
+       print "\n";
        print "    --ignore_warning                 Sometimes 2 (warning) is returned from a component.\n";
        print "                                     But the check itself is ok (from an operator view).\n";
        print "                                     With this option the plugin will return OK (0) instead of WARNING (1).\n";

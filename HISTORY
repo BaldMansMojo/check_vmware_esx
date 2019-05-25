@@ -1236,3 +1236,20 @@ History:
   - Bugfix - Back to direct call of the command interpreter in shebang. Using Linux
     it normally only possible to one argument. So "/usr/bin/env perl" will
     work while "/usr/bin/env perl -w " won't.
+
+- 25 Sep 2019 M.Fuerstenau version 1.1.0
+  - Merged most pull requests (see 0.9.26.1)
+  - New option  --maintenance_mode_state. Sets status in case ESX host is in maintenance
+    mode.
+
+    Possible values are:
+    OK or ok
+    CRITICAL or critical or CRIT or crit
+    WARNING or warning or WARN or warn
+
+    Default is UNKNOWN. Values are case insensitve.
+
+  - Renamed exit_error to exit_unknown because it exits with 3 and not with 2 or 1  
+  - Moved exit_unknown(), debug() and save_session() before the cluster sub routines because
+    the cluster part is unfinished.
+  - Some minor reformatting of code.
