@@ -956,7 +956,16 @@ sub print_help
        print "                                    - VMware tools are installed, and the version is known to be too new to\n";
        print "                                      work correctly with this virtual machine. (Critical)\n";
        print "                                    - VMware tools are installed, but the version is too old. (Warning)\n";
-       print "                                    - VMware tools are installed, but it is not managed by VMWare. (Critical)\n";
+       print "                                    - VMware tools are installed, but it is not managed by VMWare. (Warning).\n";
+       print "                                      The error code of this message can be switched from \"warning\" to \"ok\"\n";
+       print "                                      using --open_vm_tools_ok (See below).\n";
+       print "\n";
+       print "     --open_vm_tools_ok             Set check to \"ok\" instead of \"unknown\" when tools are not managed by\n";
+       print "                                    Vmware like tools  OpenVMtools.\n";
+       print "\n";
+       print "     --no_vm_tools_ok               Set check to \"ok\" instead of \"warning\" when no tools are installed.\n";
+       print "                                    For some reasons it maybe ok to run virtual machines without tools.\n";
+       print "\n";
        print "or with\n";
        print " -s, --subselect=issues             All issues for the host\n";
        print "     --multiline                    Multiline output in overview. This mean technically that\n";

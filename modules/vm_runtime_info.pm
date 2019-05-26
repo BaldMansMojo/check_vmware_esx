@@ -295,7 +295,14 @@ sub vm_runtime_info
           else
              {
              $tools_out = "VMware tools not installed.";
-             $actual_state = 1;
+             if (defined($no_vmtools))
+                {
+                $actual_state = 0;
+                }
+             else
+                {
+                $actual_state = 1;
+                }
              }
           }
        else

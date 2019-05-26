@@ -1298,7 +1298,7 @@
 #
 #   - fix bad OUM in vm_disk_io_info (6uellerBpanda)
 #
-#   - A unpluged network interface is considered critical (Ricardo Bartels)
+#   - A unplugged network interface is considered critical (Ricardo Bartels)
 #
 #   - Be more consistent in return level of maintenance mode (Ricardo Bartels)
 #     only write warning if host runtime is checked with no subselect
@@ -1337,9 +1337,38 @@
 #     the cluster part is unfinished.
 #   - Some minor reformatting of code.
 #
-# - 25 May 2019 Ricardo Bartels
-#   - request ESXi host or vCenter version trough runtime
+# - 25 Sep 2019 M.Fuerstenau version 1.1.1
+#   - Added modified SSL certificate validation by Justin Michael
 #
+# - 26 Sep 2019 M.Fuerstenau version 1.2.0
+#   - Merged:
+#      - 25 May 2019 Ricardo Bartels
+#        - request ESXi host or vCenter version trough runtime
+#        - add feature to request licenses informations from host or vCenter
+#   - Bugfix
+#     - An option --open_vm_tools_okto give OK instead of UNKNOWN was added 
+#       in 2015(!) but only for dc_runtime_info() but not for vm_runtime_info().
+#       It was also not part of help() or the command reference. Fixed.
+#   - Reformatted code of ystem_license_info()
+#     - Corresponding braces and brackets shouldbe in the same column. 
+#       This makes reading of the code easier.
+#     - Same for unified indentions
+#     - Function calls should not be spread over several lines exept you have
+#       clean indentions. Also for better readability.
+#     - Replaced "elsif" by "else if" alos for clean indention and ....
+#     - New option --no_vm_tools_ok. It maybe for some reasons that you
+#       have virtual machines without VMware tools. This should not cause an alarm.
+#   - New option  --unconnected_nics. Sets status for unconnected nics. This option
+#     replaces hardcoded set to critical by Ricardo Burhenne
+#
+#     Possible values are:
+#     OK or ok
+#     CRITICAL or critical or CRIT or crit
+#     WARNING or warning or WARN or warn
+#
+#     Default is CRITICAL. Values are case insensitve.
+#
+
 
 use strict;
 use warnings;
@@ -1359,7 +1388,16 @@ use datastore_volumes_info;
 
 # Prevent SSL certificate validation
 
-$ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0; 
+#$ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0;
+BEGIN {
+    $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0;
+    eval {
+        # required for new IO::Socket::SSL versions
+        require IO::Socket::SSL;
+        IO::Socket::SSL->import();
+        IO::Socket::SSL::set_ctx_defaults( SSL_verify_mode => 0 );
+    };
+};
 
 if ( $@ )
    {
@@ -1409,6 +1447,14 @@ our $host;                                     # Name of the vmware server
 my  $cluster;                                  # Name of the monitored cluster
 our $datacenter;                               # Name of the vCenter server
 our $vmname;                                   # Name of the virtual machine
+
+my  $unplugged_nics;                           # Which state should be deliverd in state of unconnected nics?
+
+                                               # Possible values are
+                                               # OK or ok
+                                               # CRITICAL or critical or CRIT or crit
+                                               # WARNING or warning or WARN or warn
+my  $unplugged_nics_def="warning";             # Default status for unconnected nics?
 
 my  $maintenance_mode_state;                   # Status in case ESX host is in maintenance mode
 
@@ -1507,6 +1553,7 @@ my $statelabels_def="y";                       # Default value for state labels 
                                                # set this default to "n".
 my $statelabels;                               # To overwrite $statelabels_def via commandline.
 our $openvmtools;                              # Signalize that you use Open VM Tools instead of the servers one.
+our $no_vmtools;                                # Signalize that not having VMware tools is ok
 our $hidekey;                                  # Hide licenses key when requesting license informations
 
 
@@ -1571,10 +1618,12 @@ GetOptions
                                          "gigabyte"                 => \$gigabyte,
                                          "nostoragestatus"          => \$nostoragestatus,
                                          "statelabels"              => \$statelabels,
-                                         "open-vm-tools"            => \$openvmtools,
+                                         "open_vm_tools_ok"         => \$openvmtools,
+                                         "no_vm_tools_ok"           => \$no_vmtools,
                                          "hidekey"                  => \$hidekey,
                                          "spaceleft"                => \$spaceleft,
                                          "maintenance_mode_state=s" => \$maintenance_mode_state,
+                                         "unplugged_nics=s"         => \$unplugged_nics,
          "V"   => \$version,             "version"                  => \$version,
          "d|debug" => \$DEBUG,
 );
@@ -1665,6 +1714,37 @@ else
             print "Error: Unknown exit status for checks when in maintenance mode. Please check.\n";
             exit 2;
             }
+         }
+      }
+   }
+   
+# Set state for unconnected nics
+if (!(defined($unplugged_nics)))
+   {
+   $unplugged_nics=$unplugged_nics_def;
+   }
+
+# We are using regex instead of a simple compare to be fault tolerant
+if ($unplugged_nics =~ m/^ok.*$/i)
+   {
+   $unplugged_nics = 0;
+   }
+else
+   {
+   if ($unplugged_nics =~ m/^wa.*$/i)
+      {
+      $unplugged_nics = 1;
+      }
+   else
+      {
+      if ($unplugged_nics =~ m/^cr.*$/i)
+         {
+         $unplugged_nics = 2;
+         }
+      else
+         {
+         print "Error: Unknown states for unconnected nics. Please check.\n";
+         exit 2;
          }
       }
    }
@@ -2175,7 +2255,7 @@ sub main_select
           {
           require host_net_info;
           import host_net_info;
-          ($result, $output) = host_net_info($esx_server, $maintenance_mode_state);
+          ($result, $output) = host_net_info($esx_server, $maintenance_mode_state, $unplugged_nics);
           return($result, $output);
           }
        if ($select eq "io")

@@ -1,5 +1,5 @@
 
-check_vmware_esx.pl,Version 1.1.0
+check_vmware_esx.pl,Version 1.2.0
 
 This vmware Infrastructure monitoring plugin is free software, and comes with ABSOLUTELY NO WARRANTY.
 It may be used, redistributed and/or modified under the terms of the GNU General Public Licence 
@@ -859,7 +859,16 @@ or with
                                     - VMware tools are installed, and the version is known to be too new to
                                       work correctly with this virtual machine. (Critical)
                                     - VMware tools are installed, but the version is too old. (Warning)
-                                    - VMware tools are installed, but it is not managed by VMWare. (Critical)
+                                    - VMware tools are installed, but it is not managed by VMWare. (Warning).
+                                      The error code of this message can be switched from "warning" to "ok"
+                                      using --open_vm_tools_ok (See below).
+
+     --open_vm_tools_ok             Set check to "ok" instead of "unknown" when tools are not managed by
+                                    Vmware like tools  OpenVMtools.
+
+     --no_vm_tools_ok               Set check to "ok" instead of "warning" when no tools are installed.
+                                    For some reasons it maybe ok to run virtual machines without tools.
+
 or with
  -s, --subselect=issues             All issues for the host
      --multiline                    Multiline output in overview. This mean technically that

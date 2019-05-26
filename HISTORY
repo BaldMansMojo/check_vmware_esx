@@ -1,6 +1,9 @@
 History:
 ========
 
+This document contains the addons and changes and the reasons why something
+was done
+
 - 22 Mar 2012 M.Fuerstenau
   - Started with actual version 0.5.0
   - Impelemented check_esx3new2.diff from Simon (simeg / simmerl)
@@ -1217,7 +1220,7 @@ History:
 
   - fix bad OUM in vm_disk_io_info (6uellerBpanda)
 
-  - A unpluged network interface is considered critical (Ricardo Bartels)
+  - A unplugged network interface is considered critical (Ricardo Bartels)
 
   - Be more consistent in return level of maintenance mode (Ricardo Bartels)
     only write warning if host runtime is checked with no subselect
@@ -1254,5 +1257,33 @@ History:
     the cluster part is unfinished.
   - Some minor reformatting of code.
 
-- 25 May 2019 Ricardo Bartels
-  - request ESXi host or vCenter version trough runtime
+- 25 Sep 2019 M.Fuerstenau version 1.1.1
+  - Added modified SSL certificate validation by Justin Michael
+
+- 26 Sep 2019 M.Fuerstenau version 1.2.0
+  - Merged:
+     - 25 May 2019 Ricardo Bartels
+       - request ESXi host or vCenter version trough runtime
+       - add feature to request licenses informations from host or vCenter
+  - Bugfix
+    - An option --open_vm_tools_okto give OK instead of UNKNOWN was added 
+      in 2015(!) but only for dc_runtime_info() but not for vm_runtime_info().
+      It was also not part of help() or the command reference. Fixed.
+  - Reformatted code of ystem_license_info()
+    - Corresponding braces and brackets shouldbe in the same column. 
+      This makes reading of the code easier.
+    - Same for unified indentions
+    - Function calls should not be spread over several lines exept you have
+      clean indentions. Also for better readability.
+    - Replaced "elsif" by "else if" alos for clean indention and ....
+    - New option --no_vm_tools_ok. It maybe for some reasons that you
+      have virtual machines without VMware tools. This should not cause an alarm.
+  - New option  --unconnected_nics. Sets status for unconnected nics. This option
+    replaces hardcoded set to critical by Ricardo Burhenne
+
+    Possible values are:
+    OK or ok
+    CRITICAL or critical or CRIT or crit
+    WARNING or warning or WARN or warn
+
+    Default is CRITICAL. Values are case insensitve.

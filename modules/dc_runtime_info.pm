@@ -543,7 +543,14 @@ sub dc_runtime_info
                         {
                         $guestToolsNotInstalled_cnt++;
                         $tools_out = $tools_out ."VM " . $vm->name . " Tools not installed." . $multiline;
-                        $actual_state = 1;
+                        if (defined($no_vmtools))
+                           {
+                           $actual_state = 0;
+                           }
+                        else
+                           {
+                           $actual_state = 1;
+                           }
                         $state = check_state($state, $actual_state);
                         }
                      }

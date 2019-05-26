@@ -3,7 +3,7 @@
 
 sub host_net_info
     {
-    my ($host, $maintenance_mode_state) = @_;
+    my ($host, $maintenance_mode_state, $unplugged_nics) = @_;
     my $state = 0;
     my $value;
     my $output;
@@ -220,9 +220,18 @@ sub host_net_info
                                         {
                                         $output_nic = $output_nic . ", ";
                                         }
-                                     $output_nic = $output_nic . $multiline . $NIC{$nic_key}->device . " is unplugged";
-                                     $state = 2;
-                                     $BadCount++;
+                                     if ($unplugged_nics == 0)
+                                        {
+                                        $output_nic = $output_nic . $multiline . $NIC{$nic_key}->device . " is unplugged but state is marked as ok.";
+                                        $state = $unplugged_nics;
+                                        $OKCount++;
+                                        }
+                                     else
+                                        {
+                                        $output_nic = $output_nic . $multiline . $NIC{$nic_key}->device . " is unplugged";
+                                        $state = $unplugged_nics;
+                                        $BadCount++;
+                                        }
                                      }
                                   else
                                      {
