@@ -102,10 +102,15 @@ sub return_host_performance_values
     {
     my $values;
     my $host_name = shift(@_);
+    my $maintenance_mode_state = shift(@_);
     my $host_view;
 
     $host_view = Vim::find_entity_views(view_type => 'HostSystem', filter => $host_name, properties => (['name', 'runtime.inMaintenanceMode']) ); # Added properties named argument.
 
+    if (!defined($maintenance_mode_state))
+       {
+       $maintenance_mode_state = 0;
+       }
     if (!defined($host_view))
        {
        print "Runtime error\n";
@@ -121,7 +126,7 @@ sub return_host_performance_values
     if (($$host_view[0]->get_property('runtime.inMaintenanceMode')) eq "true")
        {
        print "Notice: " . $$host_view[0]->name . " is in maintenance mode, check skipped\n";
-       exit 0;
+       exit $maintenance_mode_state;
        }
 
     $values = generic_performance_values($host_view, @_);

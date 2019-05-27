@@ -1,6 +1,6 @@
 sub host_mem_info
     {
-    my ($host) = @_;
+    my ($host, $maintenance_mode_state) = @_;
     my $state = 0;
     my $output;
     my $value;
@@ -19,7 +19,7 @@ sub host_mem_info
                                  # 0 -> existing subselect
                                  # 1 -> non existing subselect
     
-    ($host_view, $values) = return_host_performance_values($host, 'mem', ( 'usage.average', 'consumed.average','swapused.average', 'overhead.average', 'vmmemctl.average'));
+    ($host_view, $values) = return_host_performance_values($host, $maintenance_mode_state, 'mem', ( 'usage.average', 'consumed.average','swapused.average', 'overhead.average', 'vmmemctl.average'));
         
     if (defined($values))
        {
@@ -46,7 +46,7 @@ sub host_mem_info
 
        if ($perf_val_error == 1)
           {
-          ($host_view, $values) = return_host_performance_values($host, 'mem', ( 'usage.average'));
+          ($host_view, $values) = return_host_performance_values($host, $maintenance_mode_state, 'mem', ( 'usage.average'));
           }
 
        if (defined($values))
@@ -79,7 +79,7 @@ sub host_mem_info
 
        if ($perf_val_error == 1)
           {
-          ($host_view, $values) = return_host_performance_values($host, 'mem', ( 'consumed.average'));
+          ($host_view, $values) = return_host_performance_values($host, $maintenance_mode_state, 'mem', ( 'consumed.average'));
           }
 
        if (defined($values))
@@ -129,7 +129,7 @@ sub host_mem_info
 
        if ($perf_val_error == 1)
           {
-          ($host_view, $values) = return_host_performance_values($host, 'mem', ( 'swapused.average'));
+          ($host_view, $values) = return_host_performance_values($host, $maintenance_mode_state, 'mem', ( 'swapused.average'));
           }
 
        if (defined($values))
@@ -216,7 +216,7 @@ sub host_mem_info
 
        if ($perf_val_error == 1)
           {
-          ($host_view, $values) = return_host_performance_values($host, 'mem', ( 'overhead.average'));
+          ($host_view, $values) = return_host_performance_values($host, $maintenance_mode_state, 'mem', ( 'overhead.average'));
           }
 
        if (defined($values))
@@ -266,7 +266,7 @@ sub host_mem_info
 
        if ($perf_val_error == 1)
           {
-          ($host_view, $values) = return_host_performance_values($host, 'mem', ( 'vmmemctl.average'));
+          ($host_view, $values) = return_host_performance_values($host, $maintenance_mode_state, 'mem', ( 'vmmemctl.average'));
           }
 
        if (defined($values))
