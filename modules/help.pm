@@ -104,7 +104,7 @@ sub print_help
        print "                                     WARNING or warning or WARN or warn\n";
        print "\n";
        print "                                     Default is UNKNOWN because you do not know the real state.\n";
-       print "                                     Values are case insensitve.\n";
+       print "                                     Values are case insensitive.\n";
        print "\n";
        print "    --ignore_warning                 Sometimes 2 (warning) is returned from a component.\n";
        print "                                     But the check itself is ok (from an operator view).\n";
@@ -471,6 +471,15 @@ sub print_help
        print "-s, --subselect=nic                 Check all active NICs.\n";
        print "-B, --exclude=<black_list>          Blacklist NICs.\n";
        print "    --isregexp                      Whether to treat blacklist as regexp\n";
+       print "\n";
+       print "    --unplugged_nics_state          Sets status for unplugged nics\n";
+       print "\n";
+       print "                                    Possible values are:\n";
+       print "                                    OK or ok\n";
+       print "                                    CRITICAL or critical or CRIT or crit\n";
+       print "                                    WARNING or warning or WARN or warn\n";
+       print "\n";
+       print "                                    Default is WARNING. Values are case insensitive.\n";
        print "\n";
        print "Volumes:\n";
        print "--------\n";

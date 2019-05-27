@@ -1358,15 +1358,15 @@
 #     - Replaced "elsif" by "else if" alos for clean indention and ....
 #     - New option --no_vm_tools_ok. It maybe for some reasons that you
 #       have virtual machines without VMware tools. This should not cause an alarm.
-#   - New option  --unconnected_nics. Sets status for unconnected nics. This option
-#     replaces hardcoded set to critical by Ricardo Burhenne
+#   - New option --unplugged_nics_state. Sets status for unplugged nics. This option
+#     replaces hardcoded set to critical by Ricardo Bartels
 #
 #     Possible values are:
 #     OK or ok
 #     CRITICAL or critical or CRIT or crit
 #     WARNING or warning or WARN or warn
 #
-#     Default is CRITICAL. Values are case insensitve.
+#     Default is WARNING. Values are case insensitve.
 #
 
 
@@ -1448,13 +1448,13 @@ my  $cluster;                                  # Name of the monitored cluster
 our $datacenter;                               # Name of the vCenter server
 our $vmname;                                   # Name of the virtual machine
 
-my  $unplugged_nics;                           # Which state should be deliverd in state of unconnected nics?
+my  $unplugged_nics_state;                     # Which state should be deliverd in state of unconnected nics?
 
                                                # Possible values are
                                                # OK or ok
                                                # CRITICAL or critical or CRIT or crit
                                                # WARNING or warning or WARN or warn
-my  $unplugged_nics_def="warning";             # Default status for unconnected nics?
+my  $unplugged_nics_state_def="warning";       # Default status for unconnected nics?
 
 my  $maintenance_mode_state;                   # Status in case ESX host is in maintenance mode
 
@@ -1623,7 +1623,7 @@ GetOptions
                                          "hidekey"                  => \$hidekey,
                                          "spaceleft"                => \$spaceleft,
                                          "maintenance_mode_state=s" => \$maintenance_mode_state,
-                                         "unplugged_nics=s"         => \$unplugged_nics,
+                                         "unplugged_nics_state=s"   => \$unplugged_nics_state,
          "V"   => \$version,             "version"                  => \$version,
          "d|debug" => \$DEBUG,
 );
@@ -1719,27 +1719,27 @@ else
    }
    
 # Set state for unconnected nics
-if (!(defined($unplugged_nics)))
+if (!(defined($unplugged_nics_state)))
    {
-   $unplugged_nics=$unplugged_nics_def;
+   $unplugged_nics_state=$unplugged_nics_state_def;
    }
 
 # We are using regex instead of a simple compare to be fault tolerant
-if ($unplugged_nics =~ m/^ok.*$/i)
+if ($unplugged_nics_state =~ m/^ok.*$/i)
    {
-   $unplugged_nics = 0;
+   $unplugged_nics_state = 0;
    }
 else
    {
-   if ($unplugged_nics =~ m/^wa.*$/i)
+   if ($unplugged_nics_state =~ m/^wa.*$/i)
       {
-      $unplugged_nics = 1;
+      $unplugged_nics_state = 1;
       }
    else
       {
-      if ($unplugged_nics =~ m/^cr.*$/i)
+      if ($unplugged_nics_state =~ m/^cr.*$/i)
          {
-         $unplugged_nics = 2;
+         $unplugged_nics_state = 2;
          }
       else
          {
@@ -2255,7 +2255,7 @@ sub main_select
           {
           require host_net_info;
           import host_net_info;
-          ($result, $output) = host_net_info($esx_server, $maintenance_mode_state, $unplugged_nics);
+          ($result, $output) = host_net_info($esx_server, $maintenance_mode_state, $unplugged_nics_state);
           return($result, $output);
           }
        if ($select eq "io")

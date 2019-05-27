@@ -25,7 +25,7 @@ General options:
                                      WARNING or warning or WARN or warn
 
                                      Default is UNKNOWN because you do not know the real state.
-                                     Values are case insensitve.
+                                     Values are case insensitive.
 
     --ignore_warning                 Sometimes 2 (warning) is returned from a component.
                                      But the check itself is ok (from an operator view).
@@ -380,6 +380,15 @@ or
 -s, --subselect=nic                 Check all active NICs.
 -B, --exclude=<black_list>          Blacklist NICs.
     --isregexp                      Whether to treat blacklist as regexp
+
+    --unplugged_nics_state          Sets status for unplugged nics
+
+                                    Possible values are:
+                                    OK or ok
+                                    CRITICAL or critical or CRIT or crit
+                                    WARNING or warning or WARN or warn
+
+                                    Default is WARNING. Values are case insensitive.
 
 Volumes:
 --------
