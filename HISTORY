@@ -1224,24 +1224,27 @@ was done
 
   - Be more consistent in return level of maintenance mode (Ricardo Bartels)
     only write warning if host runtime is checked with no subselect
+
   - Added option "--ignore_health" to host runtime (all) check
     Sometimes not all hardware components are correctly reported via
     CIM interface which leads to check errors when checking runtime
     status all. This option ignores the health status and prevents the
     the plugin from failing to report the overall status of the host.
     IMPORTENT: make sure to monitor the host health status separately!
-    Most likely via ILO/ILOM interface.
-  - declare all file handles as UTF-8 to be able to print multibyte strings
-    from CIM interface (e.g. snapshot names)
+    Most likely via ILO/ILOM interface. (Ricardo Bartels)
 
-- 24 Sep 2019 M.Fuerstenau version 1.0.0
+  - declare all file handles as UTF-8 to be able to print multibyte strings
+    from CIM interface (e.g. snapshot names) (Ricardo Bartels)
+
+- 24 May 2019 M.Fuerstenau version 1.0.0
   - Merged most pull requests (see 0.9.26.1)
   - Bugfix - Back to direct call of the command interpreter in shebang. Using Linux
     it normally only possible to one argument. So "/usr/bin/env perl" will
     work while "/usr/bin/env perl -w " won't.
 
-- 25 Sep 2019 M.Fuerstenau version 1.1.0
+- 25 May 2019 M.Fuerstenau version 1.1.0
   - Merged most pull requests (see 0.9.26.1)
+
   - New option  --maintenance_mode_state. Sets status in case ESX host is in maintenance
     mode.
 
@@ -1253,14 +1256,16 @@ was done
     Default is UNKNOWN. Values are case insensitve.
 
   - Renamed exit_error to exit_unknown because it exits with 3 and not with 2 or 1  
+
   - Moved exit_unknown(), debug() and save_session() before the cluster sub routines because
     the cluster part is unfinished.
+
   - Some minor reformatting of code.
 
-- 25 Sep 2019 M.Fuerstenau version 1.1.1
+- 25 May 2019 M.Fuerstenau version 1.1.1
   - Added modified SSL certificate validation by Justin Michael
 
-- 26 Sep 2019 M.Fuerstenau version 1.2.0
+- 26 May 2019 M.Fuerstenau version 1.2.0
   - Merged:
      - 25 May 2019 Ricardo Bartels
        - request ESXi host or vCenter version trough runtime
@@ -1269,21 +1274,21 @@ was done
     - An option --open_vm_tools_okto give OK instead of UNKNOWN was added 
       in 2015(!) but only for dc_runtime_info() but not for vm_runtime_info().
       It was also not part of help() or the command reference. Fixed.
-  - Reformatted code of ystem_license_info()
+  - Reformatted code of system_license_info()
     - Corresponding braces and brackets shouldbe in the same column. 
       This makes reading of the code easier.
     - Same for unified indentions
     - Function calls should not be spread over several lines exept you have
       clean indentions. Also for better readability.
-    - Replaced "elsif" by "else if" alos for clean indention and ....
+    - Replaced "elsif" by "else if" also for clean indention and ....
     - New option --no_vm_tools_ok. It maybe for some reasons that you
       have virtual machines without VMware tools. This should not cause an alarm.
   - New option  --unconnected_nics. Sets status for unconnected nics. This option
-    replaces hardcoded set to critical by Ricardo Burhenne
+    replaces hardcoded set to critical by Ricardo Bartels
 
     Possible values are:
     OK or ok
     CRITICAL or critical or CRIT or crit
     WARNING or warning or WARN or warn
 
-    Default is CRITICAL. Values are case insensitve.
+    Default is CRITICAL. Values are case insensitive.
