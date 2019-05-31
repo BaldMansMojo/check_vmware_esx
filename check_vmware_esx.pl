@@ -8,7 +8,7 @@
 # Copyright (c) 2008 op5 AB
 # Original author: Kostyantyn Hushchyn <dev@op5.com>
 # Contributor(s):
-#   Patrick MÃ¼ller
+#   Patrick Müller
 #   Jeremy Martin
 #   Eric Jonsson
 #   stumpr
@@ -1370,7 +1370,6 @@
 #     WARNING or warning or WARN or warn
 #
 #     Default is WARNING. Values are case insensitve.
-#
 
 use strict;
 use warnings;
@@ -1423,7 +1422,7 @@ use open qw(:std :utf8);
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '1.2.0';                   # Contains the program version number
+our $prog_version = '1.2.1';                   # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
