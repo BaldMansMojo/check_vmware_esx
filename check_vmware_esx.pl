@@ -27,6 +27,7 @@
 #   Danijel Tasov
 #   6uellerBpanda
 #   Ricardo Bartels
+#   Claudio Kuenzler
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -1377,7 +1378,9 @@
 #     - documented/renamed new option unconnected_nics to unplugged_nics_state
 #     - fix option maintenance_mode_state, now passed on to all host modules
 #       (Thx to Ricardo to correct my lousy "middle-in-thenight-work - Martin)
-  
+#   - Added fix from Claudio Kuenzler
+#     - Corrected perf data on net checks  
+
 use strict;
 use warnings;
 use File::Basename;

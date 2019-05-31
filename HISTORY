@@ -1299,3 +1299,5 @@ was done
     - documented/renamed new option unconnected_nics to unplugged_nics_state
     - fix option maintenance_mode_state, now passed on to all host modules
       (Thx to Ricardo to correct my lousy "middle-in-thenight-work - Martin)
+  - Added fix from Claudio Kuenzler
+    - Corrected perf data on net checks  
