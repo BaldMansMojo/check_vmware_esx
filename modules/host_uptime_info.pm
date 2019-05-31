@@ -1,11 +1,11 @@
 sub host_uptime_info
    {
-   my ($host) = @_;
+   my ($host, $maintenance_mode_state) = @_;
    my $state = 2;
    my $output = 'HOST UPTIME Unknown error';
    my $value;
 
-   $values = return_host_performance_values($host, 'sys', ('uptime.latest'));
+   $values = return_host_performance_values($host, $maintenance_mode_state, 'sys', ('uptime.latest'));
 
    if (defined($values))
       {

@@ -1,6 +1,6 @@
 sub host_disk_io_info
     {
-    my ($host) = @_;
+    my ($host, $maintenance_mode_state) = @_;
     my $value;
     my $state = 0;
     my $output;
@@ -11,7 +11,7 @@ sub host_disk_io_info
                                  # 0 -> existing subselect
                                  # 1 -> non existing subselect
 
-    $values = return_host_performance_values($host, 'disk', ('commandsAborted.summation:*', 'busResets.summation:*', 'read.average:*', 'totalReadLatency.average:*', 'write.average:*', 'totalWriteLatency.average:*', 'usage.average:*', 'kernelLatency.average:*', 'deviceLatency.average:*', 'queueLatency.average:*', 'totalLatency.average:*'));
+    $values = return_host_performance_values($host, $maintenance_mode_state, 'disk', ('commandsAborted.summation:*', 'busResets.summation:*', 'read.average:*', 'totalReadLatency.average:*', 'write.average:*', 'totalWriteLatency.average:*', 'usage.average:*', 'kernelLatency.average:*', 'deviceLatency.average:*', 'queueLatency.average:*', 'totalLatency.average:*'));
 
     if (!defined($subselect))
        {

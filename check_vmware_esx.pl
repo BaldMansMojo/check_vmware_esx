@@ -2242,14 +2242,14 @@ sub main_select
           {
           require host_cpu_info;
           import host_cpu_info;
-          ($result, $output) = host_cpu_info($esx_server);
+          ($result, $output) = host_cpu_info($esx_server, $maintenance_mode_state);
           return($result, $output);
           }
        if ($select eq "mem")
           {
           require host_mem_info;
           import host_mem_info;
-          ($result, $output) = host_mem_info($esx_server);
+          ($result, $output) = host_mem_info($esx_server, $maintenance_mode_state);
           return($result, $output);
           }
        if ($select eq "net")
@@ -2263,7 +2263,7 @@ sub main_select
           {
           require host_disk_io_info;
           import host_disk_io_info;
-          ($result, $output) = host_disk_io_info($esx_server);
+          ($result, $output) = host_disk_io_info($esx_server, $maintenance_mode_state);
           return($result, $output);
           }
        if ($select eq "volumes")
@@ -2299,7 +2299,7 @@ sub main_select
           {
           require host_uptime_info;
           import host_uptime_info;
-          ($result, $output) = host_uptime_info($esx_server);
+          ($result, $output) = host_uptime_info($esx_server, $maintenance_mode_state);
           return($result, $output);
           }
        if ($select eq "hostmedia")

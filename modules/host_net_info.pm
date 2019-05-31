@@ -40,7 +40,7 @@ sub host_net_info
           }
        }
 
-    $values = return_host_performance_values($host, 'net', ('usage.average', 'received.average', 'transmitted.average'));
+    $values = return_host_performance_values($host, $maintenance_mode_state, 'net', ('usage.average', 'received.average', 'transmitted.average'));
 
 
     if (($subselect eq "usage") || ($subselect eq "all"))

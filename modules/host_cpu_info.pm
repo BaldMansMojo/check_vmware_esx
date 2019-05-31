@@ -1,6 +1,6 @@
 sub host_cpu_info
     {
-    my ($host) = @_;
+    my ($host, $maintenance_mode_state) = @_;
     my $state = 0;
     my $output;
     my $host_view;
@@ -14,7 +14,7 @@ sub host_cpu_info
                                  # 0 -> existing subselect
                                  # 1 -> non existing subselect
 
-    $values = return_host_performance_values($host,'cpu', ('wait.summation:*','ready.summation:*', 'usage.average'));
+    $values = return_host_performance_values($host, $maintenance_mode_state, 'cpu', ('wait.summation:*','ready.summation:*', 'usage.average'));
         
     if (defined($values))
        {
@@ -35,7 +35,7 @@ sub host_cpu_info
 
        if ($perf_val_error == 1)
           {
-          $values = return_host_performance_values($host,'cpu', ('wait.summation:*'));
+          $values = return_host_performance_values($host, $maintenance_mode_state, 'cpu', ('wait.summation:*'));
           }
 
        if (defined($values))
@@ -66,7 +66,7 @@ sub host_cpu_info
 
        if ($perf_val_error == 1)
           {
-          $values = return_host_performance_values($host,'cpu', ('ready.summation:*'));
+          $values = return_host_performance_values($host, $maintenance_mode_state, 'cpu', ('ready.summation:*'));
           }
 
        if (defined($values))
@@ -114,7 +114,7 @@ sub host_cpu_info
 
        if ($perf_val_error == 1)
           {
-          $values = return_host_performance_values($host,'cpu', ('usage.average'));
+          $values = return_host_performance_values($host, $maintenance_mode_state, 'cpu', ('usage.average'));
           }
 
        if (defined($values))
