@@ -1370,7 +1370,14 @@
 #     WARNING or warning or WARN or warn
 #
 #     Default is WARNING. Values are case insensitve.
-
+#
+# - 1 Jun 2019 M.Fuerstenau version 1.2.1
+#   - Added some fixes from Ricardo Bartels
+#     - fixed dates, names and typos in recent release notes
+#     - documented/renamed new option unconnected_nics to unplugged_nics_state
+#     - fix option maintenance_mode_state, now passed on to all host modules
+#       (Thx to Ricardo to correct my lousy "middle-in-thenight-work - Martin)
+  
 use strict;
 use warnings;
 use File::Basename;
