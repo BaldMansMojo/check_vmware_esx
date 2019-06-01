@@ -1301,3 +1301,4 @@ was done
       (Thx to Ricardo to correct my lousy "middle-in-thenight-work - Martin)
   - Added fix from Claudio Kuenzler
     - Corrected perf data on net checks  
+- Replaced elsif by else...if in datastore_volumes_info().

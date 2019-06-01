@@ -1379,7 +1379,8 @@
 #     - fix option maintenance_mode_state, now passed on to all host modules
 #       (Thx to Ricardo to correct my lousy "middle-in-thenight-work - Martin)
 #   - Added fix from Claudio Kuenzler
-#     - Corrected perf data on net checks  
+#     - Corrected perf data on net checks 
+#   - Replace elsif by else ...if in datastore_volumes_info()
 
 use strict;
 use warnings;
