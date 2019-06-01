@@ -323,19 +323,22 @@ sub datastore_volumes_info
        }
     else
        {
-       if(!$tmp_output and !$tmp_output_error)
-           {
-           $output = "No matching volumes found";
-           $state = 1;
-           }
-       elsif($alertonly)
+       if (!$tmp_output and !$tmp_output_error)
           {
-          $output = "OK. There are no alerts";
+          $output = "No matching volumes found";
+          $state = 1;
           }
        else
           {
-          $state = 1;
-          $output = defined($subselect)?$isregexp? "No matching volumes for regexp \"$subselect\" found":"No volume named \"$subselect\" found":"There are no volumes";
+          if ($alertonly)
+             {
+             $output = "OK. There are no alerts";
+             }
+          else
+             {
+             $state = 1;
+             $output = defined($subselect)?$isregexp? "No matching volumes for regexp \"$subselect\" found":"No volume named \"$subselect\" found":"There are no volumes";
+             }
           }
        }
        return ($state, $output);
