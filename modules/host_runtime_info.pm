@@ -308,7 +308,13 @@ sub host_runtime_info
                                    };
                         push(@{$components->{$actual_state}{Storage}}, $itemref);
                         
-                        if ($actual_state != 0)
+                        if ($actual_state == 3)
+                           {
+                              # Ignore unknown sensors
+                              # https://kb.vmware.com/s/article/57171
+                              next;
+                           }
+                        elsif ($actual_state != 0)
                            {
                            $state = check_state($state, $actual_state);
                            $AlertCount++;
@@ -357,7 +363,13 @@ sub host_runtime_info
                                 };
                      push(@{$components->{$actual_state}{Memory}}, $itemref);
                      
-                     if ($actual_state != 0)
+                     if ($actual_state == 3)
+                        {
+                           # Ignore unknown sensors
+                           # https://kb.vmware.com/s/article/57171
+                           next;
+                        }
+                     elsif ($actual_state != 0)
                         {
                         $state = check_state($state, $actual_state);
                         $AlertCount++;
@@ -429,13 +441,14 @@ sub host_runtime_info
                                 };
                      push(@{$components->{$actual_state}{$_->sensorType}}, $itemref);
                      
-                     if ($actual_state != 0)
+                     if ($actual_state == 3)
                         {
-                        if (($actual_state == 3) && (!defined($ignoreunknown)))
-                           {
-                           # Trouble with the unknown status with sensors should better be a warning than unknown
-                           $actual_state = 1;
-                           }
+                           # Ignore unknown sensors
+                           # https://kb.vmware.com/s/article/57171
+                           next;
+                        }
+                      elsif ($actual_state != 0)
+                        {
                         $state = check_state($state, $actual_state);
                         $AlertCount++;
                         }
