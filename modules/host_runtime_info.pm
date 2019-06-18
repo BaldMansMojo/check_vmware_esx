@@ -637,7 +637,7 @@ sub host_runtime_info
              {
              foreach (@$numericSensorInfo)
                      {
-                     if (lc($_->sensorType) ne 'temperature')
+                     if (lc($_->baseUnits) !~ m/^degrees.*/)
                         {
                         next;
                         }
