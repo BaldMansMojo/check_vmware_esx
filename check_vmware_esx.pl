@@ -1459,6 +1459,7 @@ our $host;                                     # Name of the vmware server
 my  $cluster;                                  # Name of the monitored cluster
 our $datacenter;                               # Name of the vCenter server
 our $vmname;                                   # Name of the virtual machine
+our $moref;                                    # Managed object reference of the virtual machine
 
 my  $unplugged_nics_state;                     # Which state should be deliverd in state of unconnected nics?
 
@@ -1601,6 +1602,7 @@ GetOptions
 	 "w=s" => \$warning,             "warning=s"                => \$warning,
 	 "c=s" => \$critical,            "critical=s"               => \$critical,
 	 "N=s" => \$vmname,              "name=s"                   => \$vmname,
+                                         "moref=s"                  => \$moref,
 	 "u=s" => \$username,            "username=s"               => \$username,
 	 "p=s" => \$password,            "password=s"               => \$password,
 	 "f=s" => \$authfile,            "authfile=s"               => \$authfile,
@@ -2192,6 +2194,23 @@ exit $result;
 
 sub main_select
     {
+    if (defined($moref))
+       {
+       # try to resolve MORef to a virtual machine name
+       local $@;
+       eval
+           {
+           my $mo_ref = ManagedObjectReference->new(type => 'VirtualMachine', value => $moref);
+           my $vm = Vim::get_view(mo_ref => $mo_ref, view_type => 'VirtualMachine', properties => [ 'name' ]);
+           $vmname = $vm->name;
+           };
+       if ($@)
+           {
+           print "Failed to resolve MORef \"$moref\" to a virtual machine name!\n";
+           exit(2);
+           }
+       }
+
     if (defined($vmname))
        {
        if ($select eq "cpu")
