@@ -28,7 +28,9 @@ sub datastore_volumes_info
     my $volume_type;
     my $uom = "MB";
     my $alertcnt = 0;
-       
+    my $stores;
+    my $store;
+    
     if (defined($subselect) && defined($blacklist) && !defined($isregexp))
        {
        print "Error! Blacklist is supported only in overall check (no subselect) or regexp subcheck!\n";
@@ -56,8 +58,8 @@ sub datastore_volumes_info
        $isregexp = 0;
        }
 
-    my $stores = Vim::get_views(mo_ref_array => $datastore, properties => ['summary', 'info']);
-    foreach my $store (@{$stores})
+    $stores = Vim::get_views(mo_ref_array => $datastore, properties => ['summary', 'info']);
+    foreach $store (@{$stores})
             {
             $name = $store->summary->name;
             $volume_type = $store->summary->type;

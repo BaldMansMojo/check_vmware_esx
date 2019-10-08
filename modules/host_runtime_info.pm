@@ -314,14 +314,17 @@ sub host_runtime_info
                               # https://kb.vmware.com/s/article/57171
                               next;
                            }
-                        elsif ($actual_state != 0)
-                           {
-                           $state = check_state($state, $actual_state);
-                           $AlertCount++;
-                           }
                         else
                            {
-                           $OKCount++;
+                           if ($actual_state != 0)
+                              {
+                              $state = check_state($state, $actual_state);
+                              $AlertCount++;
+                              }
+                           else
+                              {
+                              $OKCount++;
+                              }
                            }
                         }
                 }
@@ -369,14 +372,17 @@ sub host_runtime_info
                            # https://kb.vmware.com/s/article/57171
                            next;
                         }
-                     elsif ($actual_state != 0)
-                        {
-                        $state = check_state($state, $actual_state);
-                        $AlertCount++;
-                        }
                      else
                         {
-                        $OKCount++;
+                        if ($actual_state != 0)
+                           {
+                           $state = check_state($state, $actual_state);
+                           $AlertCount++;
+                           }
+                        else
+                           {
+                           $OKCount++;
+                           }
                         }
                      }
              }
@@ -447,14 +453,17 @@ sub host_runtime_info
                            # https://kb.vmware.com/s/article/57171
                            next;
                         }
-                      elsif ($actual_state != 0)
-                        {
-                        $state = check_state($state, $actual_state);
-                        $AlertCount++;
-                        }
                      else
                         {
-                        $OKCount++;
+                        if ($actual_state != 0)
+                           {
+                           $state = check_state($state, $actual_state);
+                           $AlertCount++;
+                           }
+                        else
+                           {
+                           $OKCount++;
+                           }
                         }
                      }
              }

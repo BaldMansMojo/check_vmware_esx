@@ -1381,6 +1381,13 @@
 #   - Added fix from Claudio Kuenzler
 #     - Corrected perf data on net checks 
 #   - Replace elsif by else ...if in datastore_volumes_info()
+#
+# - 9 Oct 2019 M.Fuerstenau version 1.2.2
+#   - Added some fixes in host_runtime_info.pm and host_disk_io_info.pm
+#     from Markus Frosch (lazyfrosch) - Netways. Fixes unknown states in 
+#     host_runtime_info() and maintenance_mode_state in host_disk_io_info().
+#     But elsif was replaced by else if because in my opninio elsif shredders the
+#     structure of the code. 
 
 use strict;
 use warnings;
