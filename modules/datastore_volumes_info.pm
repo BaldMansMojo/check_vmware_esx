@@ -23,7 +23,6 @@ sub datastore_volumes_info
     my $warn_out;
     my $crit_out;
     my $ref_store;
-    my $store;
     my $name;
     my $volume_type;
     my $uom = "MB";
