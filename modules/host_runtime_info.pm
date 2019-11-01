@@ -597,6 +597,13 @@ sub host_runtime_info
                 }
                  
                 $actual_state = check_health_state($_->status->key);
+
+                # Added to allow ignoring elements reported by vmware not related to storeage but in unknown state, known bug with HP servers - V.Safar - 1 Nov 2019
+                # Example: Unknown: Status of Proc 1 Level-2 Cache: Cannot report on the current status of the physical element
+                if (defined($ignoreunknown) && $actual_state == 3){
+                  next;
+                }
+                
                 $sensortype = $_->name;
                 $components->{$actual_state}{"Storage"}{$_->name} = $_->status->summary;
                  
