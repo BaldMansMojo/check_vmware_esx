@@ -29,7 +29,6 @@ sub datastore_volumes_info
     my $uom = "MB";
     my $alertcnt = 0;
     my $stores;
-    my $store;
     
     if (defined($subselect) && defined($blacklist) && !defined($isregexp))
        {

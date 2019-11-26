@@ -1388,6 +1388,9 @@
 #     host_runtime_info() and maintenance_mode_state in host_disk_io_info().
 #     But elsif was replaced by else if because in my opninio elsif shredders the
 #     structure of the code. 
+#
+# - 26 Nov 2019 M.Fuerstenau version 1.2.3
+#   - Fixed duplicate definition in datastore_volumes_info.pm
 
 use strict;
 use warnings;
