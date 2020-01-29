@@ -809,6 +809,8 @@ sub print_help
        print "-H, --host=<hostname>               ESX or ESXi hostname.\n";
        print "\n";
        print "-N, --name=<vmname>                 Virtual machine name.\n";
+       print "    --moref=<moref>                 Virtual machine Managed Object Reference\n";
+       print "                                    (optional, overrides --name parameter).\n";
        print "    --sslport=<port>                If a SSL port different from 443 is used.\n";
        print "\n";
        print "CPU:\n";
