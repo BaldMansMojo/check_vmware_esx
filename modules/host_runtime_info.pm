@@ -233,12 +233,19 @@ sub host_runtime_info
        $OKCount = 0;
        $AlertCount = 0;
 
+       # Ignore unknown sensors
+       # https://kb.vmware.com/s/article/57171
+       my $rm_unknown = sub {
+          lc($_[0]->{status}->{key}) ne "unknown"
+       };
+
        if (defined($runtime->healthSystemRuntime))
           {
           $cpuStatusInfo = $runtime->healthSystemRuntime->hardwareStatusInfo->cpuStatusInfo;
-          $storageStatusInfo = $runtime->healthSystemRuntime->hardwareStatusInfo->storageStatusInfo;
-          $memoryStatusInfo = $runtime->healthSystemRuntime->hardwareStatusInfo->memoryStatusInfo;
-          $numericSensorInfo = $runtime->healthSystemRuntime->systemHealthInfo->numericSensorInfo;
+          $storageStatusInfo = [grep{$rm_unknown->($_)} @{$runtime->healthSystemRuntime->hardwareStatusInfo->storageStatusInfo}];
+          $memoryStatusInfo = [grep{$rm_unknown->($_)} @{$runtime->healthSystemRuntime->hardwareStatusInfo->memoryStatusInfo}];
+          $numericSensorInfo = [grep{$rm_unknown->($_)} @{$runtime->healthSystemRuntime->systemHealthInfo->numericSensorInfo}];
+
 
           if (defined($cpuStatusInfo))
              {
@@ -284,7 +291,7 @@ sub host_runtime_info
                            {
                            $isregexp = 0;
                            }
-                  
+
                         if (defined($blacklist))
                            {
                            if (isblacklisted(\$blacklist, $isregexp, $_->name, "Storage"))
@@ -292,7 +299,7 @@ sub host_runtime_info
                               next;
                               }
                            }
-     
+
                         if (defined($whitelist))
                            {
                            if (isnotwhitelisted(\$whitelist, $isregexp, $_->name, "Storage"))
@@ -300,31 +307,22 @@ sub host_runtime_info
                               next;
                               }
                            }
-   
+
                         $actual_state = check_health_state($_->status->key);
                         $itemref = {
                                    name => $_->name,
                                    summary => $_->status->summary
                                    };
                         push(@{$components->{$actual_state}{Storage}}, $itemref);
-                        
-                        if ($actual_state == 3)
+
+                        if ($actual_state != 0)
                            {
-                              # Ignore unknown sensors
-                              # https://kb.vmware.com/s/article/57171
-                              next;
+                           $state = check_state($state, $actual_state);
+                           $AlertCount++;
                            }
                         else
                            {
-                           if ($actual_state != 0)
-                              {
-                              $state = check_state($state, $actual_state);
-                              $AlertCount++;
-                              }
-                           else
-                              {
-                              $OKCount++;
-                              }
+                           $OKCount++;
                            }
                         }
                 }
@@ -350,7 +348,7 @@ sub host_runtime_info
                            next;
                            }
                         }
-  
+
                      if (defined($whitelist))
                         {
                         if (isnotwhitelisted(\$whitelist, $isregexp, $_->name, "Memory"))
@@ -358,31 +356,22 @@ sub host_runtime_info
                            next;
                            }
                         }
-                     
+
                      $actual_state = check_health_state($_->status->key);
                      $itemref = {
                                 name => $_->name,
                                 summary => $_->status->summary
                                 };
                      push(@{$components->{$actual_state}{Memory}}, $itemref);
-                     
-                     if ($actual_state == 3)
+
+                     if ($actual_state != 0)
                         {
-                           # Ignore unknown sensors
-                           # https://kb.vmware.com/s/article/57171
-                           next;
+                        $state = check_state($state, $actual_state);
+                        $AlertCount++;
                         }
                      else
                         {
-                        if ($actual_state != 0)
-                           {
-                           $state = check_state($state, $actual_state);
-                           $AlertCount++;
-                           }
-                        else
-                           {
-                           $OKCount++;
-                           }
+                        $OKCount++;
                         }
                      }
              }
@@ -430,7 +419,7 @@ sub host_runtime_info
                            next;
                            }
                         }
-  
+
                      if (defined($whitelist))
                         {
                         if (isnotwhitelisted(\$whitelist, $isregexp, $_->name, $_->sensorType))
@@ -438,7 +427,7 @@ sub host_runtime_info
                            next;
                            }
                      }
-                     
+
                      $actual_state = check_health_state($_->healthState->key);
                      $itemref = {
                                 name => $_->name,
@@ -446,24 +435,15 @@ sub host_runtime_info
                                 label => $_->healthState->label
                                 };
                      push(@{$components->{$actual_state}{$_->sensorType}}, $itemref);
-                     
-                     if ($actual_state == 3)
+
+                     if ($actual_state != 0)
                         {
-                           # Ignore unknown sensors
-                           # https://kb.vmware.com/s/article/57171
-                           next;
+                        $state = check_state($state, $actual_state);
+                        $AlertCount++;
                         }
                      else
                         {
-                        if ($actual_state != 0)
-                           {
-                           $state = check_state($state, $actual_state);
-                           $AlertCount++;
-                           }
-                        else
-                           {
-                           $OKCount++;
-                           }
+                        $OKCount++;
                         }
                      }
              }
