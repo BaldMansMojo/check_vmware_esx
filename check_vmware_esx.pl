@@ -2430,7 +2430,7 @@ sub check_against_threshold
 
     if ((defined($warning)) && (defined($critical)))
        {
-       if ( $warning >= $critical )
+       if ( $warning > $critical )
           {
           if ( $check_result <= $warning)
              {
