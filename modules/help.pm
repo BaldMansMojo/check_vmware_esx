@@ -371,6 +371,9 @@ sub print_help
        print "===========================\n";
        print "\n";
        print "-H, --host=<hostname>               ESX or ESXi hostname.\n";
+       print "-D, --datacenter=<DCname>           (Optional) Datacenter/Vcenter hostname.\n";
+       print "                                    Do host check through datacenter.\n";
+       print "                                    If omitted the host is queried directly.\n";
        print "    --sslport=<port>                If a SSL port different from 443 is used.\n";
        print "\n";
        print "Uptime:\n";
