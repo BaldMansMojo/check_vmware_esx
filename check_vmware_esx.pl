@@ -1577,6 +1577,7 @@ my $statelabels;                               # To overwrite $statelabels_def v
 our $openvmtools;                              # Signalize that you use Open VM Tools instead of the servers one.
 our $no_vmtools;                                # Signalize that not having VMware tools is ok
 our $hidekey;                                  # Hide licenses key when requesting license informations
+our $connect_error_exit = 3;                   # Exit code for connection errors
 
 
 
@@ -1646,6 +1647,7 @@ GetOptions
                                          "spaceleft"                => \$spaceleft,
                                          "maintenance_mode_state=s" => \$maintenance_mode_state,
                                          "unplugged_nics_state=s"   => \$unplugged_nics_state,
+                                         "connect_error_exit=i"     => \$connect_error_exit,
          "V"   => \$version,             "version"                  => \$version,
          "d|debug" => \$DEBUG,
 );
@@ -1930,8 +1932,16 @@ if (defined($sslport))
 
 $url2connect = "https://" . $url2connect . "/sdk/webService";
 
-# Now let's do the login stuff
+sub util_connect
+    {
+    unless(eval { Util::connect(@_); 1 })
+       {
+         print("Cannot connect to $_[0]: $@\n");
+         exit($connect_error_exit // 3);
+       }
+    }
 
+# Now let's do the login stuff
 if (!defined($nosession))
    {
    if (defined($datacenter))
@@ -1997,7 +2007,7 @@ if (!defined($nosession))
       if (($@ ne '') || (trim_connect_url(Opts::get_option("url")) ne trim_connect_url($url2connect)))
          {
          debug("session resume failed, logging in at %s as %s", $url2connect, $username);
-         Util::connect($url2connect, $username, $password);
+         util_connect($url2connect, $username, $password);
 
          save_session($sessionfile_name);
          }
@@ -2007,14 +2017,14 @@ if (!defined($nosession))
       debug("sessionfile '%s' does not exist", $sessionfile_name);
 
       debug("logging in at %s as %s", $url2connect, $username);
-      Util::connect($url2connect, $username, $password);
+      util_connect($url2connect, $username, $password);
 
       save_session($sessionfile_name);
       }
    }
 else
    {
-   Util::connect($url2connect, $username, $password);
+   util_connect($url2connect, $username, $password);
    }
 
 # Tracemode?
