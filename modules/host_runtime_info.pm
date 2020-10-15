@@ -306,8 +306,7 @@ sub host_runtime_info
                                    name => $_->name,
                                    summary => $_->status->summary
                                    };
-                        push(@{$components->{$actual_state}{Storage}}, $itemref);
-                        
+
                         if ($actual_state == 3)
                            {
                               # Ignore unknown sensors
@@ -316,6 +315,9 @@ sub host_runtime_info
                            }
                         else
                            {
+                           # Only add state for component if it is not unknown
+                           push(@{$components->{$actual_state}{Storage}}, $itemref);
+
                            if ($actual_state != 0)
                               {
                               $state = check_state($state, $actual_state);
