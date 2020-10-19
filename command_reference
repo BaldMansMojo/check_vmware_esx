@@ -318,6 +318,8 @@ or
                                     if a four-CPU host is running a virtual machine with
                                     two CPUs, and the usage is 50%, the host is using two
                                     CPUs completely.
+or
+-s, --subselect=readiness           The hosts CPU readiness percentage
 -w, --warning=<threshold>           Warning threshold in percent.
 -c, --critical=<threshold>          Critical threshold in percent.
 
