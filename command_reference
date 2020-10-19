@@ -319,7 +319,7 @@ or
                                     two CPUs, and the usage is 50%, the host is using two
                                     CPUs completely.
 or
--s, --subselect=readiness           The hosts CPU readiness percentage
+-s, --subselect=readiness           The hosts CPU readiness percentage.
 -w, --warning=<threshold>           Warning threshold in percent.
 -c, --critical=<threshold>          Critical threshold in percent.
 
