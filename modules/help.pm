@@ -409,6 +409,8 @@ sub print_help
        print "                                    if a four-CPU host is running a virtual machine with\n";
        print "                                    two CPUs, and the usage is 50%, the host is using two\n";
        print "                                    CPUs completely.\n";
+       print "or\n";       
+       print "-s, --subselect=readiness           The host's CPU readiness percentage.\n";
        print "-w, --warning=<threshold>           Warning threshold in percent.\n";
        print "-c, --critical=<threshold>          Critical threshold in percent.\n";
        print "\n";
