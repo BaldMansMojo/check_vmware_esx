@@ -239,10 +239,16 @@ sub host_runtime_info
           lc($_[0]->{status}->{key}) ne "unknown"
        };
 
+       # Some systems reports a broken "Memory" device at the storage tree
+       # unsure how to deal with that
+       my $rm_storage_unknown = sub {
+          lc($_[0]->{status}->{key}) ne "unknown" && lc($_[0]->{name}) ne "memory"
+       };
+
        if (defined($runtime->healthSystemRuntime))
           {
           $cpuStatusInfo = $runtime->healthSystemRuntime->hardwareStatusInfo->cpuStatusInfo;
-          $storageStatusInfo = [grep{$rm_unknown->($_)} @{$runtime->healthSystemRuntime->hardwareStatusInfo->storageStatusInfo}];
+          $storageStatusInfo = [grep{$rm_storage_unknown->($_)} @{$runtime->healthSystemRuntime->hardwareStatusInfo->storageStatusInfo}];
           $memoryStatusInfo = [grep{$rm_unknown->($_)} @{$runtime->healthSystemRuntime->hardwareStatusInfo->memoryStatusInfo}];
           $numericSensorInfo = [grep{$rm_unknown->($_)} @{$runtime->healthSystemRuntime->systemHealthInfo->numericSensorInfo}];
 
