@@ -235,9 +235,11 @@ sub host_runtime_info
 
        if (defined($runtime->healthSystemRuntime))
           {
-          $cpuStatusInfo = $runtime->healthSystemRuntime->hardwareStatusInfo->cpuStatusInfo;
-          $storageStatusInfo = $runtime->healthSystemRuntime->hardwareStatusInfo->storageStatusInfo;
-          $memoryStatusInfo = $runtime->healthSystemRuntime->hardwareStatusInfo->memoryStatusInfo;
+          if (defined($runtime->healthSystemRuntime->hardwareStatusInfo)) {
+            $cpuStatusInfo = $runtime->healthSystemRuntime->hardwareStatusInfo->cpuStatusInfo;
+            $storageStatusInfo = $runtime->healthSystemRuntime->hardwareStatusInfo->storageStatusInfo;
+            $memoryStatusInfo = $runtime->healthSystemRuntime->hardwareStatusInfo->memoryStatusInfo;
+          }
           $numericSensorInfo = $runtime->healthSystemRuntime->systemHealthInfo->numericSensorInfo;
 
           if (defined($cpuStatusInfo))
