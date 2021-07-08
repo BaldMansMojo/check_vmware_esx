@@ -29,7 +29,7 @@ sub vm_cpu_info
        if ($perf_thresholds ne ';')
           {
           print_help();
-          print "\nERROR! Thresholds only allowed wint subselects!\n\n";
+          print "\nERROR! Thresholds only allowed with subselects!\n\n";
           exit 2;
           }
        }
