@@ -8,7 +8,7 @@
 # Copyright (c) 2008 op5 AB
 # Original author: Kostyantyn Hushchyn <dev@op5.com>
 # Contributor(s):
-#   Patrick Müller
+#   Patrick Mï¿½ller
 #   Jeremy Martin
 #   Eric Jonsson
 #   stumpr
@@ -1443,7 +1443,7 @@ use open qw(:std :utf8);
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '1.2.4-consol';                   # Contains the program version number
+our $prog_version = '1.2.5-consol';                   # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
@@ -2955,8 +2955,8 @@ sub cluster_runtime_info
                 }
                 elsif ($subselect eq "listhost")
                 {
-# Reminder: Wie bei host_runtime_info die virtuellen Maschinen als performancedaten ausgeben
-                        my %host_state_strings = ("poweredOn" => "UP", "poweredOff" => "DOWN", "suspended" => "SUSPENDED", "standBy" => "STANDBY", "MaintenanceMode" => "Maintenance Mode");
+                # Reminder: Wie bei host_runtime_info die virtuellen Maschinen als performancedaten ausgeben
+                        my %host_state_strings = ("poweredOn" => "UP", "poweredOff" => "DOWN", "suspended" => "SUSPENDED", "standBy" => "STANDBY", "MaintenanceMode" => "Maintenance Mode", "unknown" => "UNKNOWN");
                         my $host_views = Vim::find_entity_views(view_type => 'HostSystem', begin_entity => $cluster_view, properties => ['name', 'runtime.powerState']);
 
                         if (!defined($host_views))
@@ -2992,12 +2992,25 @@ sub cluster_runtime_info
                         chop($output);
                         chop($output);
                         $state = 0;
-                        $output = $up .  "/" . @$host_views . " Hosts up: " . $output;
-                        $perfdata = $perfdata . " vmcount=" . $up . ";" . $perf_thresholds . ";;";
-
-                        if ( $perf_thresholds eq 1 )
+                        my $up_pct = int($up / @$host_views * 100);
+                        if ( $perf_thresholds ne ";"  && $warn_is_percent eq '1'  && $crit_is_percent eq '1')
                            {
+                           $perfdata = $perfdata . " host_pct=" . $up_pct . "%;" . $perf_thresholds . ";;";
+                           $perfdata = $perfdata . " host_count=" . $up . ";;;;";
+                           $output = $up .  "/" . @$host_views . " (". $up_pct ."%) Hosts up: " . $output;
+                           $state = check_against_threshold($up_pct);
+                           }
+                        elsif ($perf_thresholds ne ";")
+                           {
+                           $perfdata = $perfdata . " host_pct=" . $up_pct . "%;;;;";
+                           $perfdata = $perfdata . " host_count=" . $up . ";" . $perf_thresholds . ";;";
+                           $output = $up .  "/" . @$host_views . " Hosts up: " . $output;
                            $state = check_against_threshold($up);
+                           }
+                        else
+                           {
+                           $perfdata = $perfdata . " host_count=" . $up . ";" . $perf_thresholds . ";;";
+                           $output = $up .  "/" . @$host_views . " Hosts up: " . $output;
                            }
 
                         $state = 3 if ($state == 0 && $unknown);
