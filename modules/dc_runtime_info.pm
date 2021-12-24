@@ -508,13 +508,13 @@ sub dc_runtime_info
                               if ($vm_guest->toolsVersionStatus eq "guestToolsUnmanaged")
                                  {
                                  $guestToolsUnmanaged_cnt++;
-                                 $tools_out = $tools_out . "VM " . $vm->name . " Installed,running,but not managed by VMWare. " . $multiline;
                                  if (defined($openvmtools))
                                     {
                                     $actual_state = 0;
                                     }
                                  else
                                     {
+                                    $tools_out = $tools_out . "VM " . $vm->name . " Installed,running,but not managed by VMWare. " . $multiline;
                                     $actual_state = 1;
                                     }
                                  $state = check_state($state, $actual_state);
