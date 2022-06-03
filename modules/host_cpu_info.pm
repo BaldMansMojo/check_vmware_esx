@@ -14,7 +14,7 @@ sub host_cpu_info
                                  # 0 -> existing subselect
                                  # 1 -> non existing subselect
 
-    $values = return_host_performance_values($host, $maintenance_mode_state, 'cpu', ('wait.summation:*','ready.summation:*', 'usage.average'));
+    $values = return_host_performance_values($host, $maintenance_mode_state, 'cpu', ('wait.summation:*','ready.summation:*','readiness.average', 'usage.average'));
         
     if (defined($values))
        {
@@ -153,6 +153,56 @@ sub host_cpu_info
              {
              $actual_state = 3;
              $output = "CPU usage=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          }
+       }
+
+    if (($subselect eq "readiness") || ($subselect eq "all"))
+       {
+       $true_sub_sel = 0;
+
+       if ($perf_val_error == 1)
+          {
+          $values = return_host_performance_values($host, $maintenance_mode_state, 'cpu', ('readiness.average'));
+          }
+
+       if (defined($values))
+          {
+          if ($perf_val_error == 1)
+             {
+             $value = simplify_number(convert_number($$values[0][0]->value) * 0.01);
+             }
+          else
+             {
+             $value = simplify_number(convert_number($$values[0][2]->value) * 0.01);
+             }
+
+          if ($subselect eq "all")
+             {
+             $output = $output . " - CPU readiness=" . $value . "%"; 
+             $perfdata = $perfdata . " \'cpu_readiness\'=" . $value . "%;" . $perf_thresholds . ";;";
+             }
+          else
+             {
+             $actual_state = check_against_threshold($value);
+             $output = "CPU readiness=" . $value . "%"; 
+             $perfdata = "\'cpu_readiness\\'=" . $value . "%;" . $perf_thresholds . ";;";
+             $state = check_state($state, $actual_state);
+             }
+          }
+       else
+          {
+          if ($subselect eq "all")
+             {
+             $actual_state = 3;
+             $output = $output . " - CPU readiness=Not available";
+             $state = check_state($state, $actual_state);
+             }
+          else
+             {
+             $actual_state = 3;
+             $output = "CPU readiness=Not available";
              $state = check_state($state, $actual_state);
              }
           }
