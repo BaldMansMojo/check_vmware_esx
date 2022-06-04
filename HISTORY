@@ -1312,3 +1312,27 @@ was done
 
 - 26 Nov 2019 M.Fuerstenau version 1.2.3
   - Fixed duplicate definition in datastore_volumes_info.pm
+
+- 3 Jun 2022 M.Fuerstenau version 1.2.4
+  - Added several patches:
+    - new command line option "--moref" that allows for selecting virtual
+      machines by their Managed Object Reference name (e.g. "vm-193")
+      Patch by terranova
+   - ESXi reports temperature sensors as category "Other" instead of
+     "Temperature" for some vendors, change selection critera from Category
+     to BaseUnit starting with "Degrees"
+     Patch by manfredw
+   - Updated some links in the readme.
+     Patch by b0bcarlson
+   - It's possible to check hosts via datacenter but it was missing in help.
+     Updated by Danijel Tasov (datamuc) ConSol
+   - Patch to catch connection errors
+     Patch by Danijel Tasov (datamuc) ConSol
+   - Health check failed if system has no hardware sensors. Fixed.
+     Patch by Michael Geschwinder (GalipoliX)
+   - Add host CPU readiness % subselect
+     Patch by InsertUsrName
+   - Added error message when trying to check guest CPU without subselect.
+     Patch by curropar
+   - Remove output of guestToolsUnmanaged if --open_vm_tools_ok
+     Patch by curropar

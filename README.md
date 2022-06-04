@@ -37,12 +37,12 @@ to kindly ask and discuss can be joined at [monitoring-portal.org](https://monit
 
 ### VMware Perl SDK
 
-Download the [VMware Perl SDK](https://code.vmware.com/web/sdk/65/vsphere-perl) (requires a free account
+Download the [vSphere Perl SDK](https://developer.vmware.com/web/sdk/6.5/vsphere-perl) (requires a free account
 that you sign up for at the same page).
 
 Do not use SDK 6.0 because it contains some bugs and incompatibilities. Use SDK 5.5 or 6.5. Both work well.
 
-Install the SDK. An installation guide can be found [here](https://www.vmware.com/support/developer/viperltoolkit/).
+Install the SDK. An installation guide can be found [here](https://developer.vmware.com/docs/4166/vsphere-sdk-for-perl-installation-guide).
 
 ### Perl Modules
 
