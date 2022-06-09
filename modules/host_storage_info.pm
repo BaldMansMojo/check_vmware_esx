@@ -95,14 +95,6 @@ sub host_storage_info
        $true_sub_sel = 0;
        }
 
-    if (!defined($subselect))
-       {
-       # This means no given subselect. So all checks must be performemed
-       # Therefore with all set no threshold check can be performed
-       $subselect = "all";
-       $true_sub_sel = 0;
-       }
-
     $storage = Vim::get_view(mo_ref => $host_view->configManager->storageSystem, properties => ['storageDeviceInfo']);
 
     if (($subselect eq "adapter") || ($subselect eq "all"))
