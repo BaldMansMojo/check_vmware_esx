@@ -280,6 +280,9 @@ Monitoring the vmware host:
 ===========================
 
 -H, --host=<hostname>               ESX or ESXi hostname.
+-D, --datacenter=<DCname>           (Optional) Datacenter/Vcenter hostname.
+                                    Do host check through datacenter.
+                                    If omitted the host is queried directly.
     --sslport=<port>                If a SSL port different from 443 is used.
 
 Uptime:
@@ -319,7 +322,7 @@ or
                                     two CPUs, and the usage is 50%, the host is using two
                                     CPUs completely.
 or
--s, --subselect=readiness           The hosts CPU readiness percentage.
+-s, --subselect=readiness           The host's CPU readiness percentage.
 -w, --warning=<threshold>           Warning threshold in percent.
 -c, --critical=<threshold>          Critical threshold in percent.
 
@@ -714,6 +717,8 @@ Monitoring a virtual machine via vmware datacenter or vmware host:
 -H, --host=<hostname>               ESX or ESXi hostname.
 
 -N, --name=<vmname>                 Virtual machine name.
+    --moref=<moref>                 Virtual machine Managed Object Reference
+                                    (optional, overrides --name parameter).
     --sslport=<port>                If a SSL port different from 443 is used.
 
 CPU:

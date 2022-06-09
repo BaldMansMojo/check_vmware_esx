@@ -3,7 +3,7 @@
 # Nagios plugin to monitor vmware ESX and vSphere servers
 #
 # License: GPL
-# This plugin is a forked by Martin Fuerstenau from the original one from op5
+# This plugin is a forked by Martin Fuerstenau from the original one (check_esx.pl) from op5
 #
 # Copyright (c) 2008 op5 AB
 # Original author: Kostyantyn Hushchyn <dev@op5.com>
@@ -28,6 +28,9 @@
 #   6uellerBpanda
 #   Ricardo Bartels
 #   Claudio Kuenzler
+#   Bob Carlson
+#   Michael Geschwinder
+#   Manfred W
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -1392,31 +1395,25 @@
 # - 26 Nov 2019 M.Fuerstenau version 1.2.3
 #   - Fixed duplicate definition in datastore_volumes_info.pm
 #
-# - 3 Jun 2022 M.Fuerstenau version 1.2.4
-#   - Added several patches:
+# - 9 Jun 2022 M.Fuerstenau version 1.2.4
+#   - Added several patches (pull requests) from Github:
 #     - new command line option "--moref" that allows for selecting virtual
 #       machines by their Managed Object Reference name (e.g. "vm-193")
-#       Patch by terranova
-#    - ESXi reports temperature sensors as category "Other" instead of
-#      "Temperature" for some vendors, change selection critera from Category
-#      to BaseUnit starting with "Degrees"
-#      Patch by manfredw
-#    - Updated some links in the readme.
-#      Patch by b0bcarlson
-#    - It's possible to check hosts via datacenter but it was missing in help.
-#      Updated by Danijel Tasov (datamuc) ConSol
-#    - Patch to catch connection errors
-#      Patch by Danijel Tasov (datamuc) ConSol
-#    - Health check failed if system has no hardware sensors. Fixed.
-#      Patch by Michael Geschwinder (GalipoliX)
-#    - Add host CPU readiness % subselect
-#      Patch by InsertUsrName
-#    - Added error message when trying to check guest CPU without subselect
-#      Patch by curropar
-#      Instead of printing whole help like in the patch only vm part
-#      is printed
-#    - Remove output of guestToolsUnmanaged if --open_vm_tools_ok
-#      Patch by curropar
+#     - ESXi reports temperature sensors as category "Other" instead of
+#       "Temperature" for some vendors, change selection critera from Category
+#       to BaseUnit starting with "Degrees"
+#     - Updated some links in the readme.
+#       Patch by b0bcarlson
+#     - It's possible to check hosts via datacenter but it was missing in help.
+#       Updated by Danijel Tasov (datamuc) ConSol
+#     - Catch connection errors
+#     - Health check failed if system has no hardware sensors. Fixed.
+#     - Add host CPU readiness % subselect
+#     - Added error message when trying to check guest CPU without subselect
+#       Instead of printing whole help like in the patch only vm part
+#       is printed
+#     - Remove output of guestToolsUnmanaged if --open_vm_tools_ok
+#     - Fully ignore unknown states for hardware
 
 
 
@@ -1470,7 +1467,7 @@ use open qw(:std :utf8);
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '1.2.1';                   # Contains the program version number
+our $prog_version = '1.2.4';                   # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
