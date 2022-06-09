@@ -1411,8 +1411,10 @@
 #      Patch by Michael Geschwinder (GalipoliX)
 #    - Add host CPU readiness % subselect
 #      Patch by InsertUsrName
-#    - Added error message when trying to check guest CPU without subselect.
+#    - Added error message when trying to check guest CPU without subselect
 #      Patch by curropar
+#      Instead of printing whole help like in the patch only vm part
+#      is printed
 #    - Remove output of guestToolsUnmanaged if --open_vm_tools_ok
 #      Patch by curropar
 
@@ -1436,7 +1438,6 @@ use datastore_volumes_info;
 
 # Prevent SSL certificate validation
 
-#$ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0;
 BEGIN {
     $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0;
     eval {
@@ -1488,6 +1489,8 @@ my  $sessionfile_name;                         # Contains the name of the sessio
                                                # a sessionfile is used for faster authentication
 my  $sessionfile_dir;                          # Optinal. Contains the path to the sessionfile. Used in conjunction
                                                # with sessionfile
+my  $sessionfile_dir_def="/tmp/";              # Directory for caching the session files and sessionfile lock files
+                                               # Good idea to use a tmpfs because it speeds up operation    
 my  $nosession;                                # Just a flag to avoid using a sessionfile
 my  $vim;                                       # Needed to stroe results ov Vim.
 
@@ -1545,8 +1548,6 @@ my  $thresholds_given = 0;                     # During checking the threshold i
                                         
 our $spaceleft;                                # This is used for datastore volumes. When checking multiple volumes
                                                # the threshol must be given in either percent or space left on device.
-my  $sessionfile_dir_def="/tmp/";              # Directory for caching the session files and sessionfile lock files
-                                               # Good idea to use a tmpfs because it speeds up operation    
 
 our $listsensors;                              # This flag set in conjunction with -l runtime -s health or -s sensors
                                                # will list all sensors
@@ -1571,7 +1572,7 @@ my  $mon;                                      # Month        - used for some da
 my  $year;                                     # Year         - used for some date functions
 
 my  $timeout = 90;                             # Time in seconds befor the plugin kills itself when it' not ready
-my  $DEBUG = 0;                                # global switch for debugging
+my  $debug = 0;                                # global switch for debugging
 
 my  $program_start = time();                   # record the program_start
 
@@ -1650,6 +1651,8 @@ GetOptions
 	 "B=s" => \$blacklist,           "exclude=s"                => \$blacklist,
 	 "W=s" => \$whitelist,           "include=s"                => \$whitelist,
          "t=s" => \$timeout,             "timeout=s"                => \$timeout,
+         "V"   => \$version,             "version"                  => \$version,
+         "d"   => \$debug,               "debug"                    => \$debug,
 	                                 "ignore_unknown"           => \$ignoreunknown,
 	                                 "ignore_warning"           => \$ignorewarning,
 	                                 "trace=s"                  => \$trace,
@@ -1673,9 +1676,7 @@ GetOptions
                                          "hidekey"                  => \$hidekey,
                                          "spaceleft"                => \$spaceleft,
                                          "maintenance_mode_state=s" => \$maintenance_mode_state,
-                                         "unplugged_nics_state=s"   => \$unplugged_nics_state,
-         "V"   => \$version,             "version"                  => \$version,
-         "d|debug" => \$DEBUG,
+                                         "unplugged_nics_state=s"   => \$unplugged_nics_state
 );
 
 # Show version
@@ -1987,7 +1988,6 @@ if (!defined($nosession))
          }
       }
       
-   
    # Set default best location for sessionfile_dir_def in this environment
    if ( $ENV{OMD_ROOT}) 
       {
@@ -2799,7 +2799,10 @@ sub exit_unknown
  
 sub debug
     {
-    unless ($DEBUG) { return; }
+    unless ($debug)
+           {
+           return;
+           }
     my $message = shift;
     printf "$message\n", @_;
     }
