@@ -1426,9 +1426,8 @@ use VMware::VIRuntime;
 use Time::Duration;
 use Time::HiRes qw(usleep);
 
-# Own modules
-use lib "modules";
-#use lib "/usr/lib/nagios/vmware/modules";
+# Own modules - add your module path here
+use lib "/usr/lib/nagios/vmware/modules";
 use help;
 use process_perfdata;
 use datastore_volumes_info;
