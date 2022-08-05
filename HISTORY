@@ -1332,3 +1332,14 @@ was done
       is printed
     - Remove output of guestToolsUnmanaged if --open_vm_tools_ok
     - Fully ignore unknown states for hardware
+
+- 04 Auf 2022 M.Fuerstenau version 1.2.5
+  - Renamed module host_list_vm_volumes_info to host_volumes_info
+    because name was misleading
+  - Minor corrections in help.pm
+  - New option --show-storage for runtime->listvms via host ore DC
+  - Fixed bug in blacklist/whitelist. Was casesensitve by default. This leads
+    to problems if for example a VM is defined in ESX with uppercase letters
+    and check is with lowercase (MYSERVER vs. myserver). So for example
+    checking for snapshots may result in no old snapshots found while 
+    there are some. Fixed by adding option --ignore_casesensitive.

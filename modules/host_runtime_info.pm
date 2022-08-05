@@ -46,6 +46,7 @@ sub host_runtime_info
     my $poweredoff_out = '';   # Virtual machine powerstate temporary output
     my $suspended_out = '';    # Virtual machine powerstate temporary output
     my $value;
+    my $stor_path;
     my $vm;
     my $vm_state;
     my $vm_views;
@@ -154,21 +155,50 @@ sub host_runtime_info
                       }
 
                   $vm_state = $vm->runtime->powerState->val;
-               
+
+                  if (defined $show_storage)
+                     {
+                     $stor_path = vm_storage_path($vm->name);
+                     }
+                  
                   if ($vm_state eq "poweredOn")
                      {
                      $poweredon++;
-                     $poweredon_out = $poweredon_out . $vm->name . " (" . $vm_state . ")" . $multiline;
+                     if (!$alertonly)
+                        {
+                        if (defined $show_storage)
+                           {
+                           $poweredon_out = $poweredon_out . $vm->name . " (" . $vm_state . ") - Storage: " .$stor_path . $multiline;
+                           }
+                        else
+                           {
+                           $poweredon_out = $poweredon_out . $vm->name . " (" . $vm_state . ")" . $multiline;
+                           }
+                        }
                      }
                   if ($vm_state eq "poweredOff")
                      {
                      $poweredoff++;
-                     $poweredoff_out = $poweredoff_out . $vm->name . " (" . $vm_state . ")" . $multiline;
+                     if (defined $show_storage)
+                        {
+                        $poweredon_out = $poweredoff_out . $vm->name . " (" . $vm_state . ") - Storage: " .$stor_path . $multiline;
+                        }
+                        else
+                        {
+                        $poweredon_out = $poweredoff_out . $vm->name . " (" . $vm_state . ")" . $multiline;
+                        }
                      }
                   if ($vm_state eq "suspended")
                      {
                      $suspended++;
-                     $suspended_out = $suspended_out . $vm->name . " (" . $vm_state . ")" . $multiline;
+                     if (defined $show_storage)
+                        {
+                        $suspended_out = $suspended_out . $vm->name . " (" . $vm_state . ") - Storage: " .$stor_path . $multiline;
+                        }
+                        else
+                        {
+                        $suspended_out = $suspended_out . $vm->name . " (" . $vm_state . ")" . $multiline;
+                        }
                      }
                   }
 

@@ -1,5 +1,5 @@
 
-check_vmware_esx.pl,Version 1.2.1
+check_vmware_esx.pl,Version 1.2.5
 
 This vmware Infrastructure monitoring plugin is free software, and comes with ABSOLUTELY NO WARRANTY.
 It may be used, redistributed and/or modified under the terms of the GNU General Public Licence 
@@ -95,6 +95,9 @@ or with
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat name, blacklist and whitelist as regexp
 -w, --warning=<threshold>           Warning threshold.
 -c, --critical=<threshold>          Critical threshold.
@@ -112,7 +115,7 @@ Runtime Info:
 -S, --select=runtime                Shows all runtime info for the datacenter/Vcenter.
                                     No thresholds are allowed here
 or with
--s, --subselect=listvms             List of vmware machines and their power state..
+-s, --subselect=listvms             List of virtual machines and their power state.
 
                                     BEWARE!! In larger environments systems can cause trouble displaying
                                     the informations needed due to the mass of data.
@@ -124,6 +127,9 @@ or with
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -160,6 +166,9 @@ or
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -180,6 +189,9 @@ or
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -195,6 +207,9 @@ or
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -229,6 +244,9 @@ or
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -256,6 +274,9 @@ Snapshots
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --listall                       List all VMs with all snapshots.
     --poweredonly                   List only VMs which are powered on.
@@ -417,6 +438,9 @@ or with
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat name, blacklist and whitelist as regexp
 -w, --warning=<threshold>           Warning threshold.
 -c, --critical=<threshold>          Critical threshold.
@@ -482,6 +506,9 @@ Host mounted media:
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --listall                       List all VMs with all mounted media.
     --multiline                     Multiline output in overview. This mean technically that
@@ -499,6 +526,9 @@ Service info:
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -517,13 +547,18 @@ Runtime info:
 or with
 -s, --subselect=con                 Shows connection state.
 or
--s, --subselect=listvms             List of vmware machines and their statuses.
+-s, --subselect=listvms             List of virtual machines and their power state.
+    --show-storage                  Shows storage used by the VM.
+
 -B, --exclude=<black_list>          Blacklist VMs.
 -W, --include=<white_list>          Whitelist VMs.
 
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -550,6 +585,9 @@ or
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
 or
 -s, --subselect=storagehealth       Local(!) storage status check.
@@ -559,6 +597,9 @@ or
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -573,6 +614,9 @@ or
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -587,6 +631,9 @@ or
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -616,6 +663,9 @@ Storage info:
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
 or with
 -s, --subselect=adapter             List host bus adapters.
@@ -625,6 +675,9 @@ or with
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --multiline                     Multiline output in overview. This mean technically that
                                     a multiline output uses a HTML <br> for the GUI instead of
@@ -645,6 +698,9 @@ or with
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --alertonly                     List only alerting units. Important here to avoid masses of data.
     --multiline                     Multiline output in overview. This mean technically that
@@ -664,6 +720,9 @@ or with
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --alertonly                     List only alerting units. Important here to avoid masses of data.
     --multiline                     Multiline output in overview. This mean technically that
@@ -689,6 +748,9 @@ Snapshots
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat blacklist and whitelist as regexp
     --listall                       List all VMs with all snapshots.
     --poweredonly                   List only VMs which are powered on.
@@ -957,6 +1019,9 @@ or with
                                     Use blacklist OR(!) whitelist. Using both in one statement
                                     is not allowed.
 
+    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example
+                                    if check is for VM myserver and the name in ESX is MYSERVER
+                                    it would not match.
     --isregexp                      Whether to treat name, blacklist and whitelist as regexp
 -w, --warning=<threshold>           Warning threshold.
 -c, --critical=<threshold>          Critical threshold.

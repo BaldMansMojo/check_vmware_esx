@@ -488,7 +488,7 @@
 #     - host_net_info.pm -> host_net_info()
 #     - host_disk_io_info.pm -> host_disk_io_info()
 #     - datastore_volumes_info.pm -> datastore_volumes_info()
-#     - host_list_vm_volumes_info.pm -> host_list_vm_volumes_info()
+#     - host_volumes_info.pm -> host_volumes_info()
 #     - host_runtime_info.pm -> host_runtime_info()
 #     - host_service_info.pm -> host_service_info()
 #     - host_storage_info.pm -> host_storage_info()
@@ -1395,7 +1395,7 @@
 # - 26 Nov 2019 M.Fuerstenau version 1.2.3
 #   - Fixed duplicate definition in datastore_volumes_info.pm
 #
-# - 9 Jun 2022 M.Fuerstenau version 1.2.4
+# - 3 Jun 2022 M.Fuerstenau version 1.2.4
 #   - Added several patches (pull requests) from Github:
 #     - new command line option "--moref" that allows for selecting virtual
 #       machines by their Managed Object Reference name (e.g. "vm-193")
@@ -1414,7 +1414,18 @@
 #       is printed
 #     - Remove output of guestToolsUnmanaged if --open_vm_tools_ok
 #     - Fully ignore unknown states for hardware
-
+#
+# - 04 Auf 2022 M.Fuerstenau version 1.2.5
+#   - Renamed module host_list_vm_volumes_info to host_volumes_info
+#     because name was misleading
+#   - Minor corrections in help.pm
+#   - New option --show-storage for runtime->listvms via host ore DC
+#   - Fixed bug in blacklist/whitelist. Was casesensitve by default. This leads
+#     to problems if for example a VM is defined in ESX with uppercase letters
+#     and check is with lowercase (MYSERVER vs. myserver). So for example
+#     checking for snapshots may result in no old snapshots found while 
+#     there are some. Fixed by adding option --ignore_casesensitive.
+#   
 
 
 use strict;
@@ -1466,7 +1477,7 @@ use open qw(:std :utf8);
 
 # General stuff
 our $version;                                  # Only for showing the version
-our $prog_version = '1.2.4';                   # Contains the program version number
+our $prog_version = '1.2.5';                   # Contains the program version number
 our $ProgName = basename($0);
 
 my  $PID = $$;                                 # Stores the process identifier of the actual run. This will be
@@ -1557,6 +1568,7 @@ our $alertonly;                                # vmfs - list only alerting volum
 
 our $blacklist;                                # Contains the blacklist
 our $whitelist;                                # Contains the whitelist
+our $ignore_casesensitive;                     # Option to handle blacklist/whitelist case insensitive
 
 our $isregexp;                                 # treat names, blacklist and whitelists as regexp
 
@@ -1599,9 +1611,9 @@ my $statelabels_def="y";                       # Default value for state labels 
                                                # set this default to "n".
 my $statelabels;                               # To overwrite $statelabels_def via commandline.
 our $openvmtools;                              # Signalize that you use Open VM Tools instead of the servers one.
-our $no_vmtools;                                # Signalize that not having VMware tools is ok
+our $no_vmtools;                               # Signalize that not having VMware tools is ok
 our $hidekey;                                  # Hide licenses key when requesting license informations
-
+our $show_storage;                             # Show storage shows storage used bei VM. Used in conjunction with listvms
 
 
 my  $trace;
@@ -1646,11 +1658,13 @@ GetOptions
 	                                 "nosession"                => \$nosession,
 	 "B=s" => \$blacklist,           "exclude=s"                => \$blacklist,
 	 "W=s" => \$whitelist,           "include=s"                => \$whitelist,
+	                                 "ignore_casesensitive"     => \$ignore_casesensitive,
          "t=s" => \$timeout,             "timeout=s"                => \$timeout,
          "V"   => \$version,             "version"                  => \$version,
          "d"   => \$debug,               "debug"                    => \$debug,
 	                                 "ignore_unknown"           => \$ignoreunknown,
 	                                 "ignore_warning"           => \$ignorewarning,
+                                         "show-storage"             => \$show_storage,
 	                                 "trace=s"                  => \$trace,
                                          "listsensors"              => \$listsensors,
                                          "ignore_health"            => \$ignorehealth,
@@ -2291,7 +2305,7 @@ sub main_select
 
     if (defined($host))
        {
-       # The following if black is only needed if we check a ESX server via the 
+       # The following if block is only needed if we check a ESX server via the 
        # the datacenten (vsphere server) instead of doing it directly.
        # Directly is better
        
@@ -2300,6 +2314,13 @@ sub main_select
           {
           $esx_server = {name => $host};
           }
+
+       if (defined $show_storage)
+          {
+          require vm_storage_path;
+          import vm_storage_path;
+          }
+
        if ($select eq "cpu")
           {
           require host_cpu_info;
@@ -2330,9 +2351,9 @@ sub main_select
           }
        if ($select eq "volumes")
           {
-          require host_list_vm_volumes_info;
-          import host_list_vm_volumes_info;
-          ($result, $output) = host_list_vm_volumes_info($esx_server, $maintenance_mode_state);
+          require host_volumes_info;
+          import host_volumes_info;
+          ($result, $output) = host_volumes_info($esx_server, $maintenance_mode_state);
           return($result, $output);
           }
        if ($select eq "runtime")
@@ -2702,9 +2723,18 @@ sub isblacklisted
        return 0;
        }
 
+#our $ignore_casesensitive;                     # Option to handle blacklist/whitelist case insensitive
+
     if ($regexpflag == 0)
        {
-       $ret = grep(/$candidate/, $$blacklist_ref);
+       if (defined($ignore_casesensitive))
+          {
+          $ret = grep(/$candidate/i, $$blacklist_ref);
+          }
+          else
+          {
+          $ret = grep(/$candidate/, $$blacklist_ref);
+          }
        }
     else
        {
@@ -2712,9 +2742,19 @@ sub isblacklisted
 
        foreach $blacklist (@blacklist)
                {
-               if ($candidate =~ m/$blacklist/)
+               if (defined($ignore_casesensitive))
                   {
-                  $hitcount++;
+                  if ($candidate =~ m/$blacklist/i)
+                     {
+                     $hitcount++;
+                     }
+                  }
+               else
+                  {
+                  if ($candidate =~ m/$blacklist/)
+                     {
+                     $hitcount++;
+                     }
                   }
                }
 
@@ -2741,7 +2781,14 @@ sub isnotwhitelisted
 
     if ($regexpflag == 0)
        {
-       $ret = ! grep(/$candidate/, $$whitelist_ref);
+       if (defined($ignore_casesensitive))
+          {
+          $ret = ! grep(/$candidate/i, $$whitelist_ref);
+          }
+          else
+          {
+          $ret = ! grep(/$candidate/, $$whitelist_ref);
+          }
        }
     else
        {
@@ -2749,9 +2796,19 @@ sub isnotwhitelisted
 
        foreach $whitelist (@whitelist)
                {
-               if ($candidate =~ m/$whitelist/)
+               if (defined($ignore_casesensitive))
                   {
-                  $hitcount++;
+                  if ($candidate =~ m/$whitelist/i)
+                     {
+                     $hitcount++;
+                     }
+                  }
+               else
+                  {
+                  if ($candidate =~ m/$whitelist/)
+                     {
+                     $hitcount++;
+                     }
                   }
                }
 

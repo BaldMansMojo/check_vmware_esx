@@ -35,6 +35,9 @@ sub hint
     print "    -S, --select=service                shows host service info.\n";
     print "    -B, --exclude=<black_list>          blacklist services.\n";
     print "    -W, --include=<white_list>          whitelist services.\n";
+    print "        --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+    print "                                        if check is for VM myserver and the name in ESX is MYSERVER\n";
+    print "                                        it would not match.\n";
     print "        --isregexp                      whether to treat blacklist and whitelist as regexp\n";
     print "        --multiline                     Multiline output in overview. This mean technically that\n";
     print "                                        a multiline output uses a HTML <br> for the GUI instead of\n";
@@ -180,6 +183,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat name, blacklist and whitelist as regexp\n";
        print "-w, --warning=<threshold>           Warning threshold.\n";
        print "-c, --critical=<threshold>          Critical threshold.\n";
@@ -197,7 +203,7 @@ sub print_help
        print "-S, --select=runtime                Shows all runtime info for the datacenter/Vcenter.\n";
        print "                                    No thresholds are allowed here\n";
        print "or with\n";
-       print "-s, --subselect=listvms             List of vmware machines and their power state..\n";
+       print "-s, --subselect=listvms             List of virtual machines and their power state.\n";
        print "\n";
        print "                                    BEWARE!! In larger environments systems can cause trouble displaying\n";
        print "                                    the informations needed due to the mass of data.\n";
@@ -209,6 +215,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --multiline                     Multiline output in overview. This mean technically that\n";
        print "                                    a multiline output uses a HTML <br> for the GUI instead of\n";
@@ -245,6 +254,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --multiline                     Multiline output in overview. This mean technically that\n";
        print "                                    a multiline output uses a HTML <br> for the GUI instead of\n";
@@ -265,6 +277,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --multiline                     Multiline output in overview. This mean technically that\n";
        print "                                    a multiline output uses a HTML <br> for the GUI instead of\n";
@@ -280,6 +295,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --multiline                     Multiline output in overview. This mean technically that\n";
        print "                                    a multiline output uses a HTML <br> for the GUI instead of\n";
@@ -314,6 +332,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --multiline                     Multiline output in overview. This mean technically that\n";
        print "                                    a multiline output uses a HTML <br> for the GUI instead of\n";
@@ -341,6 +362,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --listall                       List all VMs with all snapshots.\n";
        print "    --poweredonly                   List only VMs which are powered on.\n";
@@ -507,6 +531,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat name, blacklist and whitelist as regexp\n";
        print "-w, --warning=<threshold>           Warning threshold.\n";
        print "-c, --critical=<threshold>          Critical threshold.\n";
@@ -572,6 +599,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --listall                       List all VMs with all mounted media.\n";
        print "    --multiline                     Multiline output in overview. This mean technically that\n";
@@ -589,6 +619,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --multiline                     Multiline output in overview. This mean technically that\n";
        print "                                    a multiline output uses a HTML <br> for the GUI instead of\n";
@@ -607,13 +640,18 @@ sub print_help
        print "or with\n";
        print "-s, --subselect=con                 Shows connection state.\n";
        print "or\n";
-       print "-s, --subselect=listvms             List of vmware machines and their statuses.\n";
+       print "-s, --subselect=listvms             List of virtual machines and their power state.\n";
+       print "    --show-storage                  Shows storage used by the VM.\n";
+       print "\n";
        print "-B, --exclude=<black_list>          Blacklist VMs.\n";
        print "-W, --include=<white_list>          Whitelist VMs.\n";
        print "\n";
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --multiline                     Multiline output in overview. This mean technically that\n";
        print "                                    a multiline output uses a HTML <br> for the GUI instead of\n";
@@ -640,6 +678,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "or\n";
        print "-s, --subselect=storagehealth       Local(!) storage status check.\n";
@@ -649,6 +690,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --multiline                     Multiline output in overview. This mean technically that\n";
        print "                                    a multiline output uses a HTML <br> for the GUI instead of\n";
@@ -663,6 +707,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --multiline                     Multiline output in overview. This mean technically that\n";
        print "                                    a multiline output uses a HTML <br> for the GUI instead of\n";
@@ -677,6 +724,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --multiline                     Multiline output in overview. This mean technically that\n";
        print "                                    a multiline output uses a HTML <br> for the GUI instead of\n";
@@ -706,6 +756,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "or with\n";
        print "-s, --subselect=adapter             List host bus adapters.\n";
@@ -715,6 +768,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --multiline                     Multiline output in overview. This mean technically that\n";
        print "                                    a multiline output uses a HTML <br> for the GUI instead of\n";
@@ -735,6 +791,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --alertonly                     List only alerting units. Important here to avoid masses of data.\n";
        print "    --multiline                     Multiline output in overview. This mean technically that\n";
@@ -754,6 +813,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --alertonly                     List only alerting units. Important here to avoid masses of data.\n";
        print "    --multiline                     Multiline output in overview. This mean technically that\n";
@@ -779,6 +841,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat blacklist and whitelist as regexp\n";
        print "    --listall                       List all VMs with all snapshots.\n";
        print "    --poweredonly                   List only VMs which are powered on.\n";
@@ -1060,6 +1125,9 @@ sub print_help
        print "                                    Use blacklist OR(!) whitelist. Using both in one statement\n";
        print "                                    is not allowed.\n";
        print "\n";
+       print "    --ignore_casesensitive          Black-/whitlist is normally case sensitive. So for example\n";
+       print "                                    if check is for VM myserver and the name in ESX is MYSERVER\n";
+       print "                                    it would not match.\n";
        print "    --isregexp                      Whether to treat name, blacklist and whitelist as regexp\n";
        print "-w, --warning=<threshold>           Warning threshold.\n";
        print "-c, --critical=<threshold>          Critical threshold.\n";
