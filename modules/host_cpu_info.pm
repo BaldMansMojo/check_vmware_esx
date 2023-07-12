@@ -175,7 +175,7 @@ sub host_cpu_info
              }
           else
              {
-             $value = simplify_number(convert_number($$values[0][2]->value) * 0.01);
+             $value = simplify_number(convert_number($$values[0][3]->value) * 0.01);
              }
 
           if ($subselect eq "all")
